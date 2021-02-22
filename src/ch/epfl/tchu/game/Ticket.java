@@ -34,6 +34,7 @@ public final class Ticket implements Comparable<Ticket> {
 
     private static String computeText() {
         //TODO METHODE POUR TEXT ET UTILE JE PENSE POUR LE FOREACH AU CONSTRUCTEUR
+
         return null;
     }
 

@@ -74,7 +74,6 @@ public final class Ticket implements Comparable<Ticket> {
      */
     private static String computeText(List<Trip> tripList) {
 
-        //TODO: attribut "stationFrom" ??
         Trip firsTrip = tripList.get(0);
         String stationFromName = firsTrip.from().name();
 
@@ -96,33 +95,25 @@ public final class Ticket implements Comparable<Ticket> {
         return String.format("%s - {%s}", stationFromName, stationToText);
     }
 
+    /**
+     * Compare l'ordre alphabétique de la représentation textuelle de deux billets.
+     * Retourne un entier strictement négatif si ce billet est strictement plus petit que l'autre,
+     * un entier strictement positif si ce billet est strictement plus grand que l'autre,
+     * et zéro si les deux sont égaux.
+     *
+     * @param that
+     *            l'autre billet avec lequel comparer ce billet
+     * @return un entier en fonction de l'ordre des billets (comme décrit dans la description)
+     */
     @Override
-    public int compareTo(Ticket o) {
-
-        // Mais du coup faut juste comparer et voir si c'est dans l'ordre ?
-        for (int j = 0; j < trips.size(); j++) {
-            if(trips.get(j).from().name().compareTo(trips.get(j + 1).from().name()) > 0) {
-                
-            }
-        }
-
-        // TODO: en fait j'en tenté de trier la list dans l'ordre alphabétique mais c'est pas trop ça qu'il faut faire mdr
-       /* int size = trips.size();
-
-        for (int j = 1; j < size; j++) {
-            Trip key = trips.get(j);
-            int i = j - 1;
-            while (i >= 0) {
-                if (key.from().name().compareTo(trips.get(i).from().name()) > 0) {//here too
-                    break;
-                }
-                trips.set(i + 1, trips.get(i));
-                i--;
-            }
-            trips.set(i + 1, key);
-        } */
+    public int compareTo(Ticket that) {
+        return this.text.compareTo(that.text());
     }
 
+    /**
+     * Retourne la représentation textuelle du billet.
+     * @return la représentation textuelle du billet
+     */
     @Override
     public String toString() {
         return text;

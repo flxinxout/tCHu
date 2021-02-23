@@ -2,7 +2,6 @@ package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.Preconditions;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -68,35 +67,33 @@ public final class Ticket implements Comparable<Ticket> {
 
     /**
      * Crée la représentation textuelle du billet.
+     *
      * @param tripList
-     *                la list de trip en question
+     *                la list de trajets du billet
      * @return la représentation textuelle du billet.
      */
     private static String computeText(List<Trip> tripList) {
 
-        // La précondition passée, nous pouvons prendre la première gare de dpéart car elle est identique partout
-        String stationFrom = tripList.get(0).from().name();
+        //TODO: attribut "stationFrom" ??
+        Trip firsTrip = tripList.get(0);
+        String stationFromName = firsTrip.from().name();
 
-        // Si la list a un seul élément, alors il faut juste return le text
-        if(tripList.size() == 1) {
-            return stationFrom + " - " + tripList.get(0).to().name() +
-                    " (" + tripList.get(0).points() + ")";
-        }
-
-        // Tu me diras, mais logiquement c'est pour si jamais y'a la meme gare d'arrivée plusieurs fois
+        // Liste des textes liés aux gares d'arrivée
         TreeSet<String> stationsTo = new TreeSet<>();
 
-        // Création des chaines avec le nom d'arrivée et le nombre de points attribué
         for(Trip trip : tripList) {
             stationsTo.add(String.format("%s (%s)", trip.to().name(), trip.points()));
         }
 
-        // String qui sera dans les accolades avec les différentes station d'arrivées
-        String main = String.join(", ", stationsTo);
+        //Billet à un trajet
+        if (tripList.size() == 1) {
+            return String.format("%s - %s", stationFromName, stationsTo.first());
+        }
 
-        // Etant donné que la Precondition a déjà check si y'a bien une seul gare de départ, on peut prendre
-        // la première trip pour le départ, puis add le reste.
-        return stationFrom + " - {" + main + "}";
+        //Partie du texte des gares d'arrivée
+        String stationToText = String.join(", ", stationsTo);
+
+        return String.format("%s - {%s}", stationFromName, stationToText);
     }
 
     @Override

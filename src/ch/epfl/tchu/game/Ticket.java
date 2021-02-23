@@ -2,7 +2,7 @@ package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.Preconditions;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -28,18 +28,20 @@ public final class Ticket implements Comparable<Ticket> {
      */
     public Ticket(List<Trip> trips) {
         // TODO BEST WAY TO DO THIS !!!
-        Preconditions.checkArgument(!trips.isEmpty())
+        Preconditions.checkArgument(!trips.isEmpty());
 
         String fromStation = trips.get(0).from().name();
         boolean checkName = true;
         for(Trip trip : trips) {
-            if(!trip.from().name().equals(fromStation))
+            if (!trip.from().name().equals(fromStation)) {
                 checkName = false;
+                break;
+            }
         }
         Preconditions.checkArgument(checkName);
 
         this.trips = trips;
-        this.text = computeText();
+        this.text = computeText(trips);
     }
 
     /**
@@ -64,11 +66,37 @@ public final class Ticket implements Comparable<Ticket> {
         return text;
     }
 
-    private static String computeText() {
-        //TODO METHODE POUR TEXT ET UTILE JE PENSE POUR LE FOREACH AU CONSTRUCTEUR
-        //Ça brainfuck le static, comment accéder à la liste de trips spécifique?
+    /**
+     * Crée la représentation textuelle du billet.
+     * @param tripList
+     *                la list de trip en question
+     * @return la représentation textuelle du billet.
+     */
+    private static String computeText(List<Trip> tripList) {
 
-        return null;
+        // La précondition passée, nous pouvons prendre la première gare de dpéart car elle est identique partout
+        String stationFrom = tripList.get(0).from().name();
+
+        // Si la list a un seul élément, alors il faut juste return le text
+        if(tripList.size() == 1) {
+            return stationFrom + " - " + tripList.get(0).to().name() +
+                    " (" + tripList.get(0).points() + ")";
+        }
+
+        // Tu me diras, mais logiquement c'est pour si jamais y'a la meme gare d'arrivée plusieurs fois
+        TreeSet<String> stationsTo = new TreeSet<>();
+
+        // Création des chaines avec le nom d'arrivée et le nombre de points attribué
+        for(Trip trip : tripList) {
+            stationsTo.add(String.format("%s (%s)", trip.to().name(), trip.points()));
+        }
+
+        // String qui sera dans les accolades avec les différentes station d'arrivées
+        String main = String.join(", ", stationsTo);
+
+        // Etant donné que la Precondition a déjà check si y'a bien une seul gare de départ, on peut prendre
+        // la première trip pour le départ, puis add le reste.
+        return stationFrom + " - {" + main + "}";
     }
 
     @Override

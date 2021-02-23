@@ -53,7 +53,7 @@ public final class Ticket implements Comparable<Ticket> {
      *             le nombre de points à gagner (doit être strictement positif)
      */
     public Ticket(Station from, Station to, int points) {
-        this(Collections.singletonList(new Trip(from, to, points)));
+        this(List.of(new Trip(from, to, points)));
     }
 
     /**

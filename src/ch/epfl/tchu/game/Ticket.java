@@ -2,14 +2,15 @@ package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.Preconditions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 
 /**
  * Un billet.
  *
- * @author Dylan Vairoli (//TODO SCIPER)
- * @author Giovanni Ranieri (//TODO SCIPER)
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
  */
 public final class Ticket implements Comparable<Ticket> {
 
@@ -93,6 +94,41 @@ public final class Ticket implements Comparable<Ticket> {
         String stationToText = String.join(", ", stationsTo);
 
         return String.format("%s - {%s}", stationFromName, stationToText);
+    }
+
+    /**
+     * Retourne le nombre de points maximal des trajets du billet connectés entre eux
+     * par le réseau du joueur et la négation du nombre de point minimal du billet si
+     * aucun des trajets ne sont connectés entre eux.
+     *
+     * @param connectivity
+     *                  connectivité du réseau du joueur
+     * @return le nombre de points du billet pour la connectivité donnée (comme décrit dans la description)
+     */
+    public int points(StationConnectivity connectivity){
+        //Liste des trajet connectés par le joueur
+        final List<Trip> connectedTrips = new ArrayList<>();
+        //Garde une trace des points minimums des trajets du billet
+        int min = trips.get(0).points();
+
+        for (Trip trip: trips) {
+            if (connectivity.connected(trip.from(), trip.to())){
+                connectedTrips.add(trip);
+            }
+            if (trip.points() < min)
+                min = trip.points();
+        }
+
+        if (connectedTrips.isEmpty()) {
+            return -min;
+        }
+
+        int max = 0;
+        for (Trip connectedTrip: connectedTrips) {
+            if (connectedTrip.points() > max)
+                max = connectedTrip.points();
+        }
+        return max;
     }
 
     /**

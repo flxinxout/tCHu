@@ -5,8 +5,8 @@ import java.util.List;
 /**
  * Énumération des différentes couleurs du jeu
  *
- * @author Dylan Vairoli (//TODO SCIPER)
- * @author Giovanni Ranieri (//TODO SCIPER)
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
  */
 public enum Color {
 

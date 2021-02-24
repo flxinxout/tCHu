@@ -9,8 +9,8 @@ import java.util.Objects;
 /**
  * Un trajet.
  *
- * @author Dylan Vairoli (//TODO SCIPER)
- * @author Giovanni Ranieri (//TODO SCIPER)
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
  */
 public final class Trip {
 
@@ -89,13 +89,11 @@ public final class Trip {
     }
 
     /**
-     * Retourne le nombre de points du traje si les deux gares du trajet sont bien connectées,
+     * Retourne le nombre de points du trajet si les deux gares du trajet sont bien connectées,
      * et la négation de ce nombre de points sinon.
      *
      * @param connectivity
      *              //TODO pas bien compris son utilité, a voir plus tard
-     * @throws IllegalArgumentException
-     *             si l'une des listes est vide ou si le nombre de points est négatif.
      * @return le nombre de points du trajet pour la connectivité donnée
      */
     public int points(StationConnectivity connectivity) {

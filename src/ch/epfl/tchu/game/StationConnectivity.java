@@ -3,8 +3,8 @@ package ch.epfl.tchu.game;
 /**
  * Représente la connectivité du réseau d'un joueur,
  *
- * @author Dylan Vairoli (//TODO SCIPER)
- * @author Giovanni Ranieri (//TODO SCIPER)
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
  */
 public interface StationConnectivity {
 

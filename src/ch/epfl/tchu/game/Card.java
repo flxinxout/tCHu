@@ -5,14 +5,14 @@ import java.util.List;
 /**
  * Énumération des différentes cartes du jeu
  *
- * @author Dylan Vairoli (//TODO SCIPER)
- * @author Giovanni Ranieri (//TODO SCIPER)
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
  */
 public enum Card {
 
     BLACK(Color.BLACK),
     VIOLET(Color.VIOLET),
-    BLUE(Color.BLACK),
+    BLUE(Color.BLUE),
     GREEN(Color.GREEN),
     YELLOW(Color.YELLOW),
     ORANGE(Color.ORANGE),

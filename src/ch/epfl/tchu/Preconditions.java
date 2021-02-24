@@ -1,5 +1,11 @@
 package ch.epfl.tchu;
 
+/**
+ * Sert à vérifier la validité des arguments passés à une méthode
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ */
 public final class Preconditions {
 
     private Preconditions() {}

@@ -5,8 +5,8 @@ import ch.epfl.tchu.Preconditions;
 /**
  * Une gare.
  *
- * @author Dylan Vairoli (//TODO SCIPER)
- * @author Giovanni Ranieri (//TODO SCIPER)
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
  */
 public final class Station {
 

@@ -11,9 +11,11 @@ public final class Preconditions {
     private Preconditions() {}
 
     /**
-     * Check the validity of an argument
+     * Vérifie la validité d'un argument
      * @param shouldBeTrue
-     * @throws IllegalArgumentException if shouldBeTrue is false
+     *                  la condition à remplir si l'argument est valide
+     * @throws IllegalArgumentException
+     *                  si la condition est fausse
      */
     public static void checkArgument(boolean shouldBeTrue) {
         if(!shouldBeTrue)

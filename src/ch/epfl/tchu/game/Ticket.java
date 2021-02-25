@@ -52,7 +52,7 @@ public final class Ticket implements Comparable<Ticket> {
      * @param to
      *            la gare d'arrivée
      * @param points
-     *             le nombre de points à gagner (doit être strictement positif)
+     *            le nombre de points à gagner (doit être strictement positif)
      */
     public Ticket(Station from, Station to, int points) {
         this(List.of(new Trip(from, to, points)));

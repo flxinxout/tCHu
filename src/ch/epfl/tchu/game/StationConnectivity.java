@@ -9,14 +9,13 @@ package ch.epfl.tchu.game;
 public interface StationConnectivity {
 
     /**
-     * Indique ssi les deux gares sont connectées entre elles par le réseau du joueur.
+     * Indique si les deux gares sont connectées entre elles par le réseau du joueur.
      *
      * @param s1
      *          la première gare
      * @param s2
      *          la deuxième gare
-     *
-     * @return ssi les deux gares sont connectées entre elles par le réseau du joueur
+     * @return si les deux gares sont connectées entre elles par le réseau du joueur
      */
     boolean connected(Station s1, Station s2);
 

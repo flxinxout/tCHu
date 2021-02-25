@@ -18,6 +18,7 @@ public enum Color {
     ORANGE,
     RED,
     WHITE;
+
     /**
      * Liste contenant toutes les différentes couleurs
      */

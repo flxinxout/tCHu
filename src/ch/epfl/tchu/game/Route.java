@@ -3,6 +3,7 @@ package ch.epfl.tchu.game;
 import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,7 +21,7 @@ public final class Route {
     public enum Level {
 
         OVERGROUND,
-        UNDERGROUND;
+        UNDERGROUND
     }
 
     private final String id;
@@ -32,7 +33,7 @@ public final class Route {
 
     /**
      * Construit une route avec l'identité, les gares, la longueur,
-     * le niveau et la couleur donnés.
+     * le niveau et la couleur donnée.
      *
      * @param id
      *            l'identité de la route (non nulle)
@@ -57,11 +58,11 @@ public final class Route {
     public Route(String id, Station station1, Station station2, int length, Level level, Color color) {
         Preconditions.checkArgument(!station1.equals(station2));
 
-        Objects.requireNonNull(this.id = id)
-        Objects.requireNonNull(this.station1 = station1)
-        Objects.requireNonNull(this.station2 = station2)
+        Objects.requireNonNull(this.id = id);
+        Objects.requireNonNull(this.station1 = station1);
+        Objects.requireNonNull(this.station2 = station2);
         this.length = length;
-        Objects.requireNonNull(this.level = level)
+        Objects.requireNonNull(this.level = level);
         this.color = color;
     }
 
@@ -131,7 +132,6 @@ public final class Route {
      */
     public Station stationOpposite(Station station){
         Preconditions.checkArgument(station1.equals(station) || station2.equals(station));
-
         return station1.equals(station) ? station2 : station1;
     }
 
@@ -144,8 +144,59 @@ public final class Route {
      * pour (tenter de) s'emparer de la route
      */
     public List<SortedBag<Card>> possibleClaimCards(){
-        
+        List<SortedBag<Card>> possibleClaimCardsList = new ArrayList<>();
+        int index = 0;
+
+        for(int i = 0; i < Card.ALL.size(); i++) {
+
+            SortedBag.Builder<Card> builder = new SortedBag.Builder<>();
+            Card card = Card.ALL.get(i);
+
+            // Si la couleur de la route est neutre
+            if(this.color == null) {
+
+            } else {
+
+                // Si la couleur n'est pas neutre, check si la couleur de la carte = la couleur de la route
+                if(card.color().equals(this.color)) {
+
+                    // Si le level de la carte est underground, alors les cartes locomotives doivent être ajoutées
+                    if(this.level.equals(Level.UNDERGROUND)) {
+
+                        // Formation de toutes les différentes combinaisons possible avec des cartes de couleur + locomotive
+
+
+
+                        for(int j = 0; j <= this.length; j++) {
+                            builder.add(this.length - j, card);
+
+                            if(j != 0) {
+                                builder.add(j, Card.LOCOMOTIVE);
+                            }
+                        }
+                        possibleClaimCardsList.add(SortedBag.of());
+
+                    }
+
+                }
+
+            }
+
+            if(this.level.equals(Level.UNDERGROUND)) {
+
+                if(card.equals(Card.LOCOMOTIVE)) {
+
+                }
+
+
+                continue;
+            }
+
+        }
+
     }
+
+    private static
 
     /**
      * Retourne le nombre de cartes additionnelles à jouer

@@ -145,58 +145,63 @@ public final class Route {
      */
     public List<SortedBag<Card>> possibleClaimCards(){
         List<SortedBag<Card>> possibleClaimCardsList = new ArrayList<>();
-        int index = 0;
 
-        for(int i = 0; i < Card.ALL.size(); i++) {
+        //Si la route n'est pas de couleur neutre
+        if (color != null) {
+            //Premier ensemble : color - color - ... - color
+            SortedBag<Card> colorCards = SortedBag.of(length, Card.of(color));
+            possibleClaimCardsList.add(colorCards);
 
-            SortedBag.Builder<Card> builder = new SortedBag.Builder<>();
-            Card card = Card.ALL.get(i);
+            //Créer les ensembles :
+            // color - color - ... - locomotive - ...
+            // ...
+            // color - locomotive - ...
+            // locomotive - locomotive - ...
+            if (level == Level.UNDERGROUND){
+                for (int i = 1; i <= length; i++) {
+                    SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
 
-            // Si la couleur de la route est neutre
-            if(this.color == null) {
+                    cardsBuilder.add(length - i, Card.of(color));
+                    cardsBuilder.add(i, Card.LOCOMOTIVE);
+                    possibleClaimCardsList.add(cardsBuilder.build());
+                }
+            }
+        }
+        //Si la route est de couleur neutre
+        else {
+            if (level == Level.OVERGROUND) {
 
-            } else {
-
-                // Si la couleur n'est pas neutre, check si la couleur de la carte = la couleur de la route
-                if(card.color().equals(this.color)) {
-
-                    // Si le level de la carte est underground, alors les cartes locomotives doivent être ajoutées
-                    if(this.level.equals(Level.UNDERGROUND)) {
-
-                        // Formation de toutes les différentes combinaisons possible avec des cartes de couleur + locomotive
-
-
-
-                        for(int j = 0; j <= this.length; j++) {
-                            builder.add(this.length - j, card);
-
-                            if(j != 0) {
-                                builder.add(j, Card.LOCOMOTIVE);
-                            }
-                        }
-                        possibleClaimCardsList.add(SortedBag.of());
-
+                //Créer les ensembles:
+                // BLACK - ... - BLACK
+                // BLUE - ... - BLUE
+                // ...
+                for (Card car : Card.CARS) {
+                    SortedBag<Card> colorCards = SortedBag.of(length, car);
+                    possibleClaimCardsList.add(colorCards);
+                }
+            }
+            else {
+                //Créer les ensembles:
+                // BLACK - BLACK - ... - locomotive - ...
+                // BLUE - BLUE - ... - locomotive - ...
+                // ...
+                // BLACK - locomotive - ...
+                // BLUE - locomotive - ...
+                // ...
+                // locomotive - locomotive - ...
+                for (int i = 1; i <= length; i++) {
+                    for (Card car: Card.CARS) {
+                        SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
+                        cardsBuilder.add(length - i, car);
+                        cardsBuilder.add(i, Card.LOCOMOTIVE);
+                        possibleClaimCardsList.add(cardsBuilder.build());
                     }
-
                 }
-
             }
-
-            if(this.level.equals(Level.UNDERGROUND)) {
-
-                if(card.equals(Card.LOCOMOTIVE)) {
-
-                }
-
-
-                continue;
-            }
-
         }
 
+        return possibleClaimCardsList;
     }
-
-    private static
 
     /**
      * Retourne le nombre de cartes additionnelles à jouer

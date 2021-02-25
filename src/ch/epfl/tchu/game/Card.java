@@ -31,7 +31,7 @@ public enum Card {
      */
     public static final int COUNT = ALL.size();
     /**
-     * Nombre de cartes colorées (non-locomotive) distinctes disponibles
+     * Liste des cartes colorées (non-locomotive) distinctes disponibles
      */
     public static final List<Card> CARS = ALL.subList(0, COUNT - 1);
 
@@ -44,7 +44,6 @@ public enum Card {
      *
      * @param color
      *              la couleur du type de carte désiré
-     *
      * @return le type de carte correspondant à cette couleur
      */
     public static Card of(Color color) {

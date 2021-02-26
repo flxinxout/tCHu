@@ -147,21 +147,17 @@ public final class Route {
         List<SortedBag<Card>> possibleClaimCardsList = new ArrayList<>();
 
         //Si la route n'est pas de couleur neutre
-        if (color != null) {
+        if (this.color != null) {
+
             //Premier ensemble : color - color - ... - color
-            SortedBag<Card> colorCards = SortedBag.of(length, Card.of(color));
+            SortedBag<Card> colorCards = SortedBag.of(this.length, Card.of(this.color));
             possibleClaimCardsList.add(colorCards);
 
-            //Créer les ensembles :
-            // color - color - ... - locomotive - ...
-            // ...
-            // color - locomotive - ...
-            // locomotive - locomotive - ...
-            if (level == Level.UNDERGROUND){
-                for (int i = 1; i <= length; i++) {
+            if (this.level == Level.UNDERGROUND){
+                for (int i = 1; i <= this.length; i++) {
                     SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
 
-                    cardsBuilder.add(length - i, Card.of(color));
+                    cardsBuilder.add(this.length - i, Card.of(this.color));
                     cardsBuilder.add(i, Card.LOCOMOTIVE);
                     possibleClaimCardsList.add(cardsBuilder.build());
                 }
@@ -171,24 +167,13 @@ public final class Route {
         else {
             if (level == Level.OVERGROUND) {
 
-                //Créer les ensembles:
-                // BLACK - ... - BLACK
-                // BLUE - ... - BLUE
-                // ...
                 for (Card car : Card.CARS) {
                     SortedBag<Card> colorCards = SortedBag.of(length, car);
                     possibleClaimCardsList.add(colorCards);
                 }
             }
             else {
-                //Créer les ensembles:
-                // BLACK - BLACK - ... - locomotive - ...
-                // BLUE - BLUE - ... - locomotive - ...
-                // ...
-                // BLACK - locomotive - ...
-                // BLUE - locomotive - ...
-                // ...
-                // locomotive - locomotive - ...
+
                 for (int i = 1; i <= length; i++) {
                     for (Card car: Card.CARS) {
                         SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
@@ -211,6 +196,17 @@ public final class Route {
      */
     public int additionalClaimCardsCount(SortedBag<Card> claimCards, SortedBag<Card> drawnCards){
         Preconditions.checkArgument(level == Level.UNDERGROUND || drawnCards.size() == 3);
+        int additionalCards = 0;
+
+        // Possible additional cards -> every color placed in claimCards + locomotive
+        for(Card card : drawnCards) {
+            if(claimCards.contains(card)) {
+                additionalCards++;
+            }
+        }
+
+        return additionalCards;
+
     }
 
     /**

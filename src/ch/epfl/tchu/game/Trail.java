@@ -2,70 +2,101 @@ package ch.epfl.tchu.game;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public final class Trail {
 
-    private final int length;
+    private final List<Route> routes;
     private final Station from;
     private final Station to;
+    private final int length;
 
-    private Trail(int length, Station from, Station to) {
-        this.length = length;
+    private Trail(List<Route> routes, Station from, Station to, int length) {
+        this.routes = routes;
         this.from = from;
         this.to = to;
+        this.length = length;
     }
 
     /**
      * Retourne le chemin le plus long d'une liste de route données
-     * @param routes la liste de routes à itérer
+     * @param routes
+     *          la liste de routes à comparer
      * @return le chemin le plus long
      */
     public static Trail longest(List<Route> routes) {
-        if(routes.isEmpty()) return new Trail(0, null, null);
+        if (routes.isEmpty()) return new Trail(List.of(), null, null, 0);
 
-        /*
-        cs = liste des chemins constitués d'une seule route
-        tant que cs n'est pas vide :
-        cs' = liste vide
-        pour tout chemin c de cs :
-            rs = (routes appartenant au joueur, n'appartenant pas à c, et pouvant prolonger c) //TODO ?????????
-            pour toute route r de rs :
-                ajouter c prolongé de r à cs'
-        cs = cs'
-         */
+        List<Trail> trivialTrails = computeTrivialTrails(routes);
+        Trail maxLengthTrail = null;
 
-        int maxLength = 0;
-        List<Trail> singleTrailList = getSingleTrailList(routes);
-
-        while (!singleTrailList.isEmpty()) {
+        while (!trivialTrails.isEmpty()) {
             List<Trail> trails = new ArrayList<>();
+            for (Trail trail : trivialTrails) {
+                // rs = (routes appartenant au joueur, n'appartenant pas à c, et pouvant prolonger c)
+                List<Route> routesToExtend = new ArrayList<>();
 
-            for(Trail trail : singleTrailList) {
-                List<Route> routePlayer = new ArrayList<>();
-                //TODO pas compris l'étape
+                for (Route route : routes) {
+                    //S'il ne contient pas la route
+                    if (!trail.routes.contains(route)) {
+                        for (Route trailRoute : trail.routes) {
+                            boolean canExtend = tryExtend(trailRoute, route);
+                            //Si elle peut la prolonger
+                            if (canExtend) {
+                                routesToExtend.add(route);
+                            }
+                        }
+                    }
+                }
 
-                for(Route route : routePlayer) {
-                    trails.add()
+                for (Route route : routesToExtend) {
+                    List<Route> newRoadsList = trail.routes;
+                    newRoadsList.add(route);
+
+                    int newLength = trail.length + route.length();
+                    Trail newTrail;
+
+                    if (trail.station2().equals(route.station1()))
+                        newTrail = new Trail(newRoadsList, trail.station1(), route.station2(), newLength);
+                    else
+                        newTrail = new Trail(newRoadsList, trail.station1(), route.station1(), newLength);
+
+                    trails.add(newTrail);
+                    maxLengthTrail = newTrail.length > maxLengthTrail.length() ? newTrail : maxLengthTrail;
                 }
             }
-
-            singleTrailList = trails;
-
+            trivialTrails = trails;
         }
 
-    }
-
-    private static List<Trail> getSingleTrailList(List<Route> routes) {
-        final List<Trail> singleTrailList = new ArrayList<>();
-        for(Route route : routes) {
-            singleTrailList.add(new Trail(route.length(), route.station1(), route.station2()));
-        }
-        return singleTrailList;
+        return maxLengthTrail;
     }
 
     /**
-     * Retourne la longueur du chemin
+     * Retourne tous les chemins constitués d'une seule route
+     * reliant les routes d'une liste de routes
+     */
+    private static List<Trail> computeTrivialTrails(List<Route> routes) {
+        final List<Trail> trivialTrailsList = new ArrayList<>();
+        //Pour chaque route
+        for(Route route : routes) {
+            //Ajouter un chemin n'ayant que cette route dans un sens (gare1 - gare2)
+            trivialTrailsList.add(new Trail(List.of(route), route.station1(), route.station2(), route.length()));
+            //La même dans l'autre sens (gare2 - gare1)
+            trivialTrailsList.add(new Trail(List.of(route), route.station2(), route.station1(), route.length()));
+        }
+        return trivialTrailsList;
+    }
+
+    /**
+     * Retourne tous les chemins constitués d'une seule route
+     * reliant les routes d'une liste de routes
+     */
+    private static boolean tryExtend(Route trailRoute, Route route) {
+        return route.station1().equals(trailRoute.station2()) ||
+                route.station2().equals(trailRoute.station2());
+    }
+
+    /**
+     * Retourne la longueur du chemin (somme de la longueur des routes le constituant)
      * @return la longueur du chemin
      */
     public int length() {
@@ -84,18 +115,25 @@ public final class Trail {
      * Retourne la station d'arrivée du chemin
      * @return la station d'arrivée du chemin
      */
-    public Station station12() {
+    public Station station2() {
         return length == 0 ? null : to;
     }
 
     /**
-     * Retourne une représentation textuelle du chemin qui devra retourner au moins la gare de départ et d'arrivée,
-     * avec les points
+     * Retourne une représentation textuelle du chemin qui devra retourner
+     * au moins la gare de départ et d'arrivée, avec les points
      * @return une représentation textuelle du chemin
      */
     @Override
     public String toString() {
+        List<String> stationNames = new ArrayList<>();
 
+        for (Route route: routes) {
+            stationNames.add(route.station1().name());
+        }
+
+        String names = String.join("-", stationNames);
+        return String.format("%s (%s)", names, this.length);
     }
 }
 

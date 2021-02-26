@@ -19,7 +19,6 @@ public final class Route {
      * Énumération des deux niveaux possibles pour une route
      */
     public enum Level {
-
         OVERGROUND,
         UNDERGROUND
     }
@@ -126,6 +125,8 @@ public final class Route {
     /**
      * Retourne la gare de la route qui n'est pas celle donnée.
      *
+     * @param station
+     *            gare de la route à ne pas retourner
      * @throws IllegalArgumentException
      *            si la gare donnée n'est égale à aucune des deux de cette route
      * @return la gare de la route qui n'est pas celle donnée
@@ -191,14 +192,16 @@ public final class Route {
     /**
      * Retourne le nombre de cartes additionnelles à jouer
      * pour s'emparer de la route (en tunnel).
-     *
+     * @param claimCards
+     *              cartes initialement posées par le joueur
+     * @param drawnCards
+     *              cartes tirées du sommet de la pioche
      * @return le nombre de cartes additionnelles à jouer pour s'emparer de la route
      */
     public int additionalClaimCardsCount(SortedBag<Card> claimCards, SortedBag<Card> drawnCards){
-        Preconditions.checkArgument(level == Level.UNDERGROUND || drawnCards.size() == 3);
+        Preconditions.checkArgument(level == Level.UNDERGROUND || drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
         int additionalCards = 0;
 
-        // Possible additional cards -> every color placed in claimCards + locomotive
         for(Card card : drawnCards) {
             if(claimCards.contains(card)) {
                 additionalCards++;

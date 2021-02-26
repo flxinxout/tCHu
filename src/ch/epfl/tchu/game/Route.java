@@ -174,13 +174,17 @@ public final class Route {
                 }
             }
             else {
-
-                for (int i = 1; i <= length; i++) {
-                    for (Card car: Card.CARS) {
-                        SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
-                        cardsBuilder.add(length - i, car);
-                        cardsBuilder.add(i, Card.LOCOMOTIVE);
-                        possibleClaimCardsList.add(cardsBuilder.build());
+                for (int i = 0; i <= this.length; i++) {
+                    if (i < length) {
+                        for (Card car : Card.CARS) {
+                            SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
+                            cardsBuilder.add(length - i, car);
+                            cardsBuilder.add(i, Card.LOCOMOTIVE);
+                            possibleClaimCardsList.add(cardsBuilder.build());
+                        }
+                    }
+                    else {
+                        possibleClaimCardsList.add(SortedBag.of(i, Card.LOCOMOTIVE));
                     }
                 }
             }

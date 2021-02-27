@@ -3,6 +3,12 @@ package ch.epfl.tchu.game;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Un chemin orienté reliant deux villes ou plus.
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ */
 public final class Trail {
 
     private final List<Route> routes;
@@ -12,7 +18,7 @@ public final class Trail {
 
     private Trail(List<Route> routes, Station from, Station to) {
         this.routes = routes;
-        this.length = computeLength(routes);
+        this.length = computeLength(routes, from, to);
         this.from = from;
         this.to = to;
     }
@@ -55,9 +61,7 @@ public final class Trail {
         List<Trail> trivialTrailsList = new ArrayList<>();
 
         for(Route route : routes) {
-            //Ajouter un chemin n'ayant que cette route dans un sens (gare1 - gare2)
             trivialTrailsList.add(new Trail(List.of(route), route.station1(), route.station2()));
-            //La même dans l'autre sens (gare2 - gare1)
             trivialTrailsList.add(new Trail(List.of(route), route.station2(), route.station1()));
         }
         return trivialTrailsList;
@@ -90,8 +94,7 @@ public final class Trail {
      * Étend un chemin avec une route.
      */
     private static Trail extend(Trail trailToExtend, Route route, Station endStation) {
-        List<Route> newRoads = new ArrayList<>();
-        newRoads.addAll(trailToExtend.routes);
+        List<Route> newRoads = new ArrayList<>(trailToExtend.routes);
         newRoads.add(route);
 
         return new Trail(newRoads, trailToExtend.station1(), endStation);
@@ -102,20 +105,6 @@ public final class Trail {
      * @return la longueur du chemin
      */
     public int length() {
-        return length;
-    }
-
-    /**
-     * Calcul la longueur du chemin constitué de ces routes (somme de la longueur des routes)
-     * @return la longueur du chemin
-     */
-    private static int computeLength(List<Route> routes){
-        int length = 0;
-
-        for (Route route: routes) {
-            length += route.length();
-        }
-
         return length;
     }
 
@@ -133,6 +122,21 @@ public final class Trail {
      */
     public Station station2() {
         return length() == 0 ? null : to;
+    }
+
+    /**
+     * Calcul la longueur du chemin constitué de ces routes (somme de la longueur des routes)
+     * @return la longueur du chemin
+     */
+    private static int computeLength(List<Route> routes, Station station1, Station station2){
+        if (station1 == null || station2 == null)
+            return 0;
+
+        int length = 0;
+        for (Route route: routes) {
+            length += route.length();
+        }
+        return length;
     }
 
     /**
@@ -154,8 +158,7 @@ public final class Trail {
 
         for (Route route: routes) {
             String name = lastStationName.equals(route.station1().name()) ?
-                            route.station2().name() :
-                            route.station1().name();
+                            route.station2().name() : route.station1().name();
             stationNames.add(name);
             lastStationName = name;
         }

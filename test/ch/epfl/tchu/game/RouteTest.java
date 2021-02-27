@@ -206,7 +206,7 @@ public class RouteTest {
         }
 
         //Test de l'ordre
-        Route route = new Route("route", GENEVE, LAUSANNE, 3, UNDERGROUND, Color.BLACK);
+        Route route = new Route("route", GENEVE, LAUSANNE, 3, UNDERGROUND, null);
         List<SortedBag<Card>> possibleClaimCards = route.possibleClaimCards();
         for (int i = 0; i < 4; i++){
             SortedBag.Builder<Card> builder = new SortedBag.Builder<>();

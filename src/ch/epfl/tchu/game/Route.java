@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Une route reliant deux villes voisines.
+ * Une route non-orientée reliant deux villes voisines.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
@@ -48,6 +48,7 @@ public final class Route {
      *            la couleur de la route (peut être nulle)
      * @throws IllegalArgumentException
      *            si les deux gares sont les mêmes
+     *            ou si la longueur n'est pas comprise dans les limites acceptables
      * @throws NullPointerException
      *            si l'identité est nulle,
      *            ou si la première gare est nulle,
@@ -55,13 +56,15 @@ public final class Route {
      *            ou si le niveau est nul
      */
     public Route(String id, Station station1, Station station2, int length, Level level, Color color) {
-        Preconditions.checkArgument(!station1.equals(station2));
+        Preconditions.checkArgument(!station1.equals(station2)
+                                    || length >= Constants.MIN_ROUTE_LENGTH
+                                    || length <= Constants.MAX_ROUTE_LENGTH);
 
         Objects.requireNonNull(this.id = id);
         Objects.requireNonNull(this.station1 = station1);
         Objects.requireNonNull(this.station2 = station2);
-        this.length = length;
         Objects.requireNonNull(this.level = level);
+        this.length = length;
         this.color = color;
     }
 
@@ -175,18 +178,16 @@ public final class Route {
 
             //Si la route est un tunnel
             if (level == Level.UNDERGROUND) {
-                for (int i = 1; i <= length; i++) {
-                    if (i < length) {
-                        for (Card car : Card.CARS) {
-                            SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
-                            cardsBuilder.add(length - i, car);
-                            cardsBuilder.add(i, Card.LOCOMOTIVE);
-                            possibleClaimCardsList.add(cardsBuilder.build());
-                        }
-                    } else {
-                        possibleClaimCardsList.add(SortedBag.of(i, Card.LOCOMOTIVE));
+                for (int i = 1; i < length; i++) {
+                    for (Card car : Card.CARS) {
+                        SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
+                        cardsBuilder.add(length - i, car);
+                        cardsBuilder.add(i, Card.LOCOMOTIVE);
+                        possibleClaimCardsList.add(cardsBuilder.build());
                     }
                 }
+
+                possibleClaimCardsList.add(SortedBag.of(length, Card.LOCOMOTIVE));
             }
         }
 
@@ -203,16 +204,20 @@ public final class Route {
      * @return le nombre de cartes additionnelles à jouer pour s'emparer de la route
      */
     public int additionalClaimCardsCount(SortedBag<Card> claimCards, SortedBag<Card> drawnCards){
-        Preconditions.checkArgument(level == Level.UNDERGROUND || drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
+        Preconditions.checkArgument(level == Level.UNDERGROUND
+                                    || drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
         int additionalCards = 0;
+        Color claimColor = null;
+
+        if (!claimCards.isEmpty())
+            claimColor = claimCards.get(0).color();
 
         for(Card card : drawnCards) {
             if (card == Card.LOCOMOTIVE)
                 additionalCards++;
             else {
-                if (claimCards.contains(card)) {
+                if (card.color() == claimColor)
                     additionalCards++;
-                }
             }
         }
 

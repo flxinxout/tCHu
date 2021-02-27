@@ -148,17 +148,18 @@ public final class Route {
         List<SortedBag<Card>> possibleClaimCardsList = new ArrayList<>();
 
         //Si la route n'est pas de couleur neutre
-        if (this.color != null) {
+        if (color != null) {
 
             //Premier ensemble : color - color - ... - color
-            SortedBag<Card> colorCards = SortedBag.of(this.length, Card.of(this.color));
+            SortedBag<Card> colorCards = SortedBag.of(length, Card.of(color));
             possibleClaimCardsList.add(colorCards);
 
-            if (this.level == Level.UNDERGROUND){
-                for (int i = 1; i <= this.length; i++) {
+            //Si la route est un tunnel
+            if (level == Level.UNDERGROUND){
+                for (int i = 1; i <= length; i++) {
                     SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
 
-                    cardsBuilder.add(this.length - i, Card.of(this.color));
+                    cardsBuilder.add(length - i, Card.of(color));
                     cardsBuilder.add(i, Card.LOCOMOTIVE);
                     possibleClaimCardsList.add(cardsBuilder.build());
                 }
@@ -166,15 +167,15 @@ public final class Route {
         }
         //Si la route est de couleur neutre
         else {
-            if (level == Level.OVERGROUND) {
 
-                for (Card car : Card.CARS) {
-                    SortedBag<Card> colorCards = SortedBag.of(length, car);
-                    possibleClaimCardsList.add(colorCards);
-                }
+            for (Card car : Card.CARS) {
+                SortedBag<Card> colorCards = SortedBag.of(length, car);
+                possibleClaimCardsList.add(colorCards);
             }
-            else {
-                for (int i = 0; i <= this.length; i++) {
+
+            //Si la route est un tunnel
+            if (level == Level.UNDERGROUND) {
+                for (int i = 1; i <= length; i++) {
                     if (i < length) {
                         for (Card car : Card.CARS) {
                             SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
@@ -182,8 +183,7 @@ public final class Route {
                             cardsBuilder.add(i, Card.LOCOMOTIVE);
                             possibleClaimCardsList.add(cardsBuilder.build());
                         }
-                    }
-                    else {
+                    } else {
                         possibleClaimCardsList.add(SortedBag.of(i, Card.LOCOMOTIVE));
                     }
                 }
@@ -207,8 +207,12 @@ public final class Route {
         int additionalCards = 0;
 
         for(Card card : drawnCards) {
-            if(claimCards.contains(card)) {
+            if (card == Card.LOCOMOTIVE)
                 additionalCards++;
+            else {
+                if (claimCards.contains(card)) {
+                    additionalCards++;
+                }
             }
         }
 

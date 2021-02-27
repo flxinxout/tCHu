@@ -6,18 +6,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class TrailTest {
 
-    private static final Station station1 = new Station(2, "gnv");
-    private static final Station station2 = new Station(4, "lsn");
-    private static final Station station3 = new Station(5, "frg");
-    private static final Station station4 = new Station(6, "berne");
-    private static final Route route1 = new Route("1", station1, station2, 2, Route.Level.OVERGROUND, Color.YELLOW);
-    private static final Route route2 = new Route("2", station2, station3, 2, Route.Level.OVERGROUND, Color.ORANGE);
-    private static final Route route3 = new Route("3", station2, station4, 5, Route.Level.OVERGROUND, Color.VIOLET);
+    private static final Station GENEVE = new Station(2, "GEN");
+    private static final Station LAUSANNE = new Station(4, "LAU");
+    private static final Station FRIBOURG = new Station(5, "FRI");
+    private static final Station BERNE = new Station(6, "BER");
+
+    private static final Route GEN_FRI = new Route("6", GENEVE, FRIBOURG, 2, Route.Level.OVERGROUND, Color.YELLOW);
+    private static final Route GEN_BER = new Route("5", GENEVE, BERNE, 2, Route.Level.OVERGROUND, Color.YELLOW);
+    private static final Route GEN_LAU = new Route("4", GENEVE, LAUSANNE, 2, Route.Level.OVERGROUND, Color.YELLOW);
+    private static final Route LAU_FRI = new Route("2", LAUSANNE, FRIBOURG, 4, Route.Level.OVERGROUND, Color.ORANGE);
+    private static final Route LAU_BER = new Route("3", LAUSANNE, BERNE, 1, Route.Level.OVERGROUND, Color.VIOLET);
+    private static final Route BER_FRI = new Route("2", BERNE, FRIBOURG, 4, Route.Level.OVERGROUND, Color.ORANGE);
+
     private static final List<Route> routes = new ArrayList<>();
     private static final List<Route> routesEmpty = new ArrayList<>();
 
@@ -40,7 +44,7 @@ public class TrailTest {
     void isStation1GetStationAccessorWork() {
         createTrail2Roads();
         Trail trail = Trail.longest(routes);
-        assertEquals(station1, trail.station1());
+        assertEquals(GENEVE, trail.station1());
     }
 
     @Test
@@ -53,7 +57,7 @@ public class TrailTest {
     void isStation2GetStationAccessorWork() {
         createTrail2Roads();
         Trail trail = Trail.longest(routes);
-        assertEquals(station3, trail.station2());
+        assertEquals(FRIBOURG, trail.station2());
     }
 
     @Test
@@ -62,31 +66,56 @@ public class TrailTest {
         assertEquals(null, trail.station2());
     }
 
-    /*
-    faudra revoir l'implémentation de longest car si tu test le test de toString, le chemin met 2 fois lsn
-     */
     @Test
-    void isToStringWorkFine() {
-        createTrail2Roads();
+    void toStringWorks() {
+        List<Route> routes = new ArrayList<>(List.of(GEN_LAU, LAU_BER, LAU_FRI, GEN_BER, GEN_FRI, BER_FRI));
+
         Trail trail = Trail.longest(routes);
-        assertEquals(createToString(), trail.toString());
+        assertEquals("GEN - LAU - FRI - GEN - BER - FRI (14)", trail.toString());
+    }
+
+    @Test
+    void toStringWorks1Road() {
+        List<Route> routes = new ArrayList<>(List.of(GEN_LAU));
+
+        Trail trail = Trail.longest(routes);
+        assertEquals("GEN - LAU (2)", trail.toString());
+    }
+
+    @Test
+    void toStringWorks2Roads() {
+        List<Route> routes = new ArrayList<>(List.of(GEN_LAU, LAU_BER));
+
+        Trail trail = Trail.longest(routes);
+        assertEquals("GEN - LAU - BER (3)", trail.toString());
+    }
+
+    @Test
+    void toStringWorks3Roads() {
+        List<Route> routes = new ArrayList<>(List.of(GEN_LAU, LAU_BER, BER_FRI));
+
+        Trail trail = Trail.longest(routes);
+        assertEquals("GEN - LAU - BER - FRI (7)", trail.toString());
+    }
+
+    @Test
+    void toStringWorksWithNullRoutesList() {
+        List<Route> routes = new ArrayList<>(List.of());
+
+        Trail trail = Trail.longest(routes);
+        assertEquals("Chemin inexistant", trail.toString());
     }
 
     private static void createTrail2Roads() {
-        routes.add(route1);
-        routes.add(route2);
+        routes.add(GEN_LAU);
+        routes.add(LAU_FRI);
     }
 
     private static void createTrail3Roads() {
-        routes.add(route1);
-        routes.add(route2);
-        routes.add(route3);
+        routes.add(GEN_LAU);
+        routes.add(LAU_FRI);
+        routes.add(LAU_BER);
     }
-
-    private static String createToString() {
-        return "gnv - lsn - frg (9)";
-    }
-
 }
 
 

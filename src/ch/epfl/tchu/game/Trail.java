@@ -6,15 +6,15 @@ import java.util.List;
 public final class Trail {
 
     private final List<Route> routes;
+    private final int length;
     private final Station from;
     private final Station to;
-    private final int length;
 
-    private Trail(List<Route> routes, Station from, Station to, int length) {
+    private Trail(List<Route> routes, Station from, Station to) {
         this.routes = routes;
+        this.length = computeLength(routes);
         this.from = from;
         this.to = to;
-        this.length = length;
     }
 
     /**
@@ -24,56 +24,24 @@ public final class Trail {
      * @return le chemin le plus long
      */
     public static Trail longest(List<Route> routes) {
-        if (routes.isEmpty()) return new Trail(List.of(), null, null, 0);
+        if (routes.isEmpty()) return new Trail(List.of(), null, null);
 
-        List<Trail> trivialTrails = computeTrivialTrails(routes);
-        Trail maxLengthTrail = null;
+        List<Trail> allTrails = computeTrivialTrails(routes);
+        Trail maxLengthTrail = allTrails.get(0);
 
-        while (!trivialTrails.isEmpty()) {
-            List<Trail> trails = new ArrayList<>();
-            for (Trail trail : trivialTrails) {
-                // rs = (routes appartenant au joueur, n'appartenant pas à c, et pouvant prolonger c)
-                List<Route> routesToExtend = new ArrayList<>();
+        while (!allTrails.isEmpty()) {
+            List<Trail> tempTrails = new ArrayList<>();
 
+            for (Trail trail : allTrails) {
                 for (Route route : routes) {
-                    //S'il ne contient pas la route
-                    if (!trail.routes.contains(route)) {
-                        for (Route trailRoute : trail.routes) {
-                            boolean canExtend = tryExtend(trailRoute, route);
-                            //Si elle peut la prolonger
-                            if (canExtend) {
-                                routesToExtend.add(route);
-                            }
-                        }
-                    }
-                }
-
-                for (Route route : routesToExtend) {
-
-                    // Création d'une nouvelle list car si on recupère directement celle de trail.routes, et qu'on
-                    // lui ajoute une route, alors on va se heurter à une UnSupportedOperationException car cette liste
-                    // et immutable.
-                    List<Route> newRoadsToGet = new ArrayList<>();
-                    newRoadsToGet.addAll(trail.routes);
-                    newRoadsToGet.add(route);
-
-                    int newLength = trail.length + route.length();
-                    Trail newTrail;
-
-                    if (trail.station2().equals(route.station1()))
-                        newTrail = new Trail(newRoadsToGet, trail.station1(), route.station2(), newLength);
-                    else
-                        newTrail = new Trail(newRoadsToGet, trail.station1(), route.station1(), newLength);
-
-                    trails.add(newTrail);
-                    if(maxLengthTrail == null) {
-                        maxLengthTrail = newTrail;
-                    } else {
-                        maxLengthTrail = newTrail.length > maxLengthTrail.length() ? newTrail : maxLengthTrail;
+                    Trail newTrail = tryExtend(trail, route);
+                    if (newTrail != null) {
+                        tempTrails.add(newTrail);
+                        maxLengthTrail = newTrail.length() > maxLengthTrail.length() ? newTrail : maxLengthTrail;
                     }
                 }
             }
-            trivialTrails = trails;
+            allTrails = tempTrails;
         }
 
         return maxLengthTrail;
@@ -84,24 +52,49 @@ public final class Trail {
      * reliant les routes d'une liste de routes
      */
     private static List<Trail> computeTrivialTrails(List<Route> routes) {
-        final List<Trail> trivialTrailsList = new ArrayList<>();
-        //Pour chaque route
+        List<Trail> trivialTrailsList = new ArrayList<>();
+
         for(Route route : routes) {
             //Ajouter un chemin n'ayant que cette route dans un sens (gare1 - gare2)
-            trivialTrailsList.add(new Trail(List.of(route), route.station1(), route.station2(), route.length()));
+            trivialTrailsList.add(new Trail(List.of(route), route.station1(), route.station2()));
             //La même dans l'autre sens (gare2 - gare1)
-            trivialTrailsList.add(new Trail(List.of(route), route.station2(), route.station1(), route.length()));
+            trivialTrailsList.add(new Trail(List.of(route), route.station2(), route.station1()));
         }
         return trivialTrailsList;
     }
 
     /**
-     * Retourne tous les chemins constitués d'une seule route
-     * reliant les routes d'une liste de routes
+     * Essaie d'étendre un chemin avec une route, retourne ce chemin si l'extension a fonctionné,
+     * retourne null sinon.
      */
-    private static boolean tryExtend(Route trailRoute, Route route) {
-        return route.station1().equals(trailRoute.station2()) ||
-                route.station2().equals(trailRoute.station2());
+    private static Trail tryExtend(Trail trailToExtend, Route route) {
+        //Si le chemin ne contient pas la route
+        //TODO: changer contains par removeAll
+        if (!trailToExtend.routes.contains(route)) {
+            //Si elle peut prolonger le chemin, retourne le chemin prolongé
+            if (route.station1().equals(trailToExtend.station2())){
+                return extend(trailToExtend, route, route.station2());
+            }
+            else if (route.station2().equals(trailToExtend.station2())){
+                return extend(trailToExtend, route, route.station1());
+            }
+            //Sinon retourne null
+            else {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Étend un chemin avec une route.
+     */
+    private static Trail extend(Trail trailToExtend, Route route, Station endStation) {
+        List<Route> newRoads = new ArrayList<>();
+        newRoads.addAll(trailToExtend.routes);
+        newRoads.add(route);
+
+        return new Trail(newRoads, trailToExtend.station1(), endStation);
     }
 
     /**
@@ -113,11 +106,25 @@ public final class Trail {
     }
 
     /**
+     * Calcul la longueur du chemin constitué de ces routes (somme de la longueur des routes)
+     * @return la longueur du chemin
+     */
+    private static int computeLength(List<Route> routes){
+        int length = 0;
+
+        for (Route route: routes) {
+            length += route.length();
+        }
+
+        return length;
+    }
+
+    /**
      * Retourne la station de départ du chemin
      * @return la station de départ du chemin
      */
     public Station station1() {
-        return length == 0 ? null : from;
+        return length() == 0 ? null : from;
     }
 
     /**
@@ -125,7 +132,7 @@ public final class Trail {
      * @return la station d'arrivée du chemin
      */
     public Station station2() {
-        return length == 0 ? null : to;
+        return length() == 0 ? null : to;
     }
 
     /**
@@ -136,13 +143,25 @@ public final class Trail {
     @Override
     public String toString() {
         List<String> stationNames = new ArrayList<>();
+        String lastStationName;
+
+        if (from != null) {
+            stationNames.add(from.name());
+            lastStationName = from.name();
+        }
+        else
+            return "Chemin inexistant";
 
         for (Route route: routes) {
-            stationNames.add(route.station1().name());
+            String name = lastStationName.equals(route.station1().name()) ?
+                            route.station2().name() :
+                            route.station1().name();
+            stationNames.add(name);
+            lastStationName = name;
         }
 
         String names = String.join(" - ", stationNames);
-        return String.format("%s (%s)", names, this.length);
+        return String.format("%s (%s)", names, length());
     }
 }
 

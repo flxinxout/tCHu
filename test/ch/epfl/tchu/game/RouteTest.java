@@ -250,7 +250,7 @@ public class RouteTest {
     }
 
     @Test
-    void additionnalClaimCardsCountWorksWithOnlyColor(){
+    void additionnalClaimCardsCountWorksWithOnlyColorAtStart(){
         Route route = new Route("route", GENEVE, LAUSANNE, 3, UNDERGROUND, null);
 
         for (int i = Constants.ADDITIONAL_TUNNEL_CARDS; i >= 0; i--) {

@@ -49,19 +49,28 @@ public final class Trail {
                 }
 
                 for (Route route : routesToExtend) {
-                    List<Route> newRoadsList = trail.routes;
-                    newRoadsList.add(route);
+
+                    // Création d'une nouvelle list car si on recupère directement celle de trail.routes, et qu'on
+                    // lui ajoute une route, alors on va se heurter à une UnSupportedOperationException car cette liste
+                    // et immutable.
+                    List<Route> newRoadsToGet = new ArrayList<>();
+                    newRoadsToGet.addAll(trail.routes);
+                    newRoadsToGet.add(route);
 
                     int newLength = trail.length + route.length();
                     Trail newTrail;
 
                     if (trail.station2().equals(route.station1()))
-                        newTrail = new Trail(newRoadsList, trail.station1(), route.station2(), newLength);
+                        newTrail = new Trail(newRoadsToGet, trail.station1(), route.station2(), newLength);
                     else
-                        newTrail = new Trail(newRoadsList, trail.station1(), route.station1(), newLength);
+                        newTrail = new Trail(newRoadsToGet, trail.station1(), route.station1(), newLength);
 
                     trails.add(newTrail);
-                    maxLengthTrail = newTrail.length > maxLengthTrail.length() ? newTrail : maxLengthTrail;
+                    if(maxLengthTrail == null) {
+                        maxLengthTrail = newTrail;
+                    } else {
+                        maxLengthTrail = newTrail.length > maxLengthTrail.length() ? newTrail : maxLengthTrail;
+                    }
                 }
             }
             trivialTrails = trails;
@@ -132,7 +141,7 @@ public final class Trail {
             stationNames.add(route.station1().name());
         }
 
-        String names = String.join("-", stationNames);
+        String names = String.join(" - ", stationNames);
         return String.format("%s (%s)", names, this.length);
     }
 }

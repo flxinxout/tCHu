@@ -125,8 +125,8 @@ public class RouteTest {
     @Test
     void stationOppositeWorks() {
         Route route = new Route("route", STATION1, STATION2, 2, OVERGROUND, BLACK);
-        assertEquals(STATION1, route.stationOpposite(route.station1()));
-        assertEquals(STATION2, route.stationOpposite(route.station2()));
+        assertEquals(STATION1, route.stationOpposite(route.station2()));
+        assertEquals(STATION2, route.stationOpposite(route.station1()));
     }
 
     @Test
@@ -225,29 +225,28 @@ public class RouteTest {
         assertEquals(SortedBag.of(3, Card.LOCOMOTIVE), possibleClaimCards.get(3));
     }
 
-    //CE TEST NE FONCTIONNE PAS MAIS DANS LE MESSAGE D'ERREUR
-    // ON PEUT VOIR QUE NOTRE FONCTION EST CORRECTE
     @Test
     void possibleClaimCardsWorksWithNeutralUndergroundRoads() {
-        //for (int length = 1; length < 7; length++) {
-            Route route = new Route("route", GENEVE, LAUSANNE, 2, UNDERGROUND, null);
-            List<SortedBag<Card>> possibleClaimCards = route.possibleClaimCards();
 
-            List<SortedBag<Card>> expectedPossibleCards = new ArrayList<>();
+        Route route = new Route("route", GENEVE, LAUSANNE, 2, UNDERGROUND, null);
+        List<SortedBag<Card>> possibleClaimCards = route.possibleClaimCards();
+        List<SortedBag<Card>> expectedPossibleCards = new ArrayList<>();
 
-            for (Card car: Card.CARS) {
-                for (int i = 0; i <= 2; i++) {
-                    SortedBag.Builder<Card> bagBuilder = new SortedBag.Builder<>();
-                    bagBuilder.add(2 - i, car);
-                    bagBuilder.add(i, Card.LOCOMOTIVE);
-                    expectedPossibleCards.add(bagBuilder.build());
+        for (int i = 0; i <= 2; i++) {
+            if (i < 2) {
+                for (Card car : Card.CARS) {
+                    SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
+                    cardsBuilder.add(2 - i, car);
+                    cardsBuilder.add(i, Card.LOCOMOTIVE);
+                    expectedPossibleCards.add(cardsBuilder.build());
                 }
-                if (expectedPossibleCards.isEmpty())
-                    expectedPossibleCards.add(SortedBag.of(0, Card.LOCOMOTIVE));
-
-                assertEquals(expectedPossibleCards, possibleClaimCards);
             }
-        //}
+            else {
+                expectedPossibleCards.add(SortedBag.of(i, Card.LOCOMOTIVE));
+            }
+        }
+
+        assertEquals(expectedPossibleCards, possibleClaimCards);
     }
 
     @Test

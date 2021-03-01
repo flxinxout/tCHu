@@ -14,6 +14,8 @@ public class TrailTest {
     private static final Station LAUSANNE = new Station(4, "LAU");
     private static final Station FRIBOURG = new Station(5, "FRI");
     private static final Station BERNE = new Station(6, "BER");
+    private static final Station LUCERNE = new Station(7, "LCN");
+    private static final Station INTERLAKEN = new Station(8, "INT");
 
     private static final Route GEN_FRI = new Route("6", GENEVE, FRIBOURG, 2, Route.Level.OVERGROUND, Color.YELLOW);
     private static final Route GEN_BER = new Route("5", GENEVE, BERNE, 2, Route.Level.OVERGROUND, Color.YELLOW);
@@ -21,6 +23,7 @@ public class TrailTest {
     private static final Route LAU_FRI = new Route("2", LAUSANNE, FRIBOURG, 4, Route.Level.OVERGROUND, Color.ORANGE);
     private static final Route LAU_BER = new Route("3", LAUSANNE, BERNE, 1, Route.Level.OVERGROUND, Color.VIOLET);
     private static final Route BER_FRI = new Route("2", BERNE, FRIBOURG, 4, Route.Level.OVERGROUND, Color.ORANGE);
+    private static final Route LCN_INT = new Route("2", LUCERNE, INTERLAKEN, 3, Route.Level.OVERGROUND, Color.ORANGE);
 
     private static final List<Route> routes = new ArrayList<>();
     private static final List<Route> routesEmpty = new ArrayList<>();
@@ -29,15 +32,14 @@ public class TrailTest {
     void isLength2AccessorWork() {
         createTrail2Roads();
         Trail trail = Trail.longest(routes);
-        assertEquals(4, trail.length());
+        assertEquals(6, trail.length());
     }
 
-    // NOT WORK affiche 9 au lieu de 7
     @Test
     void isLengthMoreThan2AccessorWork() {
         createTrail3Roads();
         Trail trail = Trail.longest(routes);
-        assertEquals(7, trail.length());
+        assertEquals(6, trail.length());
     }
 
     @Test
@@ -106,6 +108,27 @@ public class TrailTest {
         assertEquals("Chemin inexistant", trail.toString());
     }
 
+   /* @Test
+    void checkLongestTrailWith5RoadsTrivial() {
+        createTrail5Roads();
+        Trail trail = Trail.longest(routes);
+        assertEquals(11, trail.length());
+    }
+
+    @Test
+    void checkLongestTrailWith5RoadsNonTrivial() {
+        createTrail5RoadsNoTrivial();
+        Trail trail = Trail.longest(routes);
+        assertEquals(11, trail.length());
+    }
+
+    @Test
+    void checkLongestTrailWith5RoadsNonTrivialFirstRoad() {
+        createTrail5RoadsNoTrivialFirstRoad();
+        Trail trail = Trail.longest(routes);
+        assertEquals(11, trail.length());
+    }*/
+
     private static void createTrail2Roads() {
         routes.add(GEN_LAU);
         routes.add(LAU_FRI);
@@ -115,6 +138,30 @@ public class TrailTest {
         routes.add(GEN_LAU);
         routes.add(LAU_FRI);
         routes.add(LAU_BER);
+    }
+
+    private static void createTrail5Roads() {
+        routes.add(GEN_LAU); // 2
+        routes.add(LAU_FRI); // 4
+        routes.add(LAU_BER); // 1
+        routes.add(BER_FRI); // 4
+        routes.add(LCN_INT); // 3
+    }
+
+    private static void createTrail5RoadsNoTrivial() {
+        routes.add(LAU_FRI); // 4
+        routes.add(LAU_BER); // 1
+        routes.add(GEN_LAU); // 2
+        routes.add(LCN_INT); // 3
+        routes.add(BER_FRI); // 4
+    }
+
+    private static void createTrail5RoadsNoTrivialFirstRoad() {
+        routes.add(LCN_INT); // 3
+        routes.add(LAU_FRI); // 4
+        routes.add(LAU_BER); // 1
+        routes.add(GEN_LAU); // 2
+        routes.add(BER_FRI); // 4
     }
 }
 

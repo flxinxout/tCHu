@@ -89,13 +89,9 @@ public class RouteTest {
     }
 
     @Test
-    void lengthAccessorWorks() {
-        var rng = TestRandomizer.newRandom();
-        for (int i = 0; i < TestRandomizer.RANDOM_ITERATIONS; i++) {
-            var length = rng.nextInt(Integer.MAX_VALUE);
-            var route = new Route("route", STATION1, STATION2, length, OVERGROUND, BLACK);
-            assertEquals(length, route.length());
-        }
+    void isLengthAccessorWork() {
+        Route route = new Route("route", STATION1, STATION2, 2, OVERGROUND, BLACK);
+        assertEquals(2, route.length());
     }
 
     @Test
@@ -204,25 +200,6 @@ public class RouteTest {
                 assertEquals(expectedPossibleCards, possibleClaimCards);
             }
         }
-
-        //Test de l'ordre
-        Route route = new Route("route", GENEVE, LAUSANNE, 3, UNDERGROUND, null);
-        List<SortedBag<Card>> possibleClaimCards = route.possibleClaimCards();
-        for (int i = 0; i < 4; i++){
-            SortedBag.Builder<Card> builder = new SortedBag.Builder<>();
-            builder.add(3 - i, Card.of(BLACK));
-            builder.add(i, Card.LOCOMOTIVE);
-            assertEquals(builder.build(), possibleClaimCards.get(i));
-        }
-
-        //First
-        assertEquals(SortedBag.of(3, Card.of(BLACK)), possibleClaimCards.get(0));
-        //Second
-        assertEquals(SortedBag.of(2, Card.of(BLACK), 1, Card.LOCOMOTIVE), possibleClaimCards.get(1));
-        //Third
-        assertEquals(SortedBag.of( 1, Card.BLACK, 2, Card.LOCOMOTIVE), possibleClaimCards.get(2));
-        //Last
-        assertEquals(SortedBag.of(3, Card.LOCOMOTIVE), possibleClaimCards.get(3));
     }
 
     @Test

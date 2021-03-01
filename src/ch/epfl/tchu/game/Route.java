@@ -57,8 +57,8 @@ public final class Route {
      */
     public Route(String id, Station station1, Station station2, int length, Level level, Color color) {
         Preconditions.checkArgument(!station1.equals(station2)
-                                    || length >= Constants.MIN_ROUTE_LENGTH
-                                    || length <= Constants.MAX_ROUTE_LENGTH);
+                                    && length >= Constants.MIN_ROUTE_LENGTH
+                                    && length <= Constants.MAX_ROUTE_LENGTH);
 
         Objects.requireNonNull(this.id = id);
         Objects.requireNonNull(this.station1 = station1);

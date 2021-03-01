@@ -108,7 +108,7 @@ public class TrailTest {
         assertEquals("Chemin inexistant", trail.toString());
     }
 
-   /* @Test
+    /*@Test
     void checkLongestTrailWith5RoadsTrivial() {
         createTrail5Roads();
         Trail trail = Trail.longest(routes);
@@ -127,6 +127,13 @@ public class TrailTest {
         createTrail5RoadsNoTrivialFirstRoad();
         Trail trail = Trail.longest(routes);
         assertEquals(11, trail.length());
+    }
+
+    @Test
+    void checkLongestTrail1RoadTrivial() {
+        createTrivialTrail();
+        Trail trail = Trail.longest(routes);
+        assertEquals(3, trail.length());
     }*/
 
     private static void createTrail2Roads() {
@@ -162,6 +169,11 @@ public class TrailTest {
         routes.add(LAU_BER); // 1
         routes.add(GEN_LAU); // 2
         routes.add(BER_FRI); // 4
+    }
+
+    private static void createTrivialTrail() {
+        routes.add(LCN_INT); // 3
+        routes.add(LAU_FRI); // 4
     }
 }
 

@@ -30,7 +30,8 @@ public final class Trail {
      * @return le chemin le plus long
      */
     public static Trail longest(List<Route> routes) {
-        if (routes.isEmpty()) return new Trail(List.of(), null, null);
+        if (routes.isEmpty())
+            return new Trail(List.of(), null, null);
 
         List<Trail> allTrails = computeTrivialTrails(routes);
         Trail maxLengthTrail = allTrails.get(0);
@@ -109,6 +110,21 @@ public final class Trail {
     }
 
     /**
+     * Calcul la longueur du chemin constitué de ces routes (somme de la longueur des routes)
+     * @return la longueur du chemin
+     */
+    private static int computeLength(List<Route> routes, Station station1, Station station2){
+        if (station1 == null || station2 == null)
+            return 0;
+
+        int length = 0;
+        for (Route route: routes) {
+            length += route.length();
+        }
+        return length;
+    }
+
+    /**
      * Retourne la station de départ du chemin
      * @return la station de départ du chemin
      */
@@ -122,21 +138,6 @@ public final class Trail {
      */
     public Station station2() {
         return length() == 0 ? null : to;
-    }
-
-    /**
-     * Calcul la longueur du chemin constitué de ces routes (somme de la longueur des routes)
-     * @return la longueur du chemin
-     */
-    private static int computeLength(List<Route> routes, Station station1, Station station2){
-        if (station1 == null || station2 == null)
-            return 0;
-
-        int length = 0;
-        for (Route route: routes) {
-            length += route.length();
-        }
-        return length;
     }
 
     /**

@@ -8,13 +8,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Un tas de cartes.
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ */
 public final class Deck<C extends Comparable<C>> {
 
     private final List<C> cards;
 
     /**
      * Constructeur d'un tas de cartes d'un type spécifique
-     * @param cards la liste de cartes constituant le tas
+     * @param cards
+     *          la liste de cartes constituant le tas
      */
     private Deck(List<C> cards) {
         this.cards = cards;
@@ -22,12 +29,14 @@ public final class Deck<C extends Comparable<C>> {
 
     /**
      * Méthode retournant un tas de cartes ayant les mêmes cartes que
-     * le multiensemble cards, mélangées au moyen du générateur de nombres aléatoires rng
-     * @param cards le multi-ensemble de cartes
-     * @param rgn un générateur de nombres aléatoires
-     * @param <C> le type de cartes contenu dans cards et retourner
-     * @return n tas de cartes ayant les mêmes cartes que
-     *      * le multiensemble cards, mélangées au moyen du générateur de nombres aléatoires rng
+     * le multi-ensemble de cartes donné, mélangées au moyen d'un générateur de nombres aléatoires.
+     * @param cards
+     *          le multi-ensemble de cartes
+     * @param rgn
+     *          un générateur de nombres aléatoires
+     * @param <C>
+     *           le type des cartes
+     * @return le tas de cartes
      */
     public static <C extends Comparable<C>> Deck<C> of(SortedBag<C> cards, Random rgn) {
         List<C> newCardsList = cards.toList();
@@ -36,49 +45,51 @@ public final class Deck<C extends Comparable<C>> {
     }
 
     /**
-     * Retourne le nombre de cartes contenu dans la liste
-     * @return le nombre de cartes contenu dans la liste
-     * @throws IllegalArgumentException si la size de la liste est vide
+     * Retourne le nombre de cartes que ce tas contient.
+     * @return le nombre de cartes que ce tas contient
      */
     public int size() {
-        Preconditions.checkArgument(!cards.isEmpty());
         return cards.size();
     }
 
     /**
-     * Retourne true:= si la liste est vide, sinon false
-     * @return true:= si la liste est vide, sinon false
+     * Retourne vrai ssi le tas est vide.
+     * @return  vrai ssi le tas est vide
      */
     public boolean isEmpty() {
         return cards.isEmpty();
     }
 
     /**
-     * Retourne la carte au dessus du deck
-     * @return la carte au dessus du deck
-     * @throws IllegalArgumentException si la size de la liste est vide
+     * Retourne la carte au sommet du tas.
+     * @throws IllegalArgumentException
+     *          si le tas est vide
+     * @return la carte au sommet du tas
      */
     public C topCard() {
-        Preconditions.checkArgument(isEmpty());
+        Preconditions.checkArgument(!isEmpty());
         return cards.get(0);
     }
 
     /**
-     * Retourne un tas identique au récepteur (this) mais sans la carte au sommet
-     * @throws IllegalArgumentException si le tas est vide
-     * @return un tas identique au récepteur (this) mais sans la carte au sommet
+     * Retourne un tas identique au récepteur ({@code this}) mais sans la carte au sommet
+     * @throws IllegalArgumentException
+     *          si le tas est vide
+     * @return un tas identique au récepteur ({@code this}) mais sans la carte au sommet
      */
     public Deck<C> withoutTopCard() {
-        Preconditions.checkArgument(isEmpty());
-        //TODO est-ce que c'est mieux de use le subList que le topCard ? Je pense que oui car on retourne rapidement une nouvelle liste là
+        Preconditions.checkArgument(!isEmpty());
+        //TODO: ATTENTION SUBLIST GARDE LA MÊME RÉFÉRENCE QUE LA LISTE INITIALE!!!
         return new Deck<>(cards.subList(1, cards.size()));
     }
 
     /**
-     * Retourne un multiensemble contenant les count cartes se trouvant au sommet du tas
-     * @param count le nombre de cartes retournées
-     * @throws IllegalArgumentException si count n'est pas compris entre 0 (inclus) et la taille du tas (incluse)
-     * @return un multiensemble contenant les count cartes se trouvant au sommet du tas
+     * Retourne un multi-ensemble contenant les {@code count} cartes se trouvant au sommet du tas
+     * @param count
+     *          le nombre de cartes retournées
+     * @throws IllegalArgumentException
+     *          si {@code count} n'est pas compris entre 0 (inclus) et la taille du tas (incluse)
+     * @return un multi-ensemble contenant les {@code count} cartes se trouvant au sommet du tas
      */
     public SortedBag<C> topCards(int count) {
         Preconditions.checkArgument(count >= 0 && count <= cards.size());
@@ -91,17 +102,17 @@ public final class Deck<C extends Comparable<C>> {
     }
 
     /**
-     * Retourne un tas identique au récepteur (this) mais sans les count cartes du sommet
-     * @param count le nombre de cartes retournées
-     * @throws IllegalArgumentException si count n'est pas compris entre 0 (inclus) et la taille du tas (incluse)
-     * @return un tas identique au récepteur (this) mais sans les count cartes du sommet
+     * Retourne un tas identique au récepteur ({@code this}) mais sans les {@code count} cartes du sommet
+     * @param count
+     *          le nombre de cartes retournées
+     * @throws IllegalArgumentException
+     *          si {@code count} n'est pas compris entre 0 (inclus) et la taille du tas (incluse)
+     * @return un tas identique au récepteur ({@code this}) mais sans les {@code count} cartes du sommet
      */
     public Deck<C> withoutTopCards(int count) {
-        List<C> newCardList = new ArrayList<>();
-        for(int i = count; i < cards.size(); i++) {
-            newCardList.add(cards.get(i));
-        }
-        return new Deck<>(newCardList);
+        Preconditions.checkArgument(count >= 0 && count <= cards.size());
+        //TODO: ATTENTION SUBLIST GARDE LA MÊME RÉFÉRENCE QUE LA LISTE INITIALE!!!
+        return new Deck<>(cards.subList(count, cards.size()));
     }
 
 }

@@ -16,7 +16,7 @@ import java.util.Random;
  */
 public final class Deck<C extends Comparable<C>> {
 
-    private final List<C> cards;
+    public final List<C> cards;
 
     /**
      * Constructeur d'un tas de cartes d'un type spécifique
@@ -32,15 +32,15 @@ public final class Deck<C extends Comparable<C>> {
      * le multi-ensemble de cartes donné, mélangées au moyen d'un générateur de nombres aléatoires.
      * @param cards
      *          le multi-ensemble de cartes
-     * @param rgn
+     * @param rng
      *          un générateur de nombres aléatoires
      * @param <C>
      *           le type des cartes
      * @return le tas de cartes
      */
-    public static <C extends Comparable<C>> Deck<C> of(SortedBag<C> cards, Random rgn) {
+    public static <C extends Comparable<C>> Deck<C> of(SortedBag<C> cards, Random rng) {
         List<C> newCardsList = cards.toList();
-        Collections.shuffle(newCardsList, rgn);
+        Collections.shuffle(newCardsList, rng);
         return new Deck<>(newCardsList);
     }
 
@@ -80,9 +80,13 @@ public final class Deck<C extends Comparable<C>> {
     public Deck<C> withoutTopCard() {
         Preconditions.checkArgument(!isEmpty());
 
-        List<C> newListOfCards = new ArrayList<>();
+        //TODO: ici c'est pas nécessaire de changer la référence je crois puisque la liste peut pas etre modifiee...
+        // en aucun cas on ne peut la changer
+        List<C> newListOfCards = cards.subList(1, size());
+
+        /*List<C> newListOfCards = new ArrayList<>();
         for(C card : cards)
-            if(!card.equals(topCard())) newListOfCards.add(card);
+            if(!card.equals(topCard())) newListOfCards.add(card);*/
 
         return new Deck<>(newListOfCards);
     }
@@ -108,7 +112,7 @@ public final class Deck<C extends Comparable<C>> {
     /**
      * Retourne un tas identique au récepteur ({@code this}) mais sans les {@code count} cartes du sommet
      * @param count
-     *          le nombre de cartes retournées
+     *          le nombre de cartes du sommet ignorées
      * @throws IllegalArgumentException
      *          si {@code count} n'est pas compris entre 0 (inclus) et la taille du tas (incluse)
      * @return un tas identique au récepteur ({@code this}) mais sans les {@code count} cartes du sommet
@@ -116,12 +120,15 @@ public final class Deck<C extends Comparable<C>> {
     public Deck<C> withoutTopCards(int count) {
         Preconditions.checkArgument(count >= 0 && count <= cards.size());
 
-        //TODO interesant, compare to dans enum pour une comparaison bien fait.
-        List<C> newListOfCards = new ArrayList<>();
+        //TODO: ici c'est pas nécessaire de changer la référence je crois puisque la liste est final...
+        // en aucun cas on ne peut la changer
+        List<C> newListOfCards = cards.subList(count, size());
+
+        /*List<C> newListOfCards = new ArrayList<>();
         SortedBag<C> cardsFromTheTop = topCards(count);
         for(C card : cards) {
             if(!cardsFromTheTop.contains(card)) newListOfCards.add(card);
-        }
+        }*/
 
         return new Deck<>(newListOfCards);
     }

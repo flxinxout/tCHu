@@ -50,15 +50,19 @@ public final class CardState extends PublicCardState {
      * par celle se trouvant au sommet de la pioche, qui en est du même coup retirée.
      * @param slot
      *          l'index des cartes face visible à remplacer
+     * @throws IndexOutOfBoundsException
+     *          si {@code slot} ne se trouve pas entre 0 et 5 (exclu)
+     * @throws IllegalArgumentException
+     *          si la pioche est vide
      * @return le nouvel ensemble de cartes
      */
     public CardState withDrawnFaceUpCard(int slot) {
         Objects.checkIndex(slot, faceUpCards().size());
-        Preconditions.checkArgument(deckSize() > 0);
+        Preconditions.checkArgument(!isDeckEmpty());
 
         Card topCard = deck.topCard();
 
-        //TODO: j'ai fait une copie de la liste pour pas changer à la référence, correct? oui totalement gg
+        //TODO: ICI PAR CONTRE COPIE OBLIGATOIRE CAR ON SET LA LISTE
         //List<Card> newCardsFaceUp = faceUpCards();
 
         List<Card> newCardsFaceUp = new ArrayList<>();

@@ -140,7 +140,7 @@ public final class Info {
     public String claimedRoute(Route route, SortedBag<Card> cards) {
         return String.format(StringsFr.CLAIMED_ROUTE,
                              playerName,
-                             nameOf(route),
+                             namesOf(route),
                              descriptionOf(cards));
     }
 
@@ -148,7 +148,7 @@ public final class Info {
      * Retourne la représentation textuelle de la route donnée.
      * @return la représentation textuelle de la route donnée
      */
-    private static String nameOf(Route route){
+    private static String namesOf(Route route){
         return (route.station1().name() + StringsFr.EN_DASH_SEPARATOR + route.station2().name());
     }
 
@@ -182,7 +182,7 @@ public final class Info {
     public String attemptsTunnelClaim(Route route, SortedBag<Card> initialCards) {
         return String.format(StringsFr.ATTEMPTS_TUNNEL_CLAIM,
                              playerName,
-                             nameOf(route),
+                             namesOf(route),
                              descriptionOf(initialCards));
     }
 
@@ -212,7 +212,7 @@ public final class Info {
      * @return retourne le message décrit ci-dessus
      */
     public String didNotClaimRoute(Route route){
-        return String.format(StringsFr.DID_NOT_CLAIM_ROUTE, playerName, nameOf(route));
+        return String.format(StringsFr.DID_NOT_CLAIM_ROUTE, playerName, namesOf(route));
     }
 
     /**

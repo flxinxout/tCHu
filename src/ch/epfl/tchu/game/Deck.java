@@ -79,8 +79,14 @@ public final class Deck<C extends Comparable<C>> {
      */
     public Deck<C> withoutTopCard() {
         Preconditions.checkArgument(!isEmpty());
-        //TODO: ATTENTION SUBLIST GARDE LA MÊME RÉFÉRENCE QUE LA LISTE INITIALE!!!
-        return new Deck<>(cards.subList(1, cards.size()));
+
+        //TODO interesant, compare to dans enum pour une comparaison bien fait.
+        List<C> newListOfCards = new ArrayList<>();
+        for(C card : cards)
+            if(!card.equals(topCard())) newListOfCards.add(card);
+
+
+        return new Deck<>(newListOfCards);
     }
 
     /**
@@ -111,8 +117,15 @@ public final class Deck<C extends Comparable<C>> {
      */
     public Deck<C> withoutTopCards(int count) {
         Preconditions.checkArgument(count >= 0 && count <= cards.size());
-        //TODO: ATTENTION SUBLIST GARDE LA MÊME RÉFÉRENCE QUE LA LISTE INITIALE!!!
-        return new Deck<>(cards.subList(count, cards.size()));
+
+        //TODO interesant, compare to dans enum pour une comparaison bien fait.
+        List<C> newListOfCards = new ArrayList<>();
+        SortedBag<C> cardsFromTheTop = topCards(count);
+        for(C card : cards) {
+            if(!cardsFromTheTop.contains(card)) newListOfCards.add(card);
+        }
+
+        return new Deck<>(newListOfCards);
     }
 
 }

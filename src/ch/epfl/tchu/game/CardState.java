@@ -58,14 +58,14 @@ public final class CardState extends PublicCardState {
 
         Card topCard = deck.topCard();
 
-        //TODO: j'ai fait une copie de la liste pour pas changer à la référence, correct?
+        //TODO: j'ai fait une copie de la liste pour pas changer à la référence, correct? oui totalement gg
         //List<Card> newCardsFaceUp = faceUpCards();
 
         List<Card> newCardsFaceUp = new ArrayList<>();
         for (int s: Constants.FACE_UP_CARD_SLOTS) {
             newCardsFaceUp.add(faceUpCard(s));
         }
-        newCardsFaceUp.set(slot, topCard);
+        newCardsFaceUp.set(slot, topCard); // ici j'ai pas compris par contre
 
         Deck<Card> newDeck = deck.withoutTopCard();
 
@@ -95,7 +95,7 @@ public final class CardState extends PublicCardState {
         Preconditions.checkArgument(!isDeckEmpty());
 
         Deck<Card> newDeck = deck.withoutTopCard();
-        //TODO: c'est oke de pas copier faceUpCards et discards?
+        //TODO: c'est oke de pas copier faceUpCards et discards? je pense plutot faire une copie à voir avec un assistant
         return new CardState(faceUpCards(), newDeck, discards);
     }
 

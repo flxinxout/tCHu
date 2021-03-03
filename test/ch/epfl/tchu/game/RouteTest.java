@@ -165,15 +165,6 @@ public class RouteTest {
 
             assertEquals(expectedPossibleCards, possibleClaimCards);
         }
-
-        //Test de l'ordre dans l'ordre des couleurs
-        for (int i = 0; i < Color.COUNT; i++){
-            Route route = new Route("route", GENEVE, LAUSANNE, 2, OVERGROUND, null);
-            List<SortedBag<Card>> possibleClaimCards = route.possibleClaimCards();
-
-            SortedBag<Card> expectedCard = SortedBag.of(2, Card.values()[i]);
-            assertEquals(expectedCard, possibleClaimCards.get(i));
-        }
     }
 
     @Test
@@ -242,7 +233,15 @@ public class RouteTest {
     //TODO: same but with locomotive au départ aussi
     @Test
     void additionnalClaimCardsCountWorks(){
+        Route route = new Route("route", GENEVE, LAUSANNE, 3, UNDERGROUND, null);
 
+        for (int i = Constants.ADDITIONAL_TUNNEL_CARDS; i >= 0; i--) {
+            SortedBag.Builder<Card> builder = new SortedBag.Builder<>();
+            builder.add(i, Card.LOCOMOTIVE);
+            builder.add(Constants.ADDITIONAL_TUNNEL_CARDS-i, Card.of(BLACK));
+            int expected = route.additionalClaimCardsCount(SortedBag.of(3, Card.LOCOMOTIVE), builder.build());
+            assertEquals(i, expected);
+        }
     }
 
     @Test

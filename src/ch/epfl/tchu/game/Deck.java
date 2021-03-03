@@ -80,11 +80,9 @@ public final class Deck<C extends Comparable<C>> {
     public Deck<C> withoutTopCard() {
         Preconditions.checkArgument(!isEmpty());
 
-        //TODO interesant, compare to dans enum pour une comparaison bien fait.
         List<C> newListOfCards = new ArrayList<>();
         for(C card : cards)
             if(!card.equals(topCard())) newListOfCards.add(card);
-
 
         return new Deck<>(newListOfCards);
     }

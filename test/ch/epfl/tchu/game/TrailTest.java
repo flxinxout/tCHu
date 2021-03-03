@@ -2,6 +2,8 @@ package ch.epfl.tchu.game;
 
 import org.junit.jupiter.api.Test;
 
+import javax.management.relation.RoleUnresolved;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -20,46 +22,19 @@ public class TrailTest {
     private static final Route GEN_FRI = new Route("6", GENEVE, FRIBOURG, 2, Route.Level.OVERGROUND, Color.YELLOW);
     private static final Route GEN_BER = new Route("5", GENEVE, BERNE, 2, Route.Level.OVERGROUND, Color.YELLOW);
     private static final Route GEN_LAU = new Route("4", GENEVE, LAUSANNE, 2, Route.Level.OVERGROUND, Color.YELLOW);
-    private static final Route LAU_FRI = new Route("2", LAUSANNE, FRIBOURG, 4, Route.Level.OVERGROUND, Color.ORANGE);
+    private static final Route LAU_FRI = new Route("2", LAUSANNE, FRIBOURG, 1, Route.Level.OVERGROUND, Color.ORANGE);
     private static final Route LAU_BER = new Route("3", LAUSANNE, BERNE, 1, Route.Level.OVERGROUND, Color.VIOLET);
-    private static final Route BER_FRI = new Route("2", BERNE, FRIBOURG, 4, Route.Level.OVERGROUND, Color.ORANGE);
-    private static final Route LCN_INT = new Route("2", LUCERNE, INTERLAKEN, 3, Route.Level.OVERGROUND, Color.ORANGE);
+    private static final Route BER_FRI = new Route("2", BERNE, FRIBOURG, 1, Route.Level.OVERGROUND, Color.ORANGE);
+    private static final Route LCN_INT = new Route("8", LUCERNE, INTERLAKEN, 5, Route.Level.OVERGROUND, Color.ORANGE);
+    private static final Route FRI_LUCN = new Route("1", FRIBOURG, LUCERNE, 3, Route.Level.OVERGROUND, Color.ORANGE);
 
     private static final List<Route> routes = new ArrayList<>();
     private static final List<Route> routesEmpty = new ArrayList<>();
 
     @Test
-    void isLength2AccessorWork() {
-        createTrail2Roads();
-        Trail trail = Trail.longest(routes);
-        assertEquals(6, trail.length());
-    }
-
-    @Test
-    void isLengthMoreThan2AccessorWork() {
-        createTrail3Roads();
-        Trail trail = Trail.longest(routes);
-        assertEquals(6, trail.length());
-    }
-
-    @Test
-    void isStation1GetStationAccessorWork() {
-        createTrail2Roads();
-        Trail trail = Trail.longest(routes);
-        assertEquals(GENEVE, trail.station1());
-    }
-
-    @Test
     void isStation1GetNUllAccessorWork() {
         Trail trail = Trail.longest(routesEmpty);
         assertEquals(null, trail.station1());
-    }
-
-    @Test
-    void isStation2GetStationAccessorWork() {
-        createTrail2Roads();
-        Trail trail = Trail.longest(routes);
-        assertEquals(FRIBOURG, trail.station2());
     }
 
     @Test
@@ -108,72 +83,17 @@ public class TrailTest {
         assertEquals("Chemin inexistant", trail.toString());
     }
 
-    /*@Test
+    @Test
     void checkLongestTrailWith5RoadsTrivial() {
-        createTrail5Roads();
+        createTrail4Roads();
         Trail trail = Trail.longest(routes);
-        assertEquals(11, trail.length());
+        assertEquals("LCN - INT (5)", trail.toString());
     }
 
-    @Test
-    void checkLongestTrailWith5RoadsNonTrivial() {
-        createTrail5RoadsNoTrivial();
-        Trail trail = Trail.longest(routes);
-        assertEquals(11, trail.length());
-    }
-
-    @Test
-    void checkLongestTrailWith5RoadsNonTrivialFirstRoad() {
-        createTrail5RoadsNoTrivialFirstRoad();
-        Trail trail = Trail.longest(routes);
-        assertEquals(11, trail.length());
-    }
-
-    @Test
-    void checkLongestTrail1RoadTrivial() {
-        createTrivialTrail();
-        Trail trail = Trail.longest(routes);
-        assertEquals(3, trail.length());
-    }*/
-
-    private static void createTrail2Roads() {
+    private static void createTrail4Roads() {
+        routes.add(LCN_INT);
         routes.add(GEN_LAU);
-        routes.add(LAU_FRI);
-    }
-
-    private static void createTrail3Roads() {
-        routes.add(GEN_LAU);
-        routes.add(LAU_FRI);
-        routes.add(LAU_BER);
-    }
-
-    private static void createTrail5Roads() {
-        routes.add(GEN_LAU); // 2
-        routes.add(LAU_FRI); // 4
-        routes.add(LAU_BER); // 1
-        routes.add(BER_FRI); // 4
-        routes.add(LCN_INT); // 3
-    }
-
-    private static void createTrail5RoadsNoTrivial() {
-        routes.add(LAU_FRI); // 4
-        routes.add(LAU_BER); // 1
-        routes.add(GEN_LAU); // 2
-        routes.add(LCN_INT); // 3
-        routes.add(BER_FRI); // 4
-    }
-
-    private static void createTrail5RoadsNoTrivialFirstRoad() {
-        routes.add(LCN_INT); // 3
-        routes.add(LAU_FRI); // 4
-        routes.add(LAU_BER); // 1
-        routes.add(GEN_LAU); // 2
-        routes.add(BER_FRI); // 4
-    }
-
-    private static void createTrivialTrail() {
-        routes.add(LCN_INT); // 3
-        routes.add(LAU_FRI); // 4
+        routes.add(LCN_INT);
     }
 }
 

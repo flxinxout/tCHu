@@ -35,6 +35,9 @@ public final class Trail {
 
         List<Trail> allTrails = computeTrivialTrails(routes);
         Trail maxLengthTrail = allTrails.get(0);
+        for(Trail trail : allTrails) {
+            maxLengthTrail = trail.length() > maxLengthTrail.length() ? trail : maxLengthTrail;
+        }
 
         while (!allTrails.isEmpty()) {
             List<Trail> tempTrails = new ArrayList<>();

@@ -1,6 +1,7 @@
 package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.SortedBag;
+import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -18,20 +19,13 @@ public class CardStateTest {
     private static List<Card> CARDS_5 = new ArrayList<>(List.of(Card.YELLOW, Card.ORANGE, Card.GREEN, Card.BLUE, Card.BLACK));
     private static List<Card> CARDS_6 = new ArrayList<>(List.of(Card.YELLOW, Card.ORANGE, Card.GREEN, Card.BLUE, Card.BLACK, Card.LOCOMOTIVE));
 
-
     @Test
     void ofFailsWithSmallDeckSize(){
-        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_4), new Random());
+        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_4), TestRandomizer.newRandom());
 
         assertThrows(IllegalArgumentException.class, () -> {
             CardState.of(deck);;
         });
     }
 
-    @Test
-    void withDrawnFaceUpCardWorks(){
-        CardState state = CardState.of(Deck.of(SortedBag.of(CARDS_6), new Random()));
-        state.withDrawnFaceUpCard(3);
-        assertEquals(CARDS_6, state.faceUpCards);
-    }
 }

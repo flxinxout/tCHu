@@ -13,7 +13,7 @@ import java.util.Objects;
  */
 public class PublicCardState {
 
-    public final List<Card> faceUpCards;
+    private final List<Card> faceUpCards;
     private final int deckSize;
     private final int discardsSize;
 

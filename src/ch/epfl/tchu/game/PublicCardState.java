@@ -13,7 +13,7 @@ import java.util.Objects;
  */
 public class PublicCardState {
 
-    private final List<Card> faceUpCards;
+    public final List<Card> faceUpCards;
     private final int deckSize;
     private final int discardsSize;
 
@@ -52,7 +52,7 @@ public class PublicCardState {
      * @return les 5 cartes face visible, sous la forme d'une liste comportant exactement 5 éléments
      */
     public List<Card> faceUpCards() {
-        return faceUpCards;
+        return List.copyOf(faceUpCards);
     }
 
     /**

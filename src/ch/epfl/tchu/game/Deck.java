@@ -80,14 +80,7 @@ public final class Deck<C extends Comparable<C>> {
     public Deck<C> withoutTopCard() {
         Preconditions.checkArgument(!isEmpty());
 
-        //TODO: ici c'est pas nécessaire de changer la référence je crois puisque la liste peut pas etre modifiee...
-        // en aucun cas on ne peut la changer
-        List<C> newListOfCards = cards.subList(1, size());
-
-        /*List<C> newListOfCards = new ArrayList<>();
-        for(C card : cards)
-            if(!card.equals(topCard())) newListOfCards.add(card);*/
-
+        List<C> newListOfCards = List.copyOf(cards).subList(1, size());
         return new Deck<>(newListOfCards);
     }
 
@@ -120,16 +113,7 @@ public final class Deck<C extends Comparable<C>> {
     public Deck<C> withoutTopCards(int count) {
         Preconditions.checkArgument(count >= 0 && count <= cards.size());
 
-        //TODO: ici c'est pas nécessaire de changer la référence je crois puisque la liste est final...
-        // en aucun cas on ne peut la changer
-        List<C> newListOfCards = cards.subList(count, size());
-
-        /*List<C> newListOfCards = new ArrayList<>();
-        SortedBag<C> cardsFromTheTop = topCards(count);
-        for(C card : cards) {
-            if(!cardsFromTheTop.contains(card)) newListOfCards.add(card);
-        }*/
-
+        List<C> newListOfCards = List.copyOf(cards).subList(count, size());
         return new Deck<>(newListOfCards);
     }
 

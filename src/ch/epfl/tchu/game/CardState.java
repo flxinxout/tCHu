@@ -36,6 +36,8 @@ public final class CardState extends PublicCardState {
      * la pioche est constituée des cartes du tas restantes, et la défausse est vide
      * @param deck
      *          la pioche
+     * @throws IllegalArgumentException
+     *          si le deck a moins de 5 éléments
      * @return l'état décrit ci-dessus
      */
     public static CardState of(Deck<Card> deck) {
@@ -62,14 +64,11 @@ public final class CardState extends PublicCardState {
 
         Card topCard = deck.topCard();
 
-        //TODO: ICI PAR CONTRE COPIE OBLIGATOIRE CAR ON SET LA LISTE
-        //List<Card> newCardsFaceUp = faceUpCards();
-
         List<Card> newCardsFaceUp = new ArrayList<>();
         for (int s: Constants.FACE_UP_CARD_SLOTS) {
             newCardsFaceUp.add(faceUpCard(s));
         }
-        newCardsFaceUp.set(slot, topCard); // ici j'ai pas compris par contre
+        newCardsFaceUp.set(slot, topCard);
 
         Deck<Card> newDeck = deck.withoutTopCard();
 
@@ -99,7 +98,6 @@ public final class CardState extends PublicCardState {
         Preconditions.checkArgument(!isDeckEmpty());
 
         Deck<Card> newDeck = deck.withoutTopCard();
-        //TODO: c'est oke de pas copier faceUpCards et discards? je pense plutot faire une copie à voir avec un assistant
         return new CardState(faceUpCards(), newDeck, discards);
     }
 
@@ -113,10 +111,9 @@ public final class CardState extends PublicCardState {
      * si ce n'est que les cartes de la défausse ont été mélangée au moyen du générateur aléatoire donné
      */
     public CardState withDeckRecreatedFromDiscards(Random rng){
-        Preconditions.checkArgument(!isDeckEmpty());
+        Preconditions.checkArgument(isDeckEmpty());
 
         Deck<Card> newDeck = Deck.of(discards, new Random());
-        //TODO: c'est oke de pas copier faceUpCards et discards?
         return new CardState(faceUpCards(), newDeck, SortedBag.of());
     }
 

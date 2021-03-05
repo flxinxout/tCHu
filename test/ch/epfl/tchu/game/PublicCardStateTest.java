@@ -1,5 +1,7 @@
 package ch.epfl.tchu.game;
 
+import ch.epfl.tchu.SortedBag;
+import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ public class PublicCardStateTest {
     private static List<Card> CARDS_3 = new ArrayList<>(List.of(Card.RED, Card.LOCOMOTIVE, Card.ORANGE));
     private static List<Card> CARDS_4 = new ArrayList<>(List.of(Card.BLUE, Card.GREEN, Card.LOCOMOTIVE, Card.VIOLET));
     private static List<Card> CARDS_5 = new ArrayList<>(List.of(Card.YELLOW, Card.ORANGE, Card.GREEN, Card.BLUE, Card.BLACK));
+    private static List<Card> CARDS_MORE = new ArrayList<>(List.of(Card.WHITE, Card.GREEN, Card.YELLOW, Card.ORANGE, Card.GREEN, Card.BLUE, Card.BLACK));
 
     @Test
     void constructorFailsWrongNumberFaceUpCards(){
@@ -40,5 +43,38 @@ public class PublicCardStateTest {
     void totalSizeWorks(){
         PublicCardState state = new PublicCardState(CARDS_5, 10, 2);
         assertEquals(17, state.totalSize());
+    }
+
+    @Test
+    void deckSizeWorks(){
+        PublicCardState state = new PublicCardState(CARDS_5, 10, 2);
+        assertEquals(10, state.deckSize());
+    }
+
+    @Test
+    void discardSizeWorks(){
+        PublicCardState state = new PublicCardState(CARDS_5, 10, 2);
+        assertEquals(2, state.discardsSize());
+    }
+
+    @Test
+    void testDeckSizeWithSuperAppeal() {
+        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_MORE), TestRandomizer.newRandom());
+        CardState cardState = CardState.of(deck);
+        assertEquals(2, cardState.deckSize());
+    }
+
+    @Test
+    void testDiscardSizeWithSuperAppeal() {
+        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_MORE), TestRandomizer.newRandom());
+        CardState cardState = CardState.of(deck);
+        assertEquals(0, cardState.discardsSize());
+    }
+
+    @Test
+    void testDiscardSizeWith() {
+        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_MORE), TestRandomizer.newRandom());
+        CardState cardState = CardState.of(deck);
+        assertEquals(0, cardState.discardsSize());
     }
 }

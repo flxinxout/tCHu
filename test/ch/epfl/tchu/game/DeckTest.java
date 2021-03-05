@@ -1,8 +1,10 @@
 package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.SortedBag;
+import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
+import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -97,4 +99,51 @@ public class DeckTest {
             deck.withoutTopCards(deck.size() + 1);
         });
     }
+
+    // Test juste pour voir un obient bien les différentes cartes en fonction du shuffle (donc marche pas souvent)
+    @Test
+    void topCardWorkWithGoodDeck() {
+        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_3), TestRandomizer.newRandom());
+        Card card = deck.topCard();
+        assertEquals(Card.ORANGE, card);
+    }
+
+    // Test juste pour voir un obient bien les différentes cartes en fonction du shuffle (donc marche pas souvent)
+    @Test
+    void topCardsWithGoodDeck() {
+        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_3), TestRandomizer.newRandom());
+        SortedBag<Card> cards = deck.topCards(2);
+        SortedBag<Card> sortedBag = SortedBag.of(1, Card.ORANGE, 1, Card.RED);
+        assertEquals(sortedBag, cards);
+    }
+
+    // Test juste pour voir un obient bien les différentes cartes en fonction du shuffle (donc marche pas souvent)
+    @Test
+    void withoutTopCardWithGoodDeck() {
+        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_3), TestRandomizer.newRandom());
+        Deck<Card> cards = deck.withoutTopCard();
+        Deck<Card> expected = Deck.of(SortedBag.of(1, Card.LOCOMOTIVE, 1, Card.RED), new Random());
+        assertEquals(expected.cards, cards.cards);
+    }
+
+    // Test juste pour voir un obient bien les différentes cartes en fonction du shuffle (donc marche pas souvent)
+    @Test
+    void withoutTopCardsWithGoodDeck() {
+        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_3), TestRandomizer.newRandom());
+        Deck<Card> cards = deck.withoutTopCards(2);
+        Deck<Card> expected = Deck.of(SortedBag.of(1, Card.LOCOMOTIVE), new Random());
+        assertEquals(expected.cards, cards.cards);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+

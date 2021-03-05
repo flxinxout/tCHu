@@ -90,7 +90,8 @@ public final class Info {
      * @return le message déclarant que le joueur a gardé le nombre de billets donné
      */
     public String keptTickets(int count) {
-        return String.format(StringsFr.KEPT_N_TICKETS, playerName, count);
+        String plural = StringsFr.plural(count);
+        return String.format(StringsFr.KEPT_N_TICKETS, playerName, count, plural);
     }
 
     /**
@@ -108,7 +109,8 @@ public final class Info {
      * @return le message déclarant que le joueur a tiré le nombre donné de billets
      */
     public String drewTickets(int count) {
-        return String.format(StringsFr.DREW_TICKETS, playerName, count);
+        String plural = StringsFr.plural(count);
+        return String.format(StringsFr.DREW_TICKETS, playerName, count, plural);
     }
 
     /**
@@ -164,9 +166,15 @@ public final class Info {
             singleTexts.add(n + " " + cardName(c, n));
         }
         int lastIndex = singleTexts.size() - 1;
-        String joined = String.join(StringsFr.AND_SEPARATOR,
-                String.join(", ", singleTexts.subList(0, lastIndex)),
-                singleTexts.get(lastIndex));
+        String joined;
+        if(singleTexts.size() == 1) {
+            joined = singleTexts.get(0);
+        } else {
+            joined = String.join(StringsFr.AND_SEPARATOR,
+                    String.join(", ", singleTexts.subList(0, lastIndex)),
+                    singleTexts.get(lastIndex));
+        }
+
         return joined;
     }
 
@@ -255,7 +263,7 @@ public final class Info {
      * @return retourne le message décrit ci-dessus
      */
     public String won(int points, int loserPoints){
-        return String.format(StringsFr.GETS_BONUS,
+        return String.format(StringsFr.WINS,
                              playerName,
                              points,
                              StringsFr.plural(points),

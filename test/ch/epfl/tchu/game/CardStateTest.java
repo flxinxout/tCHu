@@ -48,13 +48,12 @@ public class CardStateTest {
         });
     }
 
-    // Compliqué de tester.... merci de random de ses morts
     @Test
     void withDrawnFaceUpCardWorks() {
         Deck<Card> deck = Deck.of(SortedBag.of(CARDS_6), TestRandomizer.newRandom());
         CardState cardState = CardState.of(deck); // faceup de 5, discard 0 et pioche 4
         CardState newCardState = cardState.withDrawnFaceUpCard(3);
-        assertEquals(List.of(Card.LOCOMOTIVE, Card.RED, Card.BLUE, Card.ORANGE, Card.WHITE), newCardState.faceUpCards());
+        assertEquals(deck.cards, newCardState.faceUpCards());
     }
 
 

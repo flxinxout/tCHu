@@ -64,10 +64,8 @@ public final class CardState extends PublicCardState {
 
         Card topCard = deck.topCard();
 
-        List<Card> newCardsFaceUp = new ArrayList<>();
-        for (int s: Constants.FACE_UP_CARD_SLOTS) {
-            newCardsFaceUp.add(faceUpCard(s));
-        }
+        List<Card> newCardsFaceUp = new ArrayList<>(faceUpCards());
+
         newCardsFaceUp.set(slot, topCard);
 
         Deck<Card> newDeck = deck.withoutTopCard();

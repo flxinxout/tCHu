@@ -5,8 +5,8 @@ import ch.epfl.tchu.Preconditions;
 import java.util.List;
 
 /**
- *  partie publique de l'état d'un joueur, à savoir le nombre de billets, de cartes et de wagons qu'il possède,
- *  les routes dont il s'est emparé, et le nombre de points de construction qu'il a ainsi obtenu
+ *  Partie publique de l'état d'un joueur, à savoir le nombre de billets, de cartes et de wagons qu'il possède,
+ *  les routes dont il s'est emparé, et le nombre de points de construction qu'il a ainsi obtenu.
  *
  *  @author Dylan Vairoli (326603)
  *  @author Giovanni Ranieri (326870)
@@ -20,13 +20,13 @@ public class PublicPlayerState {
     private final int claimPoints;
 
     /**
-     * Constructeur d'un état de joueur
+     * Construit un état de joueur
      * @param ticketCount
-     *                  le nombre de ticket du joueur
+     *          le nombre de ticket du joueur
      * @param cardCount
-     *                  le nombre de cartes du joueur
+     *          le nombre de cartes du joueur
      * @param routes
-     *              les routes dont le players s'est emparé
+     *          les routes dont le players s'est emparé
      */
     public PublicPlayerState(int ticketCount, int cardCount, List<Route> routes) {
         Preconditions.checkArgument(ticketCount >= 0 && cardCount >= 0);
@@ -47,6 +47,7 @@ public class PublicPlayerState {
     }
 
     /**
+     * Retourne le nombre de ticket que possède le joueur.
      * @return le nombre de ticket que possède le joueur
      */
     public int ticketCount() {
@@ -54,6 +55,7 @@ public class PublicPlayerState {
     }
 
     /**
+     * Retourne le nombre de cartes possède le joueur.
      * @return le nombre de cartes possède le joueur
      */
     public int cardCount() {
@@ -61,6 +63,7 @@ public class PublicPlayerState {
     }
 
     /**
+     * Retourne les routes dont le joueur s'est emparé.
      * @return les routes dont le joueur s'est emparé
      */
     public List<Route> routes() {
@@ -68,6 +71,7 @@ public class PublicPlayerState {
     }
 
     /**
+     * Retourne le nombre de wagon que possède le joueur.
      * @return le nombre de wagon que possède le joueur
      */
     public int carCount() {
@@ -75,6 +79,7 @@ public class PublicPlayerState {
     }
 
     /**
+     * Retourne le nombre de points de construction qu'à obtenu le joueur.
      * @return le nombre de points de construction qu'à obtenu le joueur
      */
     public int claimPoints() {

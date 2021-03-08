@@ -19,6 +19,7 @@ public final class StationPartition implements StationConnectivity {
     /**
      * Constructeur d'une StationPartition, c-à-d une partition aplatie de gares
      * @param relations
+     *               tableau avec comme chaque entrée la relation index:représentant
      */
     private StationPartition(int[] relations) {
         this.relations = relations;

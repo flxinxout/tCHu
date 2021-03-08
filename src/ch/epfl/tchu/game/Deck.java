@@ -16,7 +16,7 @@ import java.util.Random;
  */
 public final class Deck<C extends Comparable<C>> {
 
-    public final List<C> cards;
+    private final List<C> cards;
 
     /**
      * Constructeur d'un tas de cartes d'un type spécifique

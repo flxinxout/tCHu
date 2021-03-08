@@ -2,10 +2,12 @@ package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.Preconditions;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 /**
- * Représente une partition aplatie de gares
+ * Représente une partition aplatie de gares.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
@@ -24,46 +26,60 @@ public final class StationPartition implements StationConnectivity {
 
     @Override
     public boolean connected(Station s1, Station s2) {
-        return false;
+        return relations[s1.id()] == relations[s2.id()];
     }
 
     /**
      * Représente le bâtisseur d'une StationPartition
      */
-    public static final class Builder {
+    public final class Builder {
 
         private int[] relations;
-        private HashSet<Station> stations;
+        private List<Station> stations;
 
         /**
-         * Bâtisseur d'une StationPartition. Il permet de créer une partition profonde de gares
+         * Construit un bâtisseur de partition d'un ensemble de gares
+         * dont l'identité est comprise entre 0 (inclus) et stationCount (exclus)
          * @param stationCount
+         *          identité maximale
+         * @throws IllegalArgumentException
+         *          si {@code stationCount} < 0
          */
         public Builder(int stationCount) {
             Preconditions.checkArgument(stationCount >= 0);
+
             for(Station station : ChMap.stations()) {
-                if(station.id() >= 0 && station.id() < stationCount) stations.add(station);
+                if(station.id() >= 0 && station.id() < stationCount)
+                    stations.add(station);
+            }
+
+            relations = new int[stations.size()];
+            for (int i = 0; i < relations.length; i++) {
+                relations[i] = i;
             }
         }
 
         /**
-         * Retourne le numéro d'identification de la gare représentant celle qui est attachée à {@note idStation}
-         * @param idStation l'id de la gare dont on aimerait trouvé le représentant
+         * Retourne le numéro d'identification de la gare représentant
+         * celle qui est attachée à {@code idStation}
          * @return le numéro d'identification de la gare représentant
          */
         private int representative(int idStation) {
-
+            return relations[idStation];
         }
 
         /**
-         *  joint les sous-ensembles contenant les deux gares passées en argument,
-         *  en « élisant » l'un des deux représentants comme représentant du sous-ensemble joint 
-         * @param s1 la première station
-         * @param s2 la seconde station
-         * @return Le bâtisseur (this)
+         *  Joint les sous-ensembles contenant les deux gares passées en argument, en « élisant »
+         *  l'un des deux représentants comme représentant du sous-ensemble joint.
+         * @param s1
+         *          la première gare
+         * @param s2
+         *          la seconde gare
+         * @return le bâtisseur ({@code this})
          */
         public Builder connect(Station s1, Station s2) {
-
+            relations[s2.id()] = representative(s1.id());
+            return this;
         }
 
         /**
@@ -72,7 +88,6 @@ public final class StationPartition implements StationConnectivity {
         public StationPartition build() {
             return new StationPartition(relations);
         }
-
     }
 
 }

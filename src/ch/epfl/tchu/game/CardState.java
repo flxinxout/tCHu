@@ -6,7 +6,7 @@ import ch.epfl.tchu.SortedBag;
 import java.util.*;
 
 /**
- * L'état total des cartes wagon/locomotive qui ne sont pas en main des joueurs
+ * L'état total des cartes wagon/locomotive qui ne sont pas en main des joueurs.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
@@ -17,13 +17,8 @@ public final class CardState extends PublicCardState {
     private final SortedBag<Card> discards;
 
     /**
-     * Constructeur d'un objet constitué de la partie privée des cartes du jeu
-     *  @param faceUpCards
-     *          les cartes faces visibles à côté du plateau de jeu
-     * @param deck
-     *          la pioche
-     * @param discards
-     *          la défausse
+     * Construit un état privé des cartes dans lequel
+     * les cartes face visible, la pioche et la défausse sont celles données.
      */
     private CardState(List<Card> faceUpCards, Deck<Card> deck, SortedBag<Card> discards) {
         super(faceUpCards, deck.size(), discards.size());
@@ -37,21 +32,21 @@ public final class CardState extends PublicCardState {
      * @param deck
      *          la pioche
      * @throws IllegalArgumentException
-     *          si le deck a moins de 5 éléments
+     *          si la pioche contient moins de 5 cartes
      * @return l'état décrit ci-dessus
      */
     public static CardState of(Deck<Card> deck) {
         Preconditions.checkArgument(deck.size() >= 5);
         Deck<Card> newDeck = deck;
-        //TODO: LIST OR ARRAY?
-        Card[] newTopCards = new Card[Constants.FACE_UP_CARDS_COUNT];
 
+        //TODO: LIST OR ARRAY?
+        List<Card> newTopCards = new ArrayList<>();
         for (int slot: Constants.FACE_UP_CARD_SLOTS) {
-            newTopCards[slot] = newDeck.topCard();
+            newTopCards.add(newDeck.topCard());
             newDeck = newDeck.withoutTopCard();
         }
 
-        return new CardState(Arrays.asList(newTopCards), newDeck, SortedBag.of());
+        return new CardState(newTopCards, newDeck, SortedBag.of());
     }
 
     /**
@@ -61,7 +56,7 @@ public final class CardState extends PublicCardState {
      * @param slot
      *          l'index des cartes face visible à remplacer
      * @throws IndexOutOfBoundsException
-     *          si {@code slot} ne se trouve pas entre 0 et 5 (exclu)
+     *          si {@code slot} ne se trouve pas entre 0 (inclus) et 5 (exclu)
      * @throws IllegalArgumentException
      *          si la pioche est vide
      * @return le nouvel ensemble de cartes
@@ -70,20 +65,17 @@ public final class CardState extends PublicCardState {
         Objects.checkIndex(slot, faceUpCards().size());
         Preconditions.checkArgument(!isDeckEmpty());
 
-        Card topCard = deck.topCard();
-        Deck<Card> newDeck = deck.withoutTopCard();
-
         List<Card> newCardsFaceUp = new ArrayList<>(faceUpCards());
-        newCardsFaceUp.set(slot, topCard);
+        newCardsFaceUp.set(slot, deck.topCard());
 
-        return new CardState(newCardsFaceUp, newDeck, discards);
+        return new CardState(newCardsFaceUp, deck.withoutTopCard(), discards);
     }
 
     /**
      * Retourne la carte se trouvant au sommet de la pioche.
      * @throws IllegalArgumentException
      *          si la pioche est vide
-     * @return la carte se trouvant au sommet de la pioche,
+     * @return la carte se trouvant au sommet de la pioche
      */
     public Card topDeckCard() {
         Preconditions.checkArgument(!isDeckEmpty());

@@ -20,11 +20,9 @@ public final class Deck<C extends Comparable<C>> {
 
     /**
      * Constructeur d'un tas de cartes d'un type spécifique
-     * @param cards
-     *          la liste de cartes constituant le tas
      */
     private Deck(List<C> cards) {
-        this.cards = cards;
+        this.cards = List.copyOf(cards);
     }
 
     /**
@@ -33,7 +31,7 @@ public final class Deck<C extends Comparable<C>> {
      * @param cards
      *          le multi-ensemble de cartes
      * @param rng
-     *          un générateur de nombres aléatoires
+     *          le générateur de nombres aléatoires
      * @param <C>
      *           le type des cartes
      * @return le tas de cartes
@@ -54,7 +52,7 @@ public final class Deck<C extends Comparable<C>> {
 
     /**
      * Retourne vrai ssi le tas est vide.
-     * @return  vrai ssi le tas est vide
+     * @return vrai ssi le tas est vide
      */
     public boolean isEmpty() {
         return cards.isEmpty();
@@ -80,7 +78,7 @@ public final class Deck<C extends Comparable<C>> {
     public Deck<C> withoutTopCard() {
         Preconditions.checkArgument(!isEmpty());
 
-        List<C> newListOfCards = List.copyOf(cards).subList(1, size());
+        List<C> newListOfCards = cards.subList(1, size());
         return new Deck<>(newListOfCards);
     }
 
@@ -93,7 +91,7 @@ public final class Deck<C extends Comparable<C>> {
      * @return un multi-ensemble contenant les {@code count} cartes se trouvant au sommet du tas
      */
     public SortedBag<C> topCards(int count) {
-        Preconditions.checkArgument(count >= 0 && count <= cards.size());
+        Preconditions.checkArgument(count >= 0 && count <= size());
 
         SortedBag.Builder<C> builder = new SortedBag.Builder<>();
         for(int i = 0; i < count; i++) {
@@ -111,10 +109,9 @@ public final class Deck<C extends Comparable<C>> {
      * @return un tas identique au récepteur ({@code this}) mais sans les {@code count} cartes du sommet
      */
     public Deck<C> withoutTopCards(int count) {
-        Preconditions.checkArgument(count >= 0 && count <= cards.size());
+        Preconditions.checkArgument(count >= 0 && count <= size());
 
-        List<C> newListOfCards = List.copyOf(cards).subList(count, size());
+        List<C> newListOfCards = cards.subList(count, size());
         return new Deck<>(newListOfCards);
     }
-
 }

@@ -1,275 +1,386 @@
 package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.SortedBag;
+import ch.epfl.tchu.game.Route.Level;
 import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-public class RouteTest {
-    private static final Route.Level OVERGROUND = Route.Level.OVERGROUND;
-    private static final Route.Level UNDERGROUND = Route.Level.UNDERGROUND;
-    private static final Color BLACK = Color.BLACK;
-    private static final Station STATION1 = new Station(0, "station1");
-    private static final Station STATION2 = new Station(1, "station2");
-    private static final Station GENEVE = new Station(2, "GEN");
-    private static final Station LAUSANNE = new Station(3, "LAU");
-    private static final Station BERNE = new Station(4, "BER");
+class RouteTest {
+    private static final List<Color> COLORS =
+            List.of(
+                    Color.BLACK,
+                    Color.VIOLET,
+                    Color.BLUE,
+                    Color.GREEN,
+                    Color.YELLOW,
+                    Color.ORANGE,
+                    Color.RED,
+                    Color.WHITE);
+    private static final List<Card> CAR_CARDS =
+            List.of(
+                    Card.BLACK,
+                    Card.VIOLET,
+                    Card.BLUE,
+                    Card.GREEN,
+                    Card.YELLOW,
+                    Card.ORANGE,
+                    Card.RED,
+                    Card.WHITE);
 
     @Test
-    void routeConstructorFailsForSameStations() {
+    void routeConstructorFailsWhenBothStationsAreEqual() {
+        var s = new Station(0, "Lausanne");
         assertThrows(IllegalArgumentException.class, () -> {
-            new Route("route", STATION1, STATION1, 2, OVERGROUND, BLACK);
+            new Route("id", s, s, 1, Level.OVERGROUND, Color.BLACK);
         });
     }
 
     @Test
-    void routeConstructorFailsForNullId() {
+    void routeConstructorFailsWhenLengthIsInvalid() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Route("id", s1, s2, 0, Level.OVERGROUND, Color.BLACK);
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Route("id", s1, s2, 7, Level.OVERGROUND, Color.BLACK);
+        });
+    }
+
+    @Test
+    void routeConstructorFailsWhenIdIsNull() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
         assertThrows(NullPointerException.class, () -> {
-            new Route(null, STATION1, STATION2, 2, OVERGROUND, BLACK);
+            new Route(null, s1, s2, 1, Level.OVERGROUND, Color.BLACK);
         });
     }
 
     @Test
-    void routeConstructorFailsForNullStation1() {
+    void routeConstructorFailsWhenOneStationIsNull() {
+        var s = new Station(0, "EPFL");
         assertThrows(NullPointerException.class, () -> {
-            new Route("route", null, STATION2, 2, OVERGROUND, BLACK);
+            new Route("id", null, s, 1, Level.OVERGROUND, Color.BLACK);
         });
-    }
-
-    @Test
-    void routeConstructorFailsForNullStation2() {
         assertThrows(NullPointerException.class, () -> {
-            new Route("route", STATION1, null, 2, OVERGROUND, BLACK);
+            new Route("id", s, null, 1, Level.OVERGROUND, Color.BLACK);
         });
     }
 
     @Test
-    void routeConstructorFailsForNullLevel() {
+    void routeConstructorFailsWhenLevelIsNull() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
         assertThrows(NullPointerException.class, () -> {
-            new Route("route", STATION1, STATION2, 2, null, BLACK);
+            new Route("id", s1, s2, 1, null, Color.BLACK);
         });
     }
 
-    private static final String alphabet = "abcdefghijklmnopqrstuvwxyz";
-    private static String randomName(Random rng, int length) {
-        var sb = new StringBuilder();
-        for (int i = 0; i < length; i++)
-            sb.append(alphabet.charAt(rng.nextInt(alphabet.length())));
-        return sb.toString();
+    @Test
+    void routeIdReturnsId() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var routes = new Route[100];
+        for (int i = 0; i < routes.length; i++)
+            routes[i] = new Route("id" + i, s1, s2, 1, Level.OVERGROUND, Color.BLACK);
+        for (int i = 0; i < routes.length; i++)
+            assertEquals("id" + i, routes[i].id());
     }
 
     @Test
-    void idAccessorWorks() {
+    void routeStation1And2ReturnStation1And2() {
         var rng = TestRandomizer.newRandom();
-        for (int i = 0; i < TestRandomizer.RANDOM_ITERATIONS; i++) {
-            var name = randomName(rng, 1 + rng.nextInt(10));
-            var route = new Route(name, STATION1, STATION2, 2, OVERGROUND, BLACK);
-            assertEquals(name, route.id());
+        var stations = new Station[100];
+        for (int i = 0; i < stations.length; i++)
+            stations[i] = new Station(i, "Station " + i);
+        var routes = new Route[100];
+        for (int i = 0; i < stations.length; i++) {
+            var s1 = stations[i];
+            var s2 = stations[(i + 1) % 100];
+            var l = 1 + rng.nextInt(6);
+            routes[i] = new Route("r" + i, s1, s2, l, Level.OVERGROUND, Color.RED);
+        }
+        for (int i = 0; i < stations.length; i++) {
+            var s1 = stations[i];
+            var s2 = stations[(i + 1) % 100];
+            var r = routes[i];
+            assertEquals(s1, r.station1());
+            assertEquals(s2, r.station2());
         }
     }
 
     @Test
-    void station1AccessorWorks() {
-        Route route = new Route("route", STATION1, STATION2, 2, OVERGROUND, BLACK);
-        assertEquals(STATION1, route.station1());
+    void routeLengthReturnsLength() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        var routes = new Route[6];
+        for (var l = 1; l <= 6; l++)
+            routes[l - 1] = new Route(id, s1, s2, l, Level.OVERGROUND, Color.BLACK);
+        for (var l = 1; l <= 6; l++)
+            assertEquals(l, routes[l - 1].length());
+
     }
 
     @Test
-    void station2AccessorWorks() {
-        Route route = new Route("route", STATION1, STATION2, 2, OVERGROUND, BLACK);
-        assertEquals(STATION2, route.station2());
+    void routeLevelReturnsLevel() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        var ro = new Route(id, s1, s2, 1, Level.OVERGROUND, Color.BLACK);
+        var ru = new Route(id, s1, s2, 1, Level.UNDERGROUND, Color.BLACK);
+        assertEquals(Level.OVERGROUND, ro.level());
+        assertEquals(Level.UNDERGROUND, ru.level());
     }
 
     @Test
-    void isLengthAccessorWork() {
-        Route route = new Route("route", STATION1, STATION2, 2, OVERGROUND, BLACK);
-        assertEquals(2, route.length());
+    void routeColorReturnsColor() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        var routes = new Route[8];
+        for (var c : COLORS)
+            routes[c.ordinal()] = new Route(id, s1, s2, 1, Level.OVERGROUND, c);
+        for (var c : COLORS)
+            assertEquals(c, routes[c.ordinal()].color());
+        var r = new Route(id, s1, s2, 1, Level.OVERGROUND, null);
+        assertNull(r.color());
     }
 
     @Test
-    void levelAccessorWorks() {
-        Route route = new Route("route", STATION1, STATION2, 2, OVERGROUND, BLACK);
-        assertEquals(OVERGROUND, route.level());
-
-        Route route2 = new Route("route2", STATION1, STATION2, 2, UNDERGROUND, BLACK);
-        assertEquals(UNDERGROUND, route2.level());
-    }
-
-    @Test
-    void colorAccessorWorks() {
-        for (Color color: Color.ALL) {
-            Route route = new Route("route", STATION1, STATION2, 2, OVERGROUND, color);
-            assertEquals(color, route.color());
+    void routeStationsReturnsStations() {
+        var rng = TestRandomizer.newRandom();
+        var stations = new Station[100];
+        for (int i = 0; i < stations.length; i++)
+            stations[i] = new Station(i, "Station " + i);
+        var routes = new Route[100];
+        for (int i = 0; i < stations.length; i++) {
+            var s1 = stations[i];
+            var s2 = stations[(i + 1) % 100];
+            var l = 1 + rng.nextInt(6);
+            routes[i] = new Route("r" + i, s1, s2, l, Level.OVERGROUND, Color.RED);
+        }
+        for (int i = 0; i < stations.length; i++) {
+            var s1 = stations[i];
+            var s2 = stations[(i + 1) % 100];
+            assertEquals(List.of(s1, s2), routes[i].stations());
         }
     }
 
     @Test
-    void stationsAccessorWorks() {
-        List<Station> stations = new ArrayList<>(Arrays.asList(STATION1, STATION2));
-        Route route = new Route("route", STATION1, STATION2, 2, OVERGROUND, BLACK);
-        assertEquals(stations, route.stations());
-    }
-
-    @Test
-    void stationOppositeWorks() {
-        Route route = new Route("route", STATION1, STATION2, 2, OVERGROUND, BLACK);
-        assertEquals(STATION1, route.stationOpposite(route.station2()));
-        assertEquals(STATION2, route.stationOpposite(route.station1()));
-    }
-
-    @Test
-    void stationOppositeFailsWithRandomStation() {
-
-        Route route = new Route("route", STATION1, STATION2, 2, OVERGROUND, BLACK);
+    void routeStationOppositeFailsWithInvalidStation() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var s3 = new Station(1, "EPFL");
+        var r = new Route("id", s1, s2, 1, Level.OVERGROUND, Color.RED);
         assertThrows(IllegalArgumentException.class, () -> {
-            route.stationOpposite(new Station(3, "test3"));
+            r.stationOpposite(s3);
         });
     }
 
     @Test
-    void possibleClaimCardsWorksWithColoredOvergroundRoads() {
-        for (int length = Constants.MIN_ROUTE_LENGTH; length < Constants.MAX_ROUTE_LENGTH; length++) {
-            for (Color color: Color.ALL) {
-                Route route = new Route("route", GENEVE, LAUSANNE, length, OVERGROUND, color);
-                List<SortedBag<Card>> possibleClaimCards = route.possibleClaimCards();
+    void routeStationOppositeReturnsOppositeStation() {
+        var rng = TestRandomizer.newRandom();
+        var stations = new Station[100];
+        for (int i = 0; i < stations.length; i++)
+            stations[i] = new Station(i, "Station " + i);
+        var routes = new Route[100];
+        for (int i = 0; i < stations.length; i++) {
+            var s1 = stations[i];
+            var s2 = stations[(i + 1) % 100];
+            var l = 1 + rng.nextInt(6);
+            routes[i] = new Route("r" + i, s1, s2, l, Level.OVERGROUND, Color.RED);
+        }
+        for (int i = 0; i < stations.length; i++) {
+            var s1 = stations[i];
+            var s2 = stations[(i + 1) % 100];
+            var r = routes[i];
+            assertEquals(s1, r.stationOpposite(s2));
+            assertEquals(s2, r.stationOpposite(s1));
+        }
+    }
 
-                List<SortedBag<Card>> expectedPossibleCards = new ArrayList<>();
-                SortedBag<Card> bag = SortedBag.of(length, Card.of(color));
-                expectedPossibleCards.add(bag);
-
-                assertEquals(expectedPossibleCards, possibleClaimCards);
+    @Test
+    void routePossibleClaimCardsWorksForOvergroundColoredRoute() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var i = 0; i < COLORS.size(); i++) {
+            var color = COLORS.get(i);
+            var card = CAR_CARDS.get(i);
+            for (var l = 1; l <= 6; l++) {
+                var r = new Route(id, s1, s2, l, Level.OVERGROUND, color);
+                assertEquals(List.of(SortedBag.of(l, card)), r.possibleClaimCards());
             }
         }
     }
 
     @Test
-    void possibleClaimCardsWorksWithNeutralOvergroundRoads() {
-        //Test bonne liste
-        for (int length = Constants.MIN_ROUTE_LENGTH; length < Constants.MAX_ROUTE_LENGTH; length++) {
-            Route route = new Route("route", GENEVE, LAUSANNE, length, OVERGROUND, null);
-            List<SortedBag<Card>> possibleClaimCards = route.possibleClaimCards();
-
-            List<SortedBag<Card>> expectedPossibleCards = new ArrayList<>();
-            for (Card card: Card.CARS) {
-                SortedBag<Card> bag = SortedBag.of(length, card);
-                expectedPossibleCards.add(bag);
-            }
-
-            assertEquals(expectedPossibleCards, possibleClaimCards);
+    void routePossibleClaimCardsWorksOnOvergroundNeutralRoute() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var l = 1; l <= 6; l++) {
+            var r = new Route(id, s1, s2, l, Level.OVERGROUND, null);
+            var expected = List.of(
+                    SortedBag.of(l, Card.BLACK),
+                    SortedBag.of(l, Card.VIOLET),
+                    SortedBag.of(l, Card.BLUE),
+                    SortedBag.of(l, Card.GREEN),
+                    SortedBag.of(l, Card.YELLOW),
+                    SortedBag.of(l, Card.ORANGE),
+                    SortedBag.of(l, Card.RED),
+                    SortedBag.of(l, Card.WHITE));
+            assertEquals(expected, r.possibleClaimCards());
         }
     }
 
     @Test
-    void possibleClaimCardsWorksWithColoredUndergroundRoads() {
-        for (int length = Constants.MIN_ROUTE_LENGTH; length < Constants.MAX_ROUTE_LENGTH; length++) {
-            for (Color color: Color.ALL) {
-                Route route = new Route("route", GENEVE, LAUSANNE, length, UNDERGROUND, color);
-                List<SortedBag<Card>> possibleClaimCards = route.possibleClaimCards();
+    void routePossibleClaimCardsWorksOnUndergroundColoredRoute() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var i = 0; i < COLORS.size(); i++) {
+            var color = COLORS.get(i);
+            var card = CAR_CARDS.get(i);
+            for (var l = 1; l <= 6; l++) {
+                var r = new Route(id, s1, s2, l, Level.UNDERGROUND, color);
 
-                List<SortedBag<Card>> expectedPossibleCards = new ArrayList<>();
-
-                SortedBag<Card> onlyColorBag = SortedBag.of(length, Card.of(color));
-                expectedPossibleCards.add(onlyColorBag);
-
-                for (int i = 1; i <= length; i++) {
-                    SortedBag.Builder<Card> bagBuilder = new SortedBag.Builder<>();
-                    bagBuilder.add(length-i, Card.of(color));
-                    bagBuilder.add(i, Card.LOCOMOTIVE);
-                    expectedPossibleCards.add(bagBuilder.build());
+                var expected = new ArrayList<SortedBag<Card>>();
+                for (var locomotives = 0; locomotives <= l; locomotives++) {
+                    var cars = l - locomotives;
+                    expected.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
                 }
-                if (expectedPossibleCards.isEmpty())
-                    expectedPossibleCards.add(SortedBag.of(0, Card.LOCOMOTIVE));
-
-                assertEquals(expectedPossibleCards, possibleClaimCards);
+                assertEquals(expected, r.possibleClaimCards());
             }
         }
     }
 
     @Test
-    void possibleClaimCardsWorksWithNeutralUndergroundRoads() {
+    void routePossibleClaimCardsWorksOnUndergroundNeutralRoute() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var l = 1; l <= 6; l++) {
+            var r = new Route(id, s1, s2, l, Level.UNDERGROUND, null);
 
-        Route route = new Route("route", GENEVE, LAUSANNE, 2, UNDERGROUND, null);
-        List<SortedBag<Card>> possibleClaimCards = route.possibleClaimCards();
-        List<SortedBag<Card>> expectedPossibleCards = new ArrayList<>();
-
-        for (int i = 0; i <= 2; i++) {
-            if (i < 2) {
-                for (Card car : Card.CARS) {
-                    SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
-                    cardsBuilder.add(2 - i, car);
-                    cardsBuilder.add(i, Card.LOCOMOTIVE);
-                    expectedPossibleCards.add(cardsBuilder.build());
+            var expected = new ArrayList<SortedBag<Card>>();
+            for (var locomotives = 0; locomotives <= l; locomotives++) {
+                var cars = l - locomotives;
+                if (cars == 0)
+                    expected.add(SortedBag.of(locomotives, Card.LOCOMOTIVE));
+                else {
+                    for (var card : CAR_CARDS)
+                        expected.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
                 }
             }
-            else {
-                expectedPossibleCards.add(SortedBag.of(i, Card.LOCOMOTIVE));
+            assertEquals(expected, r.possibleClaimCards());
+        }
+    }
+
+    @Test
+    void routeAdditionalClaimCardsCountWorksWithColoredCardsOnly() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+
+        for (var l = 1; l <= 6; l++) {
+            for (var color : COLORS) {
+                var matchingCard = CAR_CARDS.get(color.ordinal());
+                var nonMatchingCard = color == Color.BLACK
+                        ? Card.WHITE
+                        : Card.BLACK;
+                var claimCards = SortedBag.of(l, matchingCard);
+                var r = new Route(id, s1, s2, l, Level.UNDERGROUND, color);
+                for (var m = 0; m <= 3; m++) {
+                    for (var locomotives = 0; locomotives <= m; locomotives++) {
+                        var drawnB = new SortedBag.Builder<Card>();
+                        drawnB.add(locomotives, Card.LOCOMOTIVE);
+                        drawnB.add(m - locomotives, matchingCard);
+                        drawnB.add(3 - m, nonMatchingCard);
+                        var drawn = drawnB.build();
+                        assertEquals(m, r.additionalClaimCardsCount(claimCards, drawn));
+                    }
+                }
             }
         }
-
-        assertEquals(expectedPossibleCards, possibleClaimCards);
     }
 
     @Test
-    void additionnalClaimCardsCountWorksWithOnlyColorAtStart(){
-        Route route = new Route("route", GENEVE, LAUSANNE, 3, UNDERGROUND, null);
+    void routeAdditionalClaimCardsCountWorksWithLocomotivesOnly() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
 
-        for (int i = Constants.ADDITIONAL_TUNNEL_CARDS; i >= 0; i--) {
-            SortedBag.Builder<Card> builder = new SortedBag.Builder<>();
-            builder.add(i, Card.of(Color.ORANGE));
-            builder.add(Constants.ADDITIONAL_TUNNEL_CARDS-i, Card.of(BLACK));
-            int expected = route.additionalClaimCardsCount(SortedBag.of(3, Card.of(Color.ORANGE)), builder.build());
-            assertEquals(i, expected);
-        }
-    }
-
-    //TODO: same but with locomotive au départ aussi
-    @Test
-    void additionnalClaimCardsCountWorks(){
-        Route route = new Route("route", GENEVE, LAUSANNE, 3, UNDERGROUND, null);
-
-        for (int i = Constants.ADDITIONAL_TUNNEL_CARDS; i >= 0; i--) {
-            SortedBag.Builder<Card> builder = new SortedBag.Builder<>();
-            builder.add(i, Card.LOCOMOTIVE);
-            builder.add(Constants.ADDITIONAL_TUNNEL_CARDS-i, Card.of(BLACK));
-            int expected = route.additionalClaimCardsCount(SortedBag.of(3, Card.LOCOMOTIVE), builder.build());
-            assertEquals(i, expected);
-        }
-    }
-
-    @Test
-    void claimPointsIsCorrect(){
-        for (int i = Constants.MIN_ROUTE_LENGTH; i < Constants.MAX_ROUTE_LENGTH; i++) {
-            Route route = new Route("route", GENEVE, LAUSANNE, i, OVERGROUND, null);
-            int expected = 0;
-            switch (i) {
-                case 1:
-                    expected = 1;
-                    break;
-                case 2:
-                    expected = 2;
-                    break;
-                case 3:
-                    expected = 4;
-                    break;
-                case 4:
-                    expected = 7;
-                    break;
-                case 5:
-                    expected = 10;
-                    break;
-                case 6:
-                    expected = 15;
-                    break;
+        for (var l = 1; l <= 6; l++) {
+            for (var color : COLORS) {
+                var matchingCard = CAR_CARDS.get(color.ordinal());
+                var nonMatchingCard = color == Color.BLACK
+                        ? Card.WHITE
+                        : Card.BLACK;
+                var claimCards = SortedBag.of(l, Card.LOCOMOTIVE);
+                var r = new Route(id, s1, s2, l, Level.UNDERGROUND, color);
+                for (var m = 0; m <= 3; m++) {
+                    for (var locomotives = 0; locomotives <= m; locomotives++) {
+                        var drawnB = new SortedBag.Builder<Card>();
+                        drawnB.add(locomotives, Card.LOCOMOTIVE);
+                        drawnB.add(m - locomotives, matchingCard);
+                        drawnB.add(3 - m, nonMatchingCard);
+                        var drawn = drawnB.build();
+                        assertEquals(locomotives, r.additionalClaimCardsCount(claimCards, drawn));
+                    }
+                }
             }
-            assertEquals(expected, route.claimPoints());
+        }
+    }
+
+    @Test
+    void routeAdditionalClaimCardsCountWorksWithMixedCards() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+
+        for (var l = 2; l <= 6; l++) {
+            for (var color : COLORS) {
+                var matchingCard = CAR_CARDS.get(color.ordinal());
+                var nonMatchingCard = color == Color.BLACK
+                        ? Card.WHITE
+                        : Card.BLACK;
+                for (var claimLoc = 1; claimLoc < l; claimLoc++) {
+                    var claimCards = SortedBag.of(
+                            l - claimLoc, matchingCard,
+                            claimLoc, Card.LOCOMOTIVE);
+                    var r = new Route(id, s1, s2, l, Level.UNDERGROUND, color);
+                    for (var m = 0; m <= 3; m++) {
+                        for (var locomotives = 0; locomotives <= m; locomotives++) {
+                            var drawnB = new SortedBag.Builder<Card>();
+                            drawnB.add(locomotives, Card.LOCOMOTIVE);
+                            drawnB.add(m - locomotives, matchingCard);
+                            drawnB.add(3 - m, nonMatchingCard);
+                            var drawn = drawnB.build();
+                            assertEquals(m, r.additionalClaimCardsCount(claimCards, drawn));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void routeClaimPointsReturnsClaimPoints() {
+        var expectedClaimPoints =
+                List.of(Integer.MIN_VALUE, 1, 2, 4, 7, 10, 15);
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var l = 1; l <= 6; l++) {
+            var r = new Route(id, s1, s2, l, Level.OVERGROUND, Color.BLACK);
+            assertEquals(expectedClaimPoints.get(l), r.claimPoints());
         }
     }
 }

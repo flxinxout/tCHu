@@ -144,8 +144,7 @@ public final class Trail {
     }
 
     /**
-     * Retourne une représentation textuelle du chemin qui devra retourner
-     * au moins la gare de départ et d'arrivée, avec les points
+     * Retourne une représentation textuelle du chemin.
      * @return une représentation textuelle du chemin
      */
     @Override

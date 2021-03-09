@@ -19,7 +19,7 @@ public final class Info {
     private final String playerName;
 
     /**
-     * Constructeur d'un générateur de message spécifique à un joueur
+     * Construit un générateur de messages liés au joueur ayant le nom donné.
      * @param playerName
      *          le nom du joueur
      */
@@ -29,7 +29,7 @@ public final class Info {
 
     /**
      * Retourne le nom (français) de la carte donnée, au singulier ssi la valeur absolue
-     * du second argument vaut 1
+     * du second argument vaut 1.
      * @param card
      *          la carte donnée
      * @param count
@@ -40,24 +40,15 @@ public final class Info {
         String plural = StringsFr.plural(count);
 
         switch (card){
-            case BLACK:
-                return String.format("%s%s", StringsFr.BLACK_CARD, plural);
-            case VIOLET:
-                return String.format("%s%s", StringsFr.VIOLET_CARD, plural);
-            case BLUE:
-                return String.format("%s%s", StringsFr.BLUE_CARD, plural);
-            case GREEN:
-                return String.format("%s%s", StringsFr.GREEN_CARD, plural);
-            case YELLOW:
-                return String.format("%s%s", StringsFr.YELLOW_CARD, plural);
-            case ORANGE:
-                return String.format("%s%s", StringsFr.ORANGE_CARD, plural);
-            case RED:
-                return String.format("%s%s", StringsFr.RED_CARD, plural);
-            case WHITE:
-                return String.format("%s%s", StringsFr.WHITE_CARD, plural);
-            default:
-                return String.format("%s%s", StringsFr.LOCOMOTIVE_CARD, plural);
+            case BLACK: return String.format("%s%s", StringsFr.BLACK_CARD, plural);
+            case VIOLET: return String.format("%s%s", StringsFr.VIOLET_CARD, plural);
+            case BLUE: return String.format("%s%s", StringsFr.BLUE_CARD, plural);
+            case GREEN: return String.format("%s%s", StringsFr.GREEN_CARD, plural);
+            case YELLOW: return String.format("%s%s", StringsFr.YELLOW_CARD, plural);
+            case ORANGE: return String.format("%s%s", StringsFr.ORANGE_CARD, plural);
+            case RED: return String.format("%s%s", StringsFr.RED_CARD, plural);
+            case WHITE: return String.format("%s%s", StringsFr.WHITE_CARD, plural);
+            default: return String.format("%s%s", StringsFr.LOCOMOTIVE_CARD, plural);
         }
     }
 
@@ -76,15 +67,15 @@ public final class Info {
     }
 
     /**
-     * Retourne le message déclarant quel joueur jouera en premier.
-     * @return le message déclarant quel joueur jouera en premier
+     * Retourne le message déclarant que le joueur jouera en premier.
+     * @return le message déclarant que le joueur jouera en premier
      */
     public String willPlayFirst() {
         return String.format(StringsFr.WILL_PLAY_FIRST, playerName);
     }
 
     /**
-     * Retourne le message déclarant que le joueur a gardé le nombre de billets donné
+     * Retourne le message déclarant que le joueur a gardé le nombre de billets donné.
      * @param count
      *          le nombre de billets donné
      * @return le message déclarant que le joueur a gardé le nombre de billets donné
@@ -95,7 +86,7 @@ public final class Info {
     }
 
     /**
-     * Retourne le message déclarant que le joueur peut jouer
+     * Retourne le message déclarant que le joueur peut jouer.
      * @return le message déclarant que le joueur peut jouer
      */
     public String canPlay() {
@@ -103,7 +94,7 @@ public final class Info {
     }
 
     /**
-     * Retourne le message déclarant que le joueur a tiré le nombre donné de billets
+     * Retourne le message déclarant que le joueur a tiré le nombre donné de billets.
      * @param count
      *          le nombre de billets tirés
      * @return le message déclarant que le joueur a tiré le nombre donné de billets
@@ -122,7 +113,7 @@ public final class Info {
     }
 
     /**
-     * Retourne le message déclarant que le joueur a tiré la carte disposée face visible donnée
+     * Retourne le message déclarant que le joueur a tiré la carte disposée face visible donnée.
      * @param card
      *          la carte tirée
      * @return le message déclarant que le joueur a tiré la carte disposée face visible donnée
@@ -142,37 +133,36 @@ public final class Info {
     public String claimedRoute(Route route, SortedBag<Card> cards) {
         return String.format(StringsFr.CLAIMED_ROUTE,
                              playerName,
-                             namesOf(route),
+                             nameOf(route),
                              descriptionOf(cards));
     }
 
     /**
      * Retourne la représentation textuelle de la route donnée.
-     * @return la représentation textuelle de la route donnée
      */
-    private static String namesOf(Route route){
+    private static String nameOf(Route route){
         return (route.station1().name() + StringsFr.EN_DASH_SEPARATOR + route.station2().name());
     }
 
     /**
      * Retourne la description de l'ensemble de cartes donné.
-     * @return la description de l'ensemble de cartes donné
      */
     private static String descriptionOf(SortedBag<Card> cards){
-        List<String> singleTexts = new ArrayList<>();
+        List<String> singleCardNames = new ArrayList<>();
 
         for (Card c: cards.toSet()) {
             int n = cards.countOf(c);
-            singleTexts.add(n + " " + cardName(c, n));
+            singleCardNames.add(n + " " + cardName(c, n));
         }
-        int lastIndex = singleTexts.size() - 1;
+
+        int lastCardIndex = singleCardNames.size() - 1;
         String joined;
-        if(singleTexts.size() == 1) {
-            joined = singleTexts.get(0);
+        if(singleCardNames.size() == 1) {
+            joined = singleCardNames.get(0);
         } else {
             joined = String.join(StringsFr.AND_SEPARATOR,
-                    String.join(", ", singleTexts.subList(0, lastIndex)),
-                    singleTexts.get(lastIndex));
+                    String.join(", ", singleCardNames.subList(0, lastCardIndex)),
+                    singleCardNames.get(lastCardIndex));
         }
 
         return joined;
@@ -190,10 +180,9 @@ public final class Info {
     public String attemptsTunnelClaim(Route route, SortedBag<Card> initialCards) {
         return String.format(StringsFr.ATTEMPTS_TUNNEL_CLAIM,
                              playerName,
-                             namesOf(route),
+                             nameOf(route),
                              descriptionOf(initialCards));
     }
-
 
     /**
      * Retourne le message déclarant que le joueur a tiré les trois cartes additionnelles données,
@@ -220,7 +209,7 @@ public final class Info {
      * @return retourne le message décrit ci-dessus
      */
     public String didNotClaimRoute(Route route){
-        return String.format(StringsFr.DID_NOT_CLAIM_ROUTE, playerName, namesOf(route));
+        return String.format(StringsFr.DID_NOT_CLAIM_ROUTE, playerName, nameOf(route));
     }
 
     /**
@@ -242,15 +231,7 @@ public final class Info {
      * @return retourne le message décrit ci-dessus
      */
     public String getsLongestTrailBonus(Trail longestTrail){
-        return String.format(StringsFr.GETS_BONUS, playerName, nameOf(longestTrail));
-    }
-
-    /**
-     * Retourne le nom du chemin donné.
-     * @return le nom du chemin donné.
-     */
-    private static String nameOf(Trail trail){
-        return (trail.station1().name() + StringsFr.EN_DASH_SEPARATOR + trail.station2().name());
+        return String.format(StringsFr.GETS_BONUS, playerName, longestTrail);
     }
 
     /**

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * L'état public des cartes wagon/locomotive qui ne sont pas en main des joueurs
+ * L'état public (connu des joueurs) des cartes wagon/locomotive qui ne sont pas en main des joueurs.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
@@ -18,7 +18,8 @@ public class PublicCardState {
     private final int discardsSize;
 
     /**
-     * Constructeur d'un objet constitué de la partie publique des cartes du jeu
+     * Construit un état public des cartes dans lequel les cartes face visible sont celles données,
+     * la pioche contient {@code deckSize} cartes et la défausse en contient {@code discardsSize}.
      * @param faceUpCards
      *          les cartes faces visibles à côté du plateau de jeu
      * @param deckSize
@@ -26,14 +27,14 @@ public class PublicCardState {
      * @param discardsSize
      *          la taille de défausse
      * @throws IllegalArgumentException
-     *          si il n'y a pas {@code Constants.FACE_UP_CARDS_COUNT} cartes faces visibles ou
+     *          si {@code faceUpCards} ne contient pas le bon nombre d'éléments
      *          si {@code deckSize} ou {@code discardsSize} < 0
      */
     public PublicCardState(List<Card> faceUpCards, int deckSize, int discardsSize) {
         Preconditions.checkArgument(faceUpCards.size() == Constants.FACE_UP_CARDS_COUNT);
         Preconditions.checkArgument(deckSize >= 0 && discardsSize >= 0);
 
-        this.faceUpCards = faceUpCards;
+        this.faceUpCards = List.copyOf(faceUpCards);
         this.deckSize = deckSize;
         this.discardsSize = discardsSize;
     }
@@ -52,13 +53,15 @@ public class PublicCardState {
      * @return les 5 cartes face visible, sous la forme d'une liste comportant exactement 5 éléments
      */
     public List<Card> faceUpCards() {
-        return List.copyOf(faceUpCards);
+        return faceUpCards;
     }
 
     /**
      * Retourne la carte face visible à l'index donné.
      * @param slot
      *          l'index en question
+     * @throws IndexOutOfBoundsException
+     *          si {@code slot} n'est pas compris entre 0 (inclus) et le nombre de cartes face visible (exclu)
      * @return la carte face visible à l'index donné
      */
     public Card faceUpCard(int slot) {

@@ -33,6 +33,19 @@ public class CardStateTest {
     }
 
     @Test
+    void ofWorks(){
+        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_6), TestRandomizer.newRandom());
+        Deck<Card> initialDeck = deck;
+        List<Card> topCards = new ArrayList<>();
+        for (int i = 0; i < Constants.FACE_UP_CARDS_COUNT; i++) {
+            topCards.add(deck.topCard());
+            deck = deck.withoutTopCard();
+        }
+
+        assertEquals(topCards, CardState.of(initialDeck).faceUpCards());
+    }
+
+    @Test
     void withDrawnFaceUpCardFailNullSlot() {
         Deck<Card> deck = Deck.of(SortedBag.of(CARDS_4), TestRandomizer.newRandom());
         assertThrows(IllegalArgumentException.class, () -> {

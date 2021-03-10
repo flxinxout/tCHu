@@ -56,7 +56,7 @@ class TrailTest {
         if (longest.station1().equals(chRoutes.GEN))
             assertEquals(longest.station2(), chRoutes.YVE);
         else if (longest.station1().equals(chRoutes.YVE))
-            assertEquals(longest.station1(), chRoutes.GEN);
+            assertEquals(longest.station2(), chRoutes.GEN);
         else
             fail("Unexpected start station: " + longest.station1());
     }

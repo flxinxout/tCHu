@@ -46,10 +46,18 @@ public class CardStateTest {
     }
 
     @Test
-    void withDrawnFaceUpCardFailNullSlot() {
+    void withDrawnFaceUpCardFailNegativeSlot() {
         Deck<Card> deck = Deck.of(SortedBag.of(CARDS_4), TestRandomizer.newRandom());
         assertThrows(IllegalArgumentException.class, () -> {
            CardState.of(deck).withDrawnFaceUpCard(-1);
+        });
+    }
+
+    @Test
+    void withDrawnFaceUpCardFailBiggerSlot() {
+        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_4), TestRandomizer.newRandom());
+        assertThrows(IllegalArgumentException.class, () -> {
+            CardState.of(deck).withDrawnFaceUpCard(20);
         });
     }
 
@@ -60,15 +68,4 @@ public class CardStateTest {
             CardState.of(deck).withDrawnFaceUpCard(0);
         });
     }
-
-    @Test
-    void withDrawnFaceUpCardWorks() {
-        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_6), TestRandomizer.newRandom());
-        CardState cardState = CardState.of(deck); // faceup de 5, discard 0 et pioche 4
-        CardState newCardState = cardState.withDrawnFaceUpCard(3);
-        //assertEquals(deck.cards, newCardState.faceUpCards());
-    }
-
-
-
 }

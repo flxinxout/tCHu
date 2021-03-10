@@ -33,7 +33,7 @@ public class PublicPlayerState {
 
         this.ticketCount = ticketCount;
         this.cardCount = cardCount;
-        this.routes = routes;
+        this.routes = List.copyOf(routes);
 
         int tempCars = 0;
         int tempPoints = 0;

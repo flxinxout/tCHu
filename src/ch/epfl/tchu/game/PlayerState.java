@@ -3,7 +3,10 @@ package ch.epfl.tchu.game;
 import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Représente l'état complet d'un joueur.
@@ -98,8 +101,8 @@ public final class PlayerState extends PublicPlayerState {
      */
     public boolean canClaimRoute(Route route) {
         if (carCount() >= route.length()) {
-            for (SortedBag<Card> cardSet : route.possibleClaimCards()) {
-                if (cards.contains(cardSet))
+            for (SortedBag<Card> cardSortedBag : route.possibleClaimCards()) {
+                if (cards.contains(cardSortedBag))
                     return true;
             }
         }
@@ -108,39 +111,111 @@ public final class PlayerState extends PublicPlayerState {
     }
 
     /**
-     * Retourne la liste de tous les ensembles de cartes que le joueur pourrait utiliser pour prendre possession de la route donnée
+     * Retourne la liste de tous les ensembles de cartes
+     * que le joueur pourrait utiliser pour prendre possession de la route donnée.
      *
-     * @param route la route donnée
+     * @param route
+     *          la route donnée
+     * @throws IllegalArgumentException
+     *          si le nombre de wagon que possède le joueur est inférieur à la longueur de la route
      * @return la liste de tous les ensembles de cartes que le joueur pourrait utiliser pour prendre possession de la route donnée
-     * @throws IllegalArgumentException si le nombre de wagon que possède le joueur est inférieur à la longueur de la route
      */
     public List<SortedBag<Card>> possibleClaimCards(Route route) {
         Preconditions.checkArgument(carCount() >= route.length());
-        return route.possibleClaimCards();
+
+        List<SortedBag<Card>> possibleCards = new ArrayList<>();
+        for (SortedBag<Card> claimCards: route.possibleClaimCards()) {
+            if (this.cards.contains(claimCards))
+                possibleCards.add(claimCards);
+        }
+
+        return possibleCards;
     }
 
     /**
-     * retourne la liste de tous les ensembles de cartes que le joueur pourrait utiliser pour s'emparer d'un tunnel.
+     * Retourne la liste de tous les ensembles de cartes que le joueur pourrait utiliser pour s'emparer d'un tunnel.
      *
-     * @param additionalCardsCount le nombre de cartes additionnelles que le joueurs devrait poser en plus pour claim le tunnel
-     * @param initialCards         les cartes initialement posées par le joueur pour s'emparer du tunnel
-     * @param drawnCards           les cartes tirées au sommet de la pioche
-     * @return la liste de cartes mentionnée
+     * @param additionalCardsCount
+     *          le nombre de cartes additionnelles que le joueurs devrait poser en plus pour claim le tunnel
+     * @param initialCards
+     *          les cartes initialement posées par le joueur pour s'emparer du tunnel
+     * @param drawnCards
+     *          les cartes tirées au sommet de la pioche
      * @throws IllegalArgumentException si le nombre de cartes additionnelles n'est pas compris entre 1 et 3 (inclus),
      *                                  si l'ensemble des cartes initiales est vide ou contient plus de 2 types de cartes différents,
      *                                  ou si l'ensemble des cartes tirées ne contient pas exactement 3 cartes.
+     * @return la liste de cartes mentionnée
      */
     public List<SortedBag<Card>> possibleAdditionalCards(int additionalCardsCount, SortedBag<Card> initialCards, SortedBag<Card> drawnCards) {
         Preconditions.checkArgument(additionalCardsCount > 0 && additionalCardsCount <= Constants.ADDITIONAL_TUNNEL_CARDS);
+        Preconditions.checkArgument(!initialCards.isEmpty() && initialCards.toSet().size() <= 2);
         Preconditions.checkArgument(drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
 
-        for (Card card : initialCards) {
-
+        //1. Create set of all available cards in our hands (minus the initial cards)
+        Card initialCardType = Card.LOCOMOTIVE;
+        for (Card initialCard : initialCards) {
+            if (initialCard != Card.LOCOMOTIVE)
+                initialCardType = initialCard;
         }
 
-        Preconditions.checkArgument(!initialCards.isEmpty());
+        SortedBag.Builder<Card> possibleCardsBuilder = new SortedBag.Builder<>();
+        for (Card card: cards) {
+            if (card == Card.LOCOMOTIVE || card == initialCardType);
+                possibleCardsBuilder.add(card);
+        }
 
-        return null;
+        SortedBag<Card> possibleCardsInHand = possibleCardsBuilder.build().difference(initialCards);
+
+        //2. Create all possible subsets and put it in a list
+        Set<SortedBag<Card>> optionsSet = possibleCardsInHand.subsetsOfSize(additionalCardsCount);
+        List<SortedBag<Card>> optionsList = new ArrayList<>(optionsSet);
+
+        //3. Sort the list
+        optionsList.sort(Comparator.comparingInt(cs -> cs.countOf(Card.LOCOMOTIVE)));
+
+        return optionsList;
+    }
+
+    /**
+     * Retourne un état identique au récepteur,
+     * si ce n'est que le joueur s'est de plus emparé de la route donnée au moyen des cartes données.
+     * @param route
+     *          la route dont le joueur s'est emparée
+     * @param claimCards
+     *          carte posée pour s'emparer de la route
+     * @return un état identique au récepteur,
+     * si ce n'est que le joueur s'est de plus emparé de la route donnée au moyen des cartes données
+     */
+    public PlayerState withClaimedRoute(Route route, SortedBag<Card> claimCards){
+        SortedBag<Card> newCards = cards.difference(claimCards);
+
+        List<Route> newRoutes = new ArrayList<>(routes());
+        newRoutes.add(route);
+
+        return new PlayerState(tickets, newCards, newRoutes);
+    }
+
+    public int ticketPoints(){
+        int maxIndex = 0;
+        for (Route route: routes()) {
+            maxIndex = route.station1().id() > maxIndex ? route.station1().id() : maxIndex;
+            maxIndex = route.station2().id() > maxIndex ? route.station2().id() : maxIndex;
+        }
+
+        StationPartition.Builder connectivityBuilder = new StationPartition.Builder(maxIndex + 1);
+
+        StationPartition connectivity = connectivityBuilder.build();
+
+        int points = 0;
+        for (Ticket ticket: tickets) {
+            points += ticket.points(connectivity);
+        }
+
+        return points;
+    }
+
+    public int finalPoints(){
+        return claimPoints() + ticketPoints();
     }
 }
 

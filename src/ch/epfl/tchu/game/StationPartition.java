@@ -27,13 +27,16 @@ public final class StationPartition implements StationConnectivity {
 
     @Override
     public boolean connected(Station s1, Station s2) {
-        return relations[s1.id()] == relations[s2.id()];
+        if (s1.id() < relations.length && s2.id() < relations.length)
+            return relations[s1.id()] == relations[s2.id()];
+        else
+            return s1.id() == s2.id();
     }
 
     /**
      * Représente le bâtisseur d'une StationPartition
      */
-    public final class Builder {
+    public static final class Builder {
 
         private int[] relations;
         private List<Station> stations;
@@ -90,5 +93,4 @@ public final class StationPartition implements StationConnectivity {
             return new StationPartition(relations);
         }
     }
-
 }

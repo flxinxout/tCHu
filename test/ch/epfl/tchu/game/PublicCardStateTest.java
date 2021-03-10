@@ -58,23 +58,37 @@ public class PublicCardStateTest {
     }
 
     @Test
-    void testDeckSizeWithSuperAppeal() {
+    void testDeckSizeWithSuperCall() {
         Deck<Card> deck = Deck.of(SortedBag.of(CARDS_MORE), TestRandomizer.newRandom());
         CardState cardState = CardState.of(deck);
         assertEquals(2, cardState.deckSize());
     }
 
     @Test
-    void testDiscardSizeWithSuperAppeal() {
+    void testDiscardSizeWithSuperCall() {
         Deck<Card> deck = Deck.of(SortedBag.of(CARDS_MORE), TestRandomizer.newRandom());
         CardState cardState = CardState.of(deck);
         assertEquals(0, cardState.discardsSize());
     }
 
     @Test
-    void testDiscardSizeWith() {
-        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_MORE), TestRandomizer.newRandom());
-        CardState cardState = CardState.of(deck);
-        assertEquals(0, cardState.discardsSize());
+    void faceUpCardsFailsWithNegativeSlot() {
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            new PublicCardState(CARDS_5, 2, 10).faceUpCard(-5);
+        });
+    }
+
+    @Test
+    void faceUpCardsFailsWithBiggerSlot() {
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            new PublicCardState(CARDS_5, 2, 10).faceUpCard(20);
+        });
+    }
+
+    @Test
+    void faceUpCardsWorks() {
+        PublicCardState state = new PublicCardState(CARDS_5, 2, 10);
+
+        assertEquals(Card.BLUE, state.faceUpCard(3));
     }
 }

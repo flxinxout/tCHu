@@ -39,7 +39,6 @@ public final class CardState extends PublicCardState {
         Preconditions.checkArgument(deck.size() >= 5);
         Deck<Card> newDeck = deck;
 
-        //TODO: LIST OR ARRAY?
         List<Card> newTopCards = new ArrayList<>();
         for (int slot: Constants.FACE_UP_CARD_SLOTS) {
             newTopCards.add(newDeck.topCard());

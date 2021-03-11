@@ -3,7 +3,7 @@ package ch.epfl.tchu.game;
 import java.util.List;
 
 /**
- * Énumération permettant de représenter un joueur
+ * Énumération représentant l'identité un joueur.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
@@ -17,6 +17,7 @@ public enum PlayerId {
      * Liste contenant les différents joueurs.
      */
     public static final List<PlayerId> ALL = List.of(values());
+
     /**
      * Nombre de joueurs disponibles.
      */

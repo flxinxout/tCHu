@@ -20,11 +20,14 @@ public final class PlayerState extends PublicPlayerState {
     private final SortedBag<Card> cards;
 
     /**
-     * Construit l'état complet d'un joueur.
+     * Construit l'état d'un joueur possédant les billets, cartes et routes donnés.
      *
-     * @param tickets les tickets que possède le joueur
-     * @param cards   les cartes que possède le joueur
-     * @param routes  les routes que le joueur s'est emparé
+     * @param tickets
+     *          les tickets que possède le joueur
+     * @param cards
+     *          les cartes que possède le joueur
+     * @param routes
+     *          les routes que le joueur s'est emparé
      */
     public PlayerState(SortedBag<Ticket> tickets, SortedBag<Card> cards, List<Route> routes) {
         super(tickets.size(), cards.size(), routes);
@@ -36,8 +39,11 @@ public final class PlayerState extends PublicPlayerState {
     /**
      * Retourne l'état initial d'un joueur auquel les cartes initiales données ont été distribuées.
      *
-     * @param initialCards les cartes initiales du joueur
-     * @return l'état initial d'un joueur
+     * @param initialCards
+     *          les cartes initiales du joueur
+     * @throws IllegalArgumentException
+     *          si le nombre de cartes initiales ne vaut pas 4
+     * @return l'état initial d'un joueur auquel les cartes initiales données ont été distribuées
      */
     public static PlayerState initial(SortedBag<Card> initialCards) {
         Preconditions.checkArgument(initialCards.size() == Constants.INITIAL_CARDS_COUNT);
@@ -46,7 +52,6 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * Retourne les tickets du joueur.
-     *
      * @return les tickets du joueur
      */
     public SortedBag<Ticket> tickets() {
@@ -56,7 +61,8 @@ public final class PlayerState extends PublicPlayerState {
     /**
      * Retourne un état identique au récepteur, si ce n'est que le joueur possède en plus les billets donnés.
      *
-     * @param newTickets les billets données
+     * @param newTickets
+     *          les billets données
      * @return un état identique au récepteur, si ce n'est que le joueur possède en plus les billets donnés
      */
     public PlayerState withAddedTickets(SortedBag<Ticket> newTickets) {
@@ -64,9 +70,8 @@ public final class PlayerState extends PublicPlayerState {
     }
 
     /**
-     * Retourne les cartes du joueur.
-     *
-     * @return les cartes du joueur
+     * Retourne les cartes wagon/locomotive du joueur.
+     * @return les cartes wagon/locomotive du joueur
      */
     public SortedBag<Card> cards() {
         return cards;
@@ -75,7 +80,8 @@ public final class PlayerState extends PublicPlayerState {
     /**
      * Retourne un état identique au récepteur, si ce n'est que le joueur possède en plus la carte donnée.
      *
-     * @param card la carte donnée
+     * @param card
+     *          la carte donnée
      * @return un état identique au récepteur, si ce n'est que le joueur possède en plus la carte donnée
      */
     public PlayerState withAddedCards(Card card) {
@@ -96,13 +102,14 @@ public final class PlayerState extends PublicPlayerState {
      * Retourne vrai ssi le joueur peut s'emparer de la route donnée, c-à-d s'il lui
      * reste assez de wagons et s'il possède les cartes nécessaires.
      *
-     * @param route la route donnée
+     * @param route
+     *          la route donnée
      * @return vrai ssi le joueur peut s'emparer de la route donnée
      */
     public boolean canClaimRoute(Route route) {
         if (carCount() >= route.length()) {
-            for (SortedBag<Card> cardSortedBag : route.possibleClaimCards()) {
-                if (cards.contains(cardSortedBag))
+            for (SortedBag<Card> oneOfAllPossibleCards : route.possibleClaimCards()) {
+                if (cards.contains(oneOfAllPossibleCards))
                     return true;
             }
         }
@@ -118,15 +125,16 @@ public final class PlayerState extends PublicPlayerState {
      *          la route donnée
      * @throws IllegalArgumentException
      *          si le nombre de wagon que possède le joueur est inférieur à la longueur de la route
-     * @return la liste de tous les ensembles de cartes que le joueur pourrait utiliser pour prendre possession de la route donnée
+     * @return la liste de tous les ensembles de cartes que le joueur
+     * pourrait utiliser pour prendre possession de la route donnée
      */
     public List<SortedBag<Card>> possibleClaimCards(Route route) {
         Preconditions.checkArgument(carCount() >= route.length());
 
         List<SortedBag<Card>> possibleCards = new ArrayList<>();
-        for (SortedBag<Card> claimCards: route.possibleClaimCards()) {
-            if (this.cards.contains(claimCards))
-                possibleCards.add(claimCards);
+        for (SortedBag<Card> oneOfAllPossibleCards : route.possibleClaimCards()) {
+            if (this.cards.contains(oneOfAllPossibleCards))
+                possibleCards.add(oneOfAllPossibleCards);
         }
 
         return possibleCards;

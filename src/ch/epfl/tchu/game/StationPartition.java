@@ -2,6 +2,7 @@ package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.Preconditions;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +18,7 @@ public final class StationPartition implements StationConnectivity {
     private final int[] relations;
 
     /**
-     * Constructeur d'une StationPartition, c-à-d une partition aplatie de gares
+     * Constructeur d'une partition aplatie de gares.
      * @param relations
      *               tableau avec comme chaque entrée la relation index:représentant
      */
@@ -34,16 +35,16 @@ public final class StationPartition implements StationConnectivity {
     }
 
     /**
-     * Représente le bâtisseur d'une StationPartition
+     * Bâtisseur d'une StationPartition
      */
     public static final class Builder {
 
-        private int[] relations;
-        private List<Station> stations;
+        private final int[] relations;
+        private final List<Station> stations;
 
         /**
          * Construit un bâtisseur de partition d'un ensemble de gares
-         * dont l'identité est comprise entre 0 (inclus) et stationCount (exclus)
+         * dont l'identité est comprise entre 0 (inclus) et {@code stationCount} (exclus).
          * @param stationCount
          *          identité maximale
          * @throws IllegalArgumentException
@@ -52,8 +53,19 @@ public final class StationPartition implements StationConnectivity {
         public Builder(int stationCount) {
             Preconditions.checkArgument(stationCount >= 0);
 
+            //TODO: ASK AUX ASSISTANTS SI UTILE DE PRENDRE LA LISTE ENTIERE DES GARES PUIS
+            // VERIFIER SI LEUR INDICE EST CORRECT OU BIEN SI LA LISTE ChMap.stations() EST TJRS
+            // ECRITE AVEC LES GARES DANS LE BON ORDRE (D'INDEX) ET DONC FAIRE BOUCLE FOR NORMALE:
+            // L'AVANTAGE C'EST QUE Y A PLUS DE LISTE stations DONC CA ALLEGE LA CLASSE
+            /*relations = new int[stationCount];
+            for (int i = 0; i < stationCount; i++) {
+                relations[i] = ChMap.stations().get(i).id();
+            }*/
+
+            stations = new ArrayList<>();
+
             for(Station station : ChMap.stations()) {
-                if(station.id() >= 0 && station.id() < stationCount)
+                if(station.id() < stationCount)
                     stations.add(station);
             }
 
@@ -61,15 +73,6 @@ public final class StationPartition implements StationConnectivity {
             for (int i = 0; i < relations.length; i++) {
                 relations[i] = i;
             }
-        }
-
-        /**
-         * Retourne le numéro d'identification de la gare représentant
-         * celle qui est attachée à {@code idStation}
-         * @return le numéro d'identification de la gare représentant
-         */
-        private int representative(int idStation) {
-            return relations[idStation];
         }
 
         /**
@@ -82,15 +85,29 @@ public final class StationPartition implements StationConnectivity {
          * @return le bâtisseur ({@code this})
          */
         public Builder connect(Station s1, Station s2) {
+            //TODO: elle est fausse
             relations[s2.id()] = representative(s1.id());
             return this;
         }
 
         /**
-         * @return une StationPartition
+         * Retourne la partition aplatie des gares
+         * correspondant à la partition profonde en cours de construction par ce bâtisseur.
+         * @return la partition aplatie des gares ajoutées jusqu'à présent à {@code this}
          */
         public StationPartition build() {
+            //TODO: on aplatit rien du tout la il le faut
             return new StationPartition(relations);
+        }
+
+        /**
+         * Retourne le numéro d'identification de la gare représentant
+         * celle qui est attachée à {@code idStation}.
+         * @return le numéro d'identification de la gare représentant
+         * celle qui est attachée à {@code idStation}
+         */
+        private int representative(int idStation) {
+            return relations[idStation];
         }
     }
 }

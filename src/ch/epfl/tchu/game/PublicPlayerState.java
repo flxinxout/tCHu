@@ -15,18 +15,21 @@ public class PublicPlayerState {
 
     private final int ticketCount;
     private final int cardCount;
-    private final int carCount;
     private final List<Route> routes;
+    private final int carCount;
     private final int claimPoints;
 
     /**
-     * Construit un état de joueur
+     * Construit l'état public d'un joueur possédant le nombre de billets et de cartes donnés,
+     * et s'étant emparé des routes données
      * @param ticketCount
-     *          le nombre de ticket du joueur
+     *          le nombre de tickets du joueur
      * @param cardCount
      *          le nombre de cartes du joueur
      * @param routes
-     *          les routes dont le players s'est emparé
+     *          les routes dont le joueur s'est emparées
+     * @throws IllegalArgumentException
+     *          si le nombre de billets ou le nombre de cartes < 0
      */
     public PublicPlayerState(int ticketCount, int cardCount, List<Route> routes) {
         Preconditions.checkArgument(ticketCount >= 0 && cardCount >= 0);
@@ -47,8 +50,8 @@ public class PublicPlayerState {
     }
 
     /**
-     * Retourne le nombre de ticket que possède le joueur.
-     * @return le nombre de ticket que possède le joueur
+     * Retourne le nombre de tickets que possède le joueur.
+     * @return le nombre de tickets que possède le joueur
      */
     public int ticketCount() {
         return ticketCount;
@@ -85,6 +88,4 @@ public class PublicPlayerState {
     public int claimPoints() {
         return claimPoints;
     }
-
-
 }

@@ -159,7 +159,7 @@ public final class PlayerState extends PublicPlayerState {
         Preconditions.checkArgument(!initialCards.isEmpty() && initialCards.toSet().size() <= 2);
         Preconditions.checkArgument(drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
 
-        //1. Create set of all available cards in our hands (minus the initial cards)
+        //1. Create a set of all possible cards in our hands (minus the initial cards)
         Card initialCardType = Card.LOCOMOTIVE;
         for (Card initialCard : initialCards) {
             if (initialCard != Card.LOCOMOTIVE)
@@ -195,6 +195,7 @@ public final class PlayerState extends PublicPlayerState {
      * si ce n'est que le joueur s'est de plus emparé de la route donnée au moyen des cartes données
      */
     public PlayerState withClaimedRoute(Route route, SortedBag<Card> claimCards){
+        //TODO: après rendu sem. 6: vérifier que le joueur ait bien les cartes.
         SortedBag<Card> newCards = cards.difference(claimCards);
 
         List<Route> newRoutes = new ArrayList<>(routes());
@@ -203,6 +204,10 @@ public final class PlayerState extends PublicPlayerState {
         return new PlayerState(tickets, newCards, newRoutes);
     }
 
+    /**
+     * Retourne le nombre de points (éventuellement négatif) obtenus par le joueur grâce à ses billets.
+     * @return le nombre de points obtenus par le joueur grâce à ses billets
+     */
     public int ticketPoints(){
         int maxIndex = 0;
         for (Route route: routes()) {
@@ -211,7 +216,6 @@ public final class PlayerState extends PublicPlayerState {
         }
 
         StationPartition.Builder connectivityBuilder = new StationPartition.Builder(maxIndex + 1);
-
         StationPartition connectivity = connectivityBuilder.build();
 
         int points = 0;
@@ -222,6 +226,10 @@ public final class PlayerState extends PublicPlayerState {
         return points;
     }
 
+    /**
+     * Retourne la totalité des points obtenus par le joueur à la fin de la partie.
+     * @return la totalité des points obtenus par le joueur à la fin de la partie
+     */
     public int finalPoints(){
         return claimPoints() + ticketPoints();
     }

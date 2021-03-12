@@ -3,8 +3,6 @@ package ch.epfl.tchu.game;
 import ch.epfl.tchu.Preconditions;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -20,7 +18,7 @@ public final class StationPartition implements StationConnectivity {
     /**
      * Constructeur d'une partition aplatie de gares.
      * @param relations
-     *               tableau avec comme chaque entrée la relation index:représentant
+     *               tableau ayant comme chaque entrée la relation index:représentant
      */
     private StationPartition(int[] relations) {
         this.relations = relations;
@@ -85,12 +83,7 @@ public final class StationPartition implements StationConnectivity {
          * @return le bâtisseur ({@code this})
          */
         public Builder connect(Station s1, Station s2) {
-            //relations[representative(s2.id())] = representative(s1.id());
-            int temp = representative(s2.id());
-            while(temp != representative(temp)) {
-                temp = representative(temp);
-            }
-            relations[temp] = representative(s1.id());
+            relations[representative(s2.id())] = representative(s1.id());
             return this;
         }
 
@@ -101,21 +94,23 @@ public final class StationPartition implements StationConnectivity {
          */
         public StationPartition build() {
             for (int i = 0; i < relations.length; i++) {
-                while(representative(i) != representative(representative(i))) {
-                    relations[i] = representative(representative(relations[i]));
-                }
+                relations[i] = representative(i);
             }
             return new StationPartition(relations);
         }
 
         /**
-         * Retourne le numéro d'identification de la gare représentant
-         * celle qui est attachée à {@code idStation}.
-         * @return le numéro d'identification de la gare représentant
-         * celle qui est attachée à {@code idStation}
+         * Retourne le numéro d'identification du représentant du sous-ensemble la contenant.
+         * @return le numéro d'identification du représentant du sous-ensemble la contenant
          */
-        private int representative(int idStation) {
-            return relations[idStation];
+        private int representative(int stationId) {
+            //parent is the first representative in the hierarchy
+            //relations[parent] can be seen as the grandparent
+            int parent = relations[stationId];
+            while(parent != relations[parent]){
+                parent = relations[parent];
+            }
+            return parent;
         }
     }
 }

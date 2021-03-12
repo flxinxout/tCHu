@@ -85,7 +85,12 @@ public final class StationPartition implements StationConnectivity {
          * @return le bâtisseur ({@code this})
          */
         public Builder connect(Station s1, Station s2) {
-            relations[representative(s2.id())] = representative(s1.id());
+            //relations[representative(s2.id())] = representative(s1.id());
+            int temp = representative(s2.id());
+            while(temp != representative(temp)) {
+                temp = representative(temp);
+            }
+            relations[temp] = representative(s1.id());
             return this;
         }
 
@@ -95,7 +100,11 @@ public final class StationPartition implements StationConnectivity {
          * @return la partition aplatie des gares ajoutées jusqu'à présent à {@code this}
          */
         public StationPartition build() {
-            //TODO: on aplatit rien du tout la il le faut
+            for (int i = 0; i < relations.length; i++) {
+                while(representative(i) != representative(representative(i))) {
+                    relations[i] = representative(representative(relations[i]));
+                }
+            }
             return new StationPartition(relations);
         }
 

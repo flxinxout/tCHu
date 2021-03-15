@@ -4,146 +4,135 @@ import ch.epfl.tchu.SortedBag;
 import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
-import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DeckTest {
-    private static List<Card> CARD_1 = new ArrayList<>(List.of(Card.BLUE));
-    private static List<Card> CARDS_2 = new ArrayList<>(List.of(Card.WHITE, Card.GREEN));
-    private static List<Card> CARDS_3 = new ArrayList<>(List.of(Card.RED, Card.LOCOMOTIVE, Card.ORANGE));
-    private static List<Card> CARDS_4 = new ArrayList<>(List.of(Card.BLUE, Card.GREEN, Card.LOCOMOTIVE, Card.VIOLET));
-    private static List<Card> CARDS_5 = new ArrayList<>(List.of(Card.YELLOW, Card.ORANGE, Card.GREEN, Card.BLUE, Card.BLACK));
-
-    private static Deck<Card> emptyCardDeck(){
-        return Deck.of(new SortedBag.Builder<Card>().build(), new Random());
-    }
-
+class DeckTest {
     @Test
-    void sizeWorks(){
-        List<List<Card>> cards = List.of(CARD_1, CARDS_2, CARDS_3, CARDS_4, CARDS_5);
-        for (int i = 0; i < cards.size(); i++) {
-            Deck deck = Deck.of(SortedBag.of(cards.get(i)), new Random());
-            assertEquals(i+1, deck.size());
+    void deckOfShufflesDeck() {
+        var cards = listOfSize(100);
+        var cardsBag = SortedBag.of(cards);
+        for (int i = 0; i < TestRandomizer.RANDOM_ITERATIONS; i++) {
+            var rng = new Random(i);
+            var deck = Deck.of(cardsBag, rng);
+            var deckList = deckToList(deck);
+            // The shuffled deck *could* be equal to the non-shuffled one,
+            // but with 100 elements this is extremely unlikely
+            // (and doesn't happen with the random seeds we're using).
+            assertNotEquals(cards, deckList);
+
+            var deckSortedList = new ArrayList<>(deckList);
+            Collections.sort(deckSortedList);
+            assertEquals(cards, deckSortedList);
         }
     }
 
     @Test
-    void sizeWorksEmptyDeck(){
-        Deck deck = emptyCardDeck();
-        assertEquals(0, deck.size());
-    }
-
-    @Test
-    void isEmptyWorksWithNonEmptyDeck(){
-        List<List<Card>> cards = List.of(CARD_1, CARDS_2, CARDS_3, CARDS_4, CARDS_5);
-        for (int i = 0; i < cards.size(); i++) {
-            Deck deck = Deck.of(SortedBag.of(cards.get(i)), new Random());
-            assertFalse(deck.isEmpty());
+    void deckSizeReturnsSize() {
+        for (var size = 0; size < 100; size++) {
+            var rng = new Random(size);
+            var deck = Deck.of(SortedBag.of(listOfSize(size)), rng);
+            assertEquals(size, deck.size());
         }
     }
 
     @Test
-    void isEmptyWorksWithEmptyDeck(){
-        Deck deck = emptyCardDeck();
-        assertTrue(deck.isEmpty());
+    void deckIsEmptyReturnsTrueOnlyWhenDeckIsEmpty() {
+        for (var size = 0; size < 10; size++) {
+            var rng = new Random(size);
+            var deck = Deck.of(SortedBag.of(listOfSize(size)), rng);
+            assertEquals(size == 0, deck.isEmpty());
+        }
     }
 
     @Test
-    void topCardFailsWithEmptyDeck(){
-        Deck deck = emptyCardDeck();
+    void deckTopCardFailsWithEmptyDeck() {
+        var deck = Deck.of(SortedBag.<String>of(), new Random(2021));
         assertThrows(IllegalArgumentException.class, () -> {
             deck.topCard();
         });
     }
 
     @Test
-    void withoutTopCardFailsWithEmptyDeck(){
-        Deck deck = emptyCardDeck();
+    void deckTopCardReturnsTopCard() {
+        var card = "card";
+        var deck = Deck.of(SortedBag.of(10, card), new Random(2021));
+        assertEquals(card, deck.topCard());
+    }
+
+    @Test
+    void deckWithoutTopCardFailsWithEmptyDeck() {
+        var deck = Deck.of(SortedBag.<String>of(), new Random(2021));
         assertThrows(IllegalArgumentException.class, () -> {
             deck.withoutTopCard();
         });
     }
 
     @Test
-    void topCardsFailsWithNegativeValues(){
-        Deck deck = Deck.of(SortedBag.of(CARDS_3), new Random());
-        assertThrows(IllegalArgumentException.class, () -> {
-            deck.topCards(-1);
-        });
+    void deckWithoutTopCardRemovesTopCard() {
+        var cards = SortedBag.of(listOfSize(50));
+        var deck = Deck.of(cards, TestRandomizer.newRandom());
+        var actualCardsBuilder = new SortedBag.Builder<Integer>();
+        while (!deck.isEmpty()) {
+            actualCardsBuilder.add(deck.topCard());
+            deck = deck.withoutTopCard();
+        }
+        assertEquals(cards, actualCardsBuilder.build());
     }
 
     @Test
-    void topCardsFailsWithBiggerValues(){
-        Deck deck = Deck.of(SortedBag.of(CARDS_3), new Random());
-        assertThrows(IllegalArgumentException.class, () -> {
-            deck.topCards(deck.size() + 1);
-        });
+    void deckTopCardsFailsWithTooSmallDeck() {
+        var rng = TestRandomizer.newRandom();
+        for (int deckSize = 0; deckSize < 20; deckSize++) {
+            var deck = Deck.of(SortedBag.of(deckSize, "card"), rng);
+            var tooBigSize = deckSize + 1;
+            assertThrows(IllegalArgumentException.class, () -> {
+                deck.withoutTopCards(tooBigSize);
+            });
+        }
     }
 
     @Test
-    void withoutTopCardsFailsWithNegativeValues(){
-        Deck deck = Deck.of(SortedBag.of(CARDS_3), new Random());
-        assertThrows(IllegalArgumentException.class, () -> {
-            deck.withoutTopCards(-1);
-        });
+    void deckTopCardsReturnsTopCards() {
+        var rng = TestRandomizer.newRandom();
+        for (int deckSize = 0; deckSize < 20; deckSize++) {
+            var cards = SortedBag.of(deckSize, "card");
+            var deck = Deck.of(cards, rng);
+            assertEquals(cards, deck.topCards(deckSize));
+        }
     }
 
     @Test
-    void withoutTopCardsFailsWithBiggerValues(){
-        Deck deck = Deck.of(SortedBag.of(CARDS_3), new Random());
-        assertThrows(IllegalArgumentException.class, () -> {
-            deck.withoutTopCards(deck.size() + 1);
-        });
+    void deckWithoutTopCardsRemovesTopCards() {
+        var cards = SortedBag.of(listOfSize((1 << 8) - 1));
+        var deck = Deck.of(cards, TestRandomizer.newRandom());
+        var actualCardsBuilder = new SortedBag.Builder<Integer>();
+        for (int i = 0; i < 8; i++) {
+            var count = 1 << i; // == 2^i
+            actualCardsBuilder.add(deck.topCards(count));
+            deck = deck.withoutTopCards(count);
+        }
+        assertTrue(deck.isEmpty());
+        assertEquals(cards, actualCardsBuilder.build());
     }
 
-    // Test juste pour voir un obient bien les différentes cartes en fonction du shuffle (donc marche pas souvent)
-    @Test
-    void topCardWorkWithGoodDeck() {
-        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_3), TestRandomizer.newRandom());
-        Card card = deck.topCard();
-        assertEquals(Card.ORANGE, card);
+    private static <E extends Comparable<E>> List<E> deckToList(Deck<E> deck) {
+        var list = new ArrayList<E>(deck.size());
+        while (!deck.isEmpty()) {
+            var topCard = deck.topCard();
+            list.add(topCard);
+            deck = deck.withoutTopCard();
+        }
+        return Collections.unmodifiableList(list);
     }
 
-    // Test juste pour voir un obient bien les différentes cartes en fonction du shuffle (donc marche pas souvent)
-    @Test
-    void topCardsWithGoodDeck() {
-        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_3), TestRandomizer.newRandom());
-        SortedBag<Card> cards = deck.topCards(2);
-        SortedBag<Card> sortedBag = SortedBag.of(1, Card.ORANGE, 1, Card.RED);
-        assertEquals(sortedBag, cards);
-    }
-
-    // Test juste pour voir un obient bien les différentes cartes en fonction du shuffle (donc marche pas souvent)
-    @Test
-    void withoutTopCardWithGoodDeck() {
-        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_3), TestRandomizer.newRandom());
-        Deck<Card> cards = deck.withoutTopCard();
-        Deck<Card> expected = Deck.of(SortedBag.of(1, Card.LOCOMOTIVE, 1, Card.RED), new Random());
-        //assertEquals(expected.cards, cards.cards);
-    }
-
-    // Test juste pour voir un obient bien les différentes cartes en fonction du shuffle (donc marche pas souvent)
-    @Test
-    void withoutTopCardsWithGoodDeck() {
-        Deck<Card> deck = Deck.of(SortedBag.of(CARDS_3), TestRandomizer.newRandom());
-        Deck<Card> cards = deck.withoutTopCards(2);
-        Deck<Card> expected = Deck.of(SortedBag.of(1, Card.LOCOMOTIVE), new Random());
-        //assertEquals(expected.cards, cards.cards);
+    private static List<Integer> listOfSize(int size) {
+        var list = new ArrayList<Integer>(size);
+        for (int i = 0; i < size; i++) list.add(i);
+        return Collections.unmodifiableList(list);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

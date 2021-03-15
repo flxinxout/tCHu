@@ -36,7 +36,7 @@ public final class CardState extends PublicCardState {
      * @return l'état décrit ci-dessus
      */
     public static CardState of(Deck<Card> deck) {
-        Preconditions.checkArgument(deck.size() >= 5);
+        Preconditions.checkArgument(deck.size() >= Constants.FACE_UP_CARDS_COUNT);
         Deck<Card> newDeck = deck;
 
         List<Card> newTopCards = new ArrayList<>();

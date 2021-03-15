@@ -70,7 +70,7 @@ public class PublicPlayerState {
      * @return les routes dont le joueur s'est emparé
      */
     public List<Route> routes() {
-        return List.copyOf(routes);
+        return routes;
     }
 
     /**

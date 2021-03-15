@@ -91,7 +91,8 @@ public final class PlayerState extends PublicPlayerState {
     /**
      * Retourne un état identique au récepteur, si ce n'est que le joueur possède en plus les cartes données.
      *
-     * @param additionalCards les cartes données
+     * @param additionalCards
+     *          les cartes données
      * @return un état identique au récepteur, si ce n'est que le joueur possède en plus les cartes données
      */
     public PlayerState withAddedCards(SortedBag<Card> additionalCards) {
@@ -161,14 +162,14 @@ public final class PlayerState extends PublicPlayerState {
 
         //1. Create a set of all possible cards in our hands (minus the initial cards)
         Card initialCardType = Card.LOCOMOTIVE;
-        for (Card initialCard : initialCards) {
+        for (Card initialCard : initialCards.toSet()) {
             if (initialCard != Card.LOCOMOTIVE)
                 initialCardType = initialCard;
         }
 
         SortedBag.Builder<Card> possibleCardsBuilder = new SortedBag.Builder<>();
         for (Card card: cards) {
-            if (card == Card.LOCOMOTIVE || card == initialCardType);
+            if (card == Card.LOCOMOTIVE || card == initialCardType)
                 possibleCardsBuilder.add(card);
         }
 

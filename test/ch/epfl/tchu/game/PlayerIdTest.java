@@ -10,10 +10,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class PlayerIdTest {
 
     @Test
-    void testAllValues() {
+    void allWorks() {
         PlayerId pl1 = PlayerId.PLAYER_1;
         PlayerId pl2 = PlayerId.PLAYER_2;
         assertEquals(List.of(pl1, pl2), PlayerId.ALL);
+    }
+
+    @Test
+    void countWorks() {
+        assertEquals(2, PlayerId.COUNT);
     }
 
     @Test

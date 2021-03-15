@@ -26,6 +26,16 @@ public class PublicPlayerStateTest {
         assertEquals(40 - (3 + 5 + 4), state.carCount());
     }
 
+    @Test
+    void constructorFailsWithLessTicketsOrCards(){
+        assertThrows(IllegalArgumentException.class, () -> {
+            PublicPlayerState state = new PublicPlayerState(-3, 3, List.of());
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            PublicPlayerState state2 = new PublicPlayerState(3, -3, List.of());
+        });
+    }
+
 }
 
 

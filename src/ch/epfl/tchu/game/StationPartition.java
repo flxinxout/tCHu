@@ -38,7 +38,6 @@ public final class StationPartition implements StationConnectivity {
     public static final class Builder {
 
         private final int[] relations;
-        private final List<Station> stations;
 
         /**
          * Construit un bâtisseur de partition d'un ensemble de gares
@@ -51,24 +50,8 @@ public final class StationPartition implements StationConnectivity {
         public Builder(int stationCount) {
             Preconditions.checkArgument(stationCount >= 0);
 
-            //TODO: ASK AUX ASSISTANTS SI UTILE DE PRENDRE LA LISTE ENTIERE DES GARES PUIS
-            // VERIFIER SI LEUR INDICE EST CORRECT OU BIEN SI LA LISTE ChMap.stations() EST TJRS
-            // ECRITE AVEC LES GARES DANS LE BON ORDRE (D'INDEX) ET DONC FAIRE BOUCLE FOR NORMALE:
-            // L'AVANTAGE C'EST QUE Y A PLUS DE LISTE stations DONC CA ALLEGE LA CLASSE
-            /*relations = new int[stationCount];
+            relations = new int[stationCount];
             for (int i = 0; i < stationCount; i++) {
-                relations[i] = ChMap.stations().get(i).id();
-            }*/
-
-            stations = new ArrayList<>();
-
-            for(Station station : ChMap.stations()) {
-                if(station.id() < stationCount)
-                    stations.add(station);
-            }
-
-            relations = new int[stations.size()];
-            for (int i = 0; i < relations.length; i++) {
                 relations[i] = i;
             }
         }

@@ -84,7 +84,7 @@ public final class PlayerState extends PublicPlayerState {
      *          la carte donnée
      * @return un état identique au récepteur, si ce n'est que le joueur possède en plus la carte donnée
      */
-    public PlayerState withAddedCards(Card card) {
+    public PlayerState withAddedCard(Card card) {
         return new PlayerState(tickets, cards.union(SortedBag.of(card)), routes());
     }
 

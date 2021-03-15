@@ -21,7 +21,7 @@ public final class StationPartition implements StationConnectivity {
      *               tableau ayant comme chaque entrée la relation index:représentant
      */
     private StationPartition(int[] relations) {
-        this.relations = relations;
+        this.relations = relations.clone();
     }
 
     @Override
@@ -87,8 +87,6 @@ public final class StationPartition implements StationConnectivity {
          * @return le numéro d'identification du représentant du sous-ensemble la contenant
          */
         private int representative(int stationId) {
-            //parent is the first representative in the hierarchy
-            //relations[parent] can be seen as the grandparent
             int parent = relations[stationId];
             while(parent != relations[parent]){
                 parent = relations[parent];

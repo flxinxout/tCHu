@@ -4,68 +4,66 @@ import ch.epfl.tchu.SortedBag;
 
 import java.util.*;
 
+/**
+ * Représente l'état d'une partie de tCHu.
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ */
 public final class GameState extends PublicGameState {
 
     private final SortedBag<Ticket> tickets;
 
+    /**
+     * Constructeur d'un état de partie de tCHu.
+     */
     private GameState(SortedBag<Ticket> tickets, PublicCardState cardState, PlayerId currentPlayerId,
-                      Map<PlayerId, PublicPlayerState> playerState, PlayerId lastPlayer) {
-        super(tickets.size(), cardState, currentPlayerId, playerState, lastPlayer);
+                      Map<PlayerId, PlayerState> playerState, PlayerId lastPlayer) {
+        super(tickets.size(), cardState, currentPlayerId, makePublic(playerState), lastPlayer);
 
         this.tickets = tickets;
     }
 
+    /**
+     * Retourne l'état initial d'une partie de tCHu dans laquelle la pioche des billets contient les billets donnés.
+     * @param tickets
+     *          billets donnés
+     * @param rng
+     *          générateur aléatoire donné
+     * @return l'état initial d'une partie de tCHu
+     */
     public static GameState initial(SortedBag<Ticket> tickets, Random rng) {
 
-        // 1. The 2 players
         PlayerId firstPlayer = PlayerId.ALL.get(rng.nextInt(PlayerId.COUNT));
-        PlayerId lastPlayer = firstPlayer.next();
 
-        // 2. Create the cards in hand the 2 the players
-        Collections.shuffle(tickets.toList(), rng);
-        Deck<Card> deckOfCardForTheGame = Deck.of(Constants.ALL_CARDS, rng);
-        SortedBag<Card> the8CardsFromTheTop = deckOfCardForTheGame.topCards(8);
+        // 2. Create the cards of the deck and those in hand of the 2 players
 
-        SortedBag.Builder<Card> cardsFirst = new SortedBag.Builder<>();
-        SortedBag.Builder<Card> cardsLast = new SortedBag.Builder<>();
-        for(int i = 0; i < Constants.INITIAL_CARDS_COUNT; i++) {
-            cardsFirst.add(the8CardsFromTheTop.get(i));
-            cardsLast.add(the8CardsFromTheTop.get(i + 4));
-        }
+        Deck<Card> cardsDeck = Deck.of(Constants.ALL_CARDS, rng);
 
-        SortedBag<Card> cardsFirstPlayer = cardsFirst.build();
-        SortedBag<Card> cardsLastPlayer = cardsFirst.build();
+        SortedBag<Card> firstPlayerCards = cardsDeck.topCards(4);
+        cardsDeck = cardsDeck.withoutTopCards(4);
 
-        // 3. Create the tickets for the 2 players
-        SortedBag.Builder<Ticket> ticketsFirst = new SortedBag.Builder<>();
-        SortedBag.Builder<Ticket> ticketsLast = new SortedBag.Builder<>();
-        for(int i = 0; i < Constants.INITIAL_TICKETS_COUNT; i++) {
-            ticketsFirst.add(tickets.get(i));
-            ticketsLast.add(tickets.get(i + 5));
-        }
+        SortedBag<Card> secondPlayerCards = cardsDeck.topCards(4);
+        cardsDeck = cardsDeck.withoutTopCards(4);
 
-        SortedBag<Ticket> ticketsFirstPlayer = ticketsFirst.build();
-        SortedBag<Ticket> ticketsLastPlayer = ticketsLast.build();
+        // 4. Create the player states of the 2 players
+        PlayerState statePlayer1 = new PlayerState(SortedBag.of(), firstPlayerCards, List.of());
+        PlayerState statePlayer2 = new PlayerState(SortedBag.of(), secondPlayerCards, List.of());
 
-        // 4. Create the public part of the 2 players
-        PublicPlayerState statePlayer1 = makePublic(new PlayerState(ticketsFirstPlayer, cardsFirstPlayer, List.of()));
-        PublicPlayerState statePlayer2 = makePublic(new PlayerState(ticketsLastPlayer, cardsLastPlayer, List.of()));
-
-        Map<PlayerId, PublicPlayerState> playerStateEnumMap = new EnumMap<>(PlayerId.class);
+        Map<PlayerId, PlayerState> playerStateEnumMap = new EnumMap<>(PlayerId.class);
         playerStateEnumMap.put(firstPlayer, statePlayer1);
         playerStateEnumMap.put(lastPlayer, statePlayer2);
 
-        // 5. Create the card state of the game
-        Deck<Card> cardsWithoutThe8CardsFromTheTop = deckOfCardForTheGame.withoutTopCards(8);
+        CardState cardState = CardState.of(cardsDeck);
 
-        //TODO j'ai mis un card state dans un public card state mais est-ce juste ? comme pour le makePublic() ?
-        PublicCardState publicCardState = CardState.of(cardsWithoutThe8CardsFromTheTop);
-
-        return new GameState(tickets, publicCardState, firstPlayer, playerStateEnumMap, lastPlayer);
+        return new GameState(tickets, cardState, firstPlayer, playerStateEnumMap, lastPlayer);
     }
 
-    private static PublicPlayerState makePublic(PlayerState playerState) {
-        return new PublicPlayerState(playerState.ticketCount(), playerState.cardCount(), playerState.routes());
+    private static Map<PlayerId, PublicPlayerState>  makePublic(Map<PlayerId, PlayerState> nonPublicMap) {
+        Map<PlayerId, PublicPlayerState> publicMap = new EnumMap(PlayerId.class);
+        publicMap.putAll(nonPublicMap);
+
+        return publicMap;
     }
 
 }

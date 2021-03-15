@@ -231,7 +231,14 @@ public final class Info {
      * @return retourne le message décrit ci-dessus
      */
     public String getsLongestTrailBonus(Trail longestTrail){
-        return String.format(StringsFr.GETS_BONUS, playerName, longestTrail);
+        return String.format(StringsFr.GETS_BONUS, playerName, nameOf(longestTrail));
+    }
+
+    /**
+     * Retourne la représentation textuelle de la route donnée.
+     */
+    private static String nameOf(Trail trail){
+        return (trail.station1().name() + StringsFr.EN_DASH_SEPARATOR + trail.station2().name());
     }
 
     /**

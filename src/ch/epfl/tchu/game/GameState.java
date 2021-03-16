@@ -35,9 +35,11 @@ public final class GameState extends PublicGameState {
     public static GameState initial(SortedBag<Ticket> tickets, Random rng) {
 
         PlayerId firstPlayer = PlayerId.ALL.get(rng.nextInt(PlayerId.COUNT));
+        PlayerId secondPlayer = firstPlayer.next();
 
-        // 2. Create the cards of the deck and those in hand of the 2 players
+        Deck<Ticket> ticketsDeck = Deck.of(tickets, rng);
 
+        //Create the cards of the deck and those in hand of the 2 players
         Deck<Card> cardsDeck = Deck.of(Constants.ALL_CARDS, rng);
 
         SortedBag<Card> firstPlayerCards = cardsDeck.topCards(4);
@@ -46,19 +48,17 @@ public final class GameState extends PublicGameState {
         SortedBag<Card> secondPlayerCards = cardsDeck.topCards(4);
         cardsDeck = cardsDeck.withoutTopCards(4);
 
-        // 4. Create the player states of the 2 players
-        PlayerState statePlayer1 = new PlayerState(SortedBag.of(), firstPlayerCards, List.of());
-        PlayerState statePlayer2 = new PlayerState(SortedBag.of(), secondPlayerCards, List.of());
+        //Create the player states of the 2 players
+        PlayerState statePlayer1 = PlayerState.initial(firstPlayerCards);
+        PlayerState statePlayer2 = PlayerState.initial(secondPlayerCards);
 
-        //5. Deck of tickets
-        Deck<Ticket> ticketsDeck = Deck.of(tickets, rng);
-
-        Map<PlayerId, PlayerState> playerStateEnumMap = new EnumMap<>(PlayerId.class);
-        playerStateEnumMap.put(firstPlayer, statePlayer1);
+        Map<PlayerId, PlayerState> playerState = new EnumMap<>(PlayerId.class);
+        playerState.put(firstPlayer, statePlayer1);
+        playerState.put(secondPlayer, statePlayer2);
 
         CardState cardState = CardState.of(cardsDeck);
 
-        return new GameState(ticketsDeck, cardState, firstPlayer, playerStateEnumMap, null);
+        return new GameState(ticketsDeck, cardState, firstPlayer, playerState, null);
     }
 
     private static Map<PlayerId, PublicPlayerState>  makePublic(Map<PlayerId, PlayerState> nonPublicMap) {
@@ -68,4 +68,26 @@ public final class GameState extends PublicGameState {
         return publicMap;
     }
 
+    /**
+     * Retourne l'état complet du joueur d'identité donnée.
+     *
+     * @param playerId
+     *          le joueur donné
+     * @return l'état complet du joueur d'identité donnée
+     */
+    @Override
+    public PlayerState playerState(PlayerId playerId) {
+        //TODO: cast???
+        return (PlayerState) super.playerState(playerId);
+    }
+
+    /**
+     * Retourne l'état complet du joueur courant.
+     * @return Retourne l'état complet du joueur courant
+     */
+    @Override
+    public PlayerState currentPlayerState() {
+        //TODO: cast???
+        return (PlayerState) super.currentPlayerState();
+    }
 }

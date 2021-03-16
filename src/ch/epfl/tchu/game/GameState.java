@@ -12,12 +12,12 @@ import java.util.*;
  */
 public final class GameState extends PublicGameState {
 
-    private final SortedBag<Ticket> tickets;
+    private final Deck<Ticket> tickets;
 
     /**
      * Constructeur d'un état de partie de tCHu.
      */
-    private GameState(SortedBag<Ticket> tickets, PublicCardState cardState, PlayerId currentPlayerId,
+    private GameState(Deck<Ticket> tickets, PublicCardState cardState, PlayerId currentPlayerId,
                       Map<PlayerId, PlayerState> playerState, PlayerId lastPlayer) {
         super(tickets.size(), cardState, currentPlayerId, makePublic(playerState), lastPlayer);
 
@@ -50,13 +50,15 @@ public final class GameState extends PublicGameState {
         PlayerState statePlayer1 = new PlayerState(SortedBag.of(), firstPlayerCards, List.of());
         PlayerState statePlayer2 = new PlayerState(SortedBag.of(), secondPlayerCards, List.of());
 
+        //5. Deck of tickets
+        Deck<Ticket> ticketsDeck = Deck.of(tickets, rng);
+
         Map<PlayerId, PlayerState> playerStateEnumMap = new EnumMap<>(PlayerId.class);
         playerStateEnumMap.put(firstPlayer, statePlayer1);
-        playerStateEnumMap.put(lastPlayer, statePlayer2);
 
         CardState cardState = CardState.of(cardsDeck);
 
-        return new GameState(tickets, cardState, firstPlayer, playerStateEnumMap, lastPlayer);
+        return new GameState(ticketsDeck, cardState, firstPlayer, playerStateEnumMap, null);
     }
 
     private static Map<PlayerId, PublicPlayerState>  makePublic(Map<PlayerId, PlayerState> nonPublicMap) {

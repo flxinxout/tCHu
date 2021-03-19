@@ -119,7 +119,6 @@ public class PublicGameState {
             routes.addAll(playerStateEntry.getValue().routes());
         }
 
-        //TODO: bien la copie?
         return List.copyOf(routes);
     }
 

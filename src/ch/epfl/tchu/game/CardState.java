@@ -112,9 +112,9 @@ public final class CardState extends PublicCardState {
     }
 
     /**
-     * Retourne un ensemble de cartes identique au récepteur ({@code this),
+     * Retourne un ensemble de cartes identique au récepteur ({@code this}),
      * mais avec les cartes données ajoutées à la défausse.
-     * @return un ensemble de cartes identique au récepteur ({@code this),
+     * @return un ensemble de cartes identique au récepteur ({@code this}),
      * mais avec les cartes données ajoutées à la défausse
      */
     public CardState withMoreDiscardedCards(SortedBag<Card> additionalDiscards) {

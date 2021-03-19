@@ -31,9 +31,9 @@ public class PublicGameState {
      * @param currentPlayerId
      *              le joueur courant (non null)
      * @param playerState
-     *              l'état public des joueurs
+     *              l'état public des joueurs (non null)
      * @param lastPlayer
-     *              l'identité du dernier joueur
+     *              l'identité du dernier joueur (peut être null)
      * @throws IllegalArgumentException
      *              si la taille de la pioche de billets est strictement négative ou
      *              si playerState ne contient pas exactement deux paires clef/valeur
@@ -115,8 +115,8 @@ public class PublicGameState {
      */
     public List<Route> claimedRoutes() {
         List<Route> routes = new ArrayList<>();
-        for(Map.Entry<PlayerId, PublicPlayerState> playerStateEntry : playerState.entrySet()) {
-            routes.addAll(playerStateEntry.getValue().routes());
+        for(PublicPlayerState ps : playerState.values()) {
+            routes.addAll(ps.routes());
         }
 
         return List.copyOf(routes);
@@ -129,5 +129,4 @@ public class PublicGameState {
     public PlayerId lastPlayer() {
         return lastPlayer;
     }
-
 }

@@ -25,31 +25,25 @@ public final class GameState extends PublicGameState {
         super(tickets.size(), cardState, currentPlayerId, Map.copyOf(playerState), lastPlayer);
 
         this.tickets = tickets;
-        this.playerState = Map.copyOf(playerState);
-        this.cardState = cardState;
+        this.playerState = Map.copyOf(Objects.requireNonNull(playerState));
+        this.cardState = Objects.requireNonNull(cardState);
     }
 
     /**
      * Retourne l'état initial d'une partie de tCHu dans laquelle la pioche des billets contient les billets donnés
-     * et la pioche des cartes contient les cartes de Constants.ALL_CARDS, sans les 8 (2×4) du dessus, distribuées
-     * aux joueurs ; ces pioches sont mélangées au moyen du générateur aléatoire donné, qui est aussi utilisé pour
-     * choisir au hasard l'identité du premier joueur.
+     * et la pioche des cartes contient toutes les cartes du jeu, sans les 8 (2×4) du dessus, distribuées
+     * aux joueurs;
      *
      * @param tickets
      *          billets donnés
      * @param rng
      *          générateur aléatoire donné
-     *
      * @return l'état initial d'une partie de tCHu.
      */
     public static GameState initial(SortedBag<Ticket> tickets, Random rng) {
 
-        PlayerId firstPlayer = PlayerId.ALL.get(rng.nextInt(PlayerId.COUNT));
-        PlayerId secondPlayer = firstPlayer.next();
-
         Deck<Ticket> ticketsDeck = Deck.of(tickets, rng);
 
-        //Create the cards of the deck and those in hand of the 2 players
         Deck<Card> cardsDeck = Deck.of(Constants.ALL_CARDS, rng);
 
         SortedBag<Card> firstPlayerCards = cardsDeck.topCards(4);
@@ -57,6 +51,11 @@ public final class GameState extends PublicGameState {
 
         SortedBag<Card> secondPlayerCards = cardsDeck.topCards(4);
         cardsDeck = cardsDeck.withoutTopCards(4);
+
+        CardState cardState = CardState.of(cardsDeck);
+
+        PlayerId firstPlayer = PlayerId.ALL.get(rng.nextInt(PlayerId.COUNT));
+        PlayerId secondPlayer = firstPlayer.next();
 
         //Create the player states of the 2 players
         PlayerState statePlayer1 = PlayerState.initial(firstPlayerCards);
@@ -66,13 +65,11 @@ public final class GameState extends PublicGameState {
         playerState.put(firstPlayer, statePlayer1);
         playerState.put(secondPlayer, statePlayer2);
 
-        CardState cardState = CardState.of(cardsDeck);
-
         return new GameState(ticketsDeck, cardState, firstPlayer, playerState, null);
     }
 
     /**
-     * Converti une map avec des PlayerState comme valeur en une map avec des PublicPlayerState en valeur.
+     * Convertit une map avec des PlayerState comme valeur en une map avec des PublicPlayerState en valeur.
      * @param nonPublicMap
      *              la map avec les PlayerState comme valeur
      * @return la nouvelle map avec la conversion effectuée.
@@ -89,7 +86,7 @@ public final class GameState extends PublicGameState {
      *
      * @param playerId
      *          le joueur donné
-     * @return l'état complet du joueur d'identité donnée.
+     * @return l'état complet du joueur d'identité donnée
      */
     @Override
     public PlayerState playerState(PlayerId playerId) { return playerState.get(playerId); }
@@ -107,10 +104,9 @@ public final class GameState extends PublicGameState {
      *          le nombre de billets retournés du sommet de la pioche
      * @throws IllegalArgumentException
      *         si {@code count} n'est pas compris entre 0 et la taille de la pioche (inclus)
-     * @return le nombre de billets retournés du sommet de la pioche.
+     * @return le nombre de billets retournés du sommet de la pioche
      */
     public SortedBag<Ticket> topTickets(int count){
-        Preconditions.checkArgument(count >= 0 && count <= ticketsCount());
         return tickets.topCards(count);
     }
 
@@ -120,21 +116,19 @@ public final class GameState extends PublicGameState {
      *          le nombre de cartes enlevées du sommet de la pioche
      * @throws IllegalArgumentException
      *          si {@code count} n'est pas compris entre 0 et la taille de la pioche (inclus)
-     * @return un état identique au récepteur, mais sans les {@code count} billets du sommet de la pioche.
+     * @return un état identique au récepteur, mais sans les {@code count} billets du sommet de la pioche
      */
     public GameState withoutTopTickets(int count){
-        Preconditions.checkArgument(count >= 0 && count <= ticketsCount());
-        return new GameState(tickets.withoutTopCards(count), this.cardState, currentPlayerId(), playerState, lastPlayer());
+        return new GameState(tickets.withoutTopCards(count), cardState, currentPlayerId(), playerState, lastPlayer());
     }
 
     /**
      * Retourne la carte au sommet de la pioche.
      * @throws IllegalArgumentException
      *              si la pioche est vide
-     * @return la carte au sommet de la pioche.
+     * @return la carte au sommet de la pioche
      */
     public Card topCard() {
-        Preconditions.checkArgument(!cardState().isDeckEmpty());
         return cardState.topDeckCard();
     }
 
@@ -142,10 +136,9 @@ public final class GameState extends PublicGameState {
      * Retourne un état identique au récepteur mais sans la carte au sommet de la pioche.
      * @throws IllegalArgumentException
      *              si la pioche est vide
-     * @return un état identique au récepteur mais sans la carte au sommet de la pioche.
+     * @return un état identique au récepteur mais sans la carte au sommet de la pioche
      */
     public GameState withoutTopCard(){
-        Preconditions.checkArgument(!cardState().isDeckEmpty());
         return new GameState(tickets, cardState.withoutTopDeckCard(), currentPlayerId(), playerState, lastPlayer());
     }
 
@@ -165,12 +158,11 @@ public final class GameState extends PublicGameState {
      * @param rng
      *          le générateur aléatoire pour le mélange des cartes.
      * @return un état identique au récepteur sauf si la pioche de cartes est vide, auquel cas elle est recréée
-     * à partir de la défausse, mélangée au moyen du générateur aléatoire donné {@code rng}.
+     * à partir de la défausse
      */
     public GameState withCardsDeckRecreatedIfNeeded(Random rng){
-        if (this.cardState.isDeckEmpty()) {
+        if (cardState.isDeckEmpty())
             return new GameState(tickets, cardState.withDeckRecreatedFromDiscards(rng), currentPlayerId(), playerState, lastPlayer());
-        }
 
         return new GameState(tickets, cardState, currentPlayerId(), playerState, lastPlayer());
     }
@@ -179,30 +171,21 @@ public final class GameState extends PublicGameState {
      * Retourne un état identique au récepteur mais dans lequel les billets donnés {@code chosenTickets} ont été
      * ajoutés à la main du joueur donné {@code playerId}.
      * @param playerId
-     *              le joueur auquel on lui a ajouté des billets
+     *              le joueur auquel on a ajouté des billets
      * @param chosenTickets
-     *              les billets ajoutés au joueur
+     *              les billets ajoutés
      * @throws IllegalArgumentException
      *              si le joueur en question possède déjà au moins un billet
-     *
-     * @implNote cette méthode ne doit pas modifier la pioche de billets ! En effet, les 5 billets distribués
-     * initialement aux joueurs auront déjà été extraits préalablement de la pioche au moyen de la méthode
-     * withoutTopTickets, et le seul but de withInitiallyChosenTickets est de modifier l'état du joueur pour y
-     * stocker le sous-ensemble de ces 5 billets qu'il a choisi de garder.
-     *
-     * @see GameState#withoutTopTickets(int)
-     * @see GameState#withInitiallyChosenTickets(PlayerId, SortedBag)
-     *
      * @return un état identique au récepteur mais dans lequel les billets donnés {@code chosenTickets} ont été
-     * ajoutés à la main du joueur donné {@code playerId}.
+     * ajoutés à la main du joueur donné {@code playerId}
      */
     public GameState withInitiallyChosenTickets(PlayerId playerId, SortedBag<Ticket> chosenTickets){
         Preconditions.checkArgument(playerState(playerId).tickets().size() == 0);
 
-        Map<PlayerId, PlayerState> playerState = new EnumMap<>(this.playerState);
-        playerState.put(playerId, playerState(playerId).withAddedTickets(chosenTickets));
+        Map<PlayerId, PlayerState> newPlayerState = new EnumMap<>(this.playerState);
+        newPlayerState.put(playerId, playerState(playerId).withAddedTickets(chosenTickets));
 
-        return new GameState(tickets, this.cardState, currentPlayerId(), playerState, lastPlayer());
+        return new GameState(tickets, cardState, currentPlayerId(), newPlayerState, lastPlayer());
     }
 
     /**
@@ -220,10 +203,10 @@ public final class GameState extends PublicGameState {
     public GameState withChosenAdditionalTickets(SortedBag<Ticket> drawnTickets, SortedBag<Ticket> chosenTickets){
         Preconditions.checkArgument(drawnTickets.contains(chosenTickets));
 
-        Map<PlayerId, PlayerState> playerState = new EnumMap<>(this.playerState);
-        playerState.put(currentPlayerId(), currentPlayerState().withAddedTickets(chosenTickets));
+        Map<PlayerId, PlayerState> newPlayerState = new EnumMap<>(this.playerState);
+        newPlayerState.put(currentPlayerId(), currentPlayerState().withAddedTickets(chosenTickets));
 
-        return new GameState(tickets.withoutTopCards(drawnTickets.size()), this.cardState, currentPlayerId(), playerState, lastPlayer());
+        return new GameState(tickets.withoutTopCards(drawnTickets.size()), cardState, currentPlayerId(), newPlayerState, lastPlayer());
     }
 
     /**
@@ -232,12 +215,10 @@ public final class GameState extends PublicGameState {
      * @param slot
      *          l'emplacement de la carte qui a été placée dans la main du joueur courant
      * @throws IllegalArgumentException
-     *          s'il n'est pas possible de tirer des cartes, c-à-d si canDrawCards retourne faux
-     *
-     * @see GameState#canDrawCards()
-     *
+     *          s'il n'est pas possible de tirer des cartes, c-à-d si {@code canDrawCards} retourne faux
      * @return un état identique au récepteur si ce n'est que la carte face retournée à l'emplacement donné {@code slot}
-     * a été placée dans la main du joueur courant, et remplacée par celle au sommet de la pioche.
+     * a été placée dans la main du joueur courant, et remplacée par celle au sommet de la pioche
+     * @see GameState#canDrawCards()
      */
     public GameState withDrawnFaceUpCard(int slot){
         Preconditions.checkArgument(canDrawCards());
@@ -254,21 +235,18 @@ public final class GameState extends PublicGameState {
      * Retourne un état identique au récepteur si ce n'est que la carte du sommet de la pioche a été placée
      * dans la main du joueur courant.
      * @throws IllegalArgumentException
-     *          s'il n'est pas possible de tirer des cartes, c-à-d si canDrawCards retourne faux
-     * @see GameState#canDrawCards()
-     *
+     *          s'il n'est pas possible de tirer des cartes, c-à-d si {@code canDrawCards} retourne faux
      * @return  un état identique au récepteur si ce n'est que la carte du sommet de la pioche a été placée dans
      * la main du joueur courant
+     * @see GameState#canDrawCards()
      */
     public GameState withBlindlyDrawnCard(){
         Preconditions.checkArgument(canDrawCards());
 
-        CardState cardState = (CardState) cardState();
+        Map<PlayerId, PlayerState> newPlayerState = new EnumMap<>(playerState);
+        newPlayerState.put(currentPlayerId(), currentPlayerState().withAddedCard(cardState.topDeckCard()));
 
-        Map<PlayerId, PlayerState> playerState = new EnumMap<>(this.playerState);
-        playerState.put(currentPlayerId(), currentPlayerState().withAddedCard(cardState.topDeckCard()));
-
-        return new GameState(tickets, cardState.withoutTopDeckCard(), currentPlayerId(), playerState, lastPlayer());
+        return new GameState(tickets, cardState.withoutTopDeckCard(), currentPlayerId(), newPlayerState, lastPlayer());
     }
 
     /**
@@ -278,8 +256,8 @@ public final class GameState extends PublicGameState {
      *          la route dont le joueur s'est emparé
      * @param cards
      *          les cartes utilisées pour s'emparer de la route
-     * @return n état identique au récepteur mais dans lequel le joueur courant s'est emparé de la route {@code route}
-     * donnée au moyen des cartes données {@code cards}.
+     * @return un état identique au récepteur mais dans lequel le joueur courant s'est emparé de la route {@code route}
+     * donnée au moyen des cartes données {@code cards}
      */
     public GameState withClaimedRoute(Route route, SortedBag<Card> cards){
         Map<PlayerId, PlayerState> playerState = new EnumMap<>(this.playerState);
@@ -290,9 +268,9 @@ public final class GameState extends PublicGameState {
 
     /**
      * Retourne vrai ssi le dernier tour commence, c-à-d si l'identité du dernier joueur est actuellement inconnue
-     * mais que le joueur courant n'a plus que deux wagons ou moins ; cette méthode doit être appelée uniquement à
+     * mais que le joueur courant n'a plus que deux wagons ou moins; cette méthode doit être appelée uniquement à
      * la fin du tour d'un joueur.
-     * @return vrai/faux en fonction des arguments ci-dessus.
+     * @return vrai ou faux selon la description ci-dessus
      */
     public boolean lastTurnBegins(){
         return lastPlayer() == null && currentPlayerState().carCount() <= 2;
@@ -300,18 +278,15 @@ public final class GameState extends PublicGameState {
 
     /**
      * Termine le tour du joueur courant, c-à-d retourne un état identique au récepteur si ce n'est que le joueur
-     * courant est celui qui suit le joueur courant actuel ; de plus, si lastTurnBegins retourne vrai, le joueur
+     * courant est celui qui suit le joueur courant actuel; de plus, si {@code lastTurnBegins()} retourne vrai, le joueur
      * courant actuel devient le dernier joueur.
      * 
-     * @return un état identique au récepteur si ce n'est que le joueur
-     * courant est celui qui suit le joueur courant actuel ; de plus, si lastTurnBegins retourne vrai, le joueur
-     * courant actuel devient le dernier joueur.
+     * @return un état identique au récepteur si ce n'est que le joueur le tour des joueurs a été inversé
+     * @see GameState#lastTurnBegins()
      */
     public GameState forNextTurn(){
-        PlayerId lastPlayer = null;
-        if (lastTurnBegins())
-            lastPlayer = currentPlayerId();
+        PlayerId lastPlayer = lastTurnBegins() ? currentPlayerId() : null;
 
-        return new GameState(tickets, this.cardState, currentPlayerId().next(), playerState, lastPlayer);
+        return new GameState(tickets, cardState, currentPlayerId().next(), playerState, lastPlayer);
     }
 }

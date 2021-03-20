@@ -24,12 +24,11 @@ public interface Player {
     void initPlayers(PlayerId ownId, Map<PlayerId, String> playerNames);
 
     /**
-     * Appelée chaque fois qu'une information doit être communiquée au joueur au cours de la partie ; cette information
+     * Appelée chaque fois qu'une information doit être communiquée au joueur au cours de la partie; cette information
      * est donnée sous la forme d'une chaîne de caractères {@code info}, généralement produite par la classe Info.
      * @param info
      *          l'information qui doit être communiquée
      * @see ch.epfl.tchu.gui.Info
-     *
      */
     void receiveInfo(String info);
 
@@ -55,7 +54,6 @@ public interface Player {
      * (via la méthode précédente) il garde.
      *
      * @see Player#setInitialTicketChoice(SortedBag)
-     *
      * @return les billets que le joueur qu'on lui a donné initialement.
      */
     SortedBag<Ticket> chooseInitialTickets();
@@ -70,31 +68,31 @@ public interface Player {
      * Appelée lorsque le joueur a décidé de tirer des billets supplémentaires en cours de partie, afin de lui
      * communiquer les billets tirés et de savoir lesquels il garde.
      * @param options
-     *              les billets supplémentaires
-     * @return les billets gardés. //TODO BILLET GARDE ? jai pas compris
+     *              les billets tirés
+     * @return les billets gardés
      */
     SortedBag<Ticket> chooseTickets(SortedBag<Ticket> options);
 
     /**
      * Appelée lorsque le joueur a décidé de tirer des cartes wagon/locomotive, afin de savoir d'où il désire les
-     * tirer : d'un des emplacements contenant une carte face visible — auquel cas la valeur retourne est comprise
-     * entre 0 et 4 inclus —, ou de la pioche — auquel cas la valeur retournée vaut Constants.DECK_SLOT (c-à-d -1).
+     * tirer: d'un des emplacements contenant une carte face visible — auquel cas la valeur retournée est comprise
+     * entre 0 et 4 inclus —, ou de la pioche — auquel cas la valeur retournée vaut Constants.DECK_SLOT (c-à-d -1).
      *
-     * @return entre 0 et 4 inclu:= si le joueur tire des cartes faces visibles / Constants.DECK_SLOT (-1) si c'est
-     * dans la pioche.
+     * @return entre 0 et 4 inclus:= si le joueur tire des cartes faces visibles / Constants.DECK_SLOT (-1) si c'est
+     * dans la pioche
      */
     int drawSlot();
 
     /**
      *  Appelée lorsque le joueur a décidé de (tenter de) s'emparer d'une route, afin de savoir de quelle route
      *  il s'agit.
-     * @return la route dont le joueur tente de s'emparer.
+     * @return la route dont le joueur tente de s'emparer
      */
     Route claimedRoute();
 
     /**
      * Appelée lorsque le joueur a décidé de (tenter de) s'emparer d'une route, afin de savoir quelle(s) carte(s)
-     * il désire initialement utiliser pour cela
+     * il désire initialement utiliser pour cela.
      * @return les cartes que le joueur veut utiliser pour s'emparer d'une route
      */
     SortedBag<Card> initialClaimCards();
@@ -102,12 +100,11 @@ public interface Player {
     /**
      * Appelée lorsque le joueur a décidé de tenter de s'emparer d'un tunnel et que des cartes additionnelles
      * sont nécessaires, afin de savoir quelle(s) carte(s) il désire utiliser pour cela, les possibilités lui
-     * étant passées en argument ; si le multiensemble retourné est vide, cela signifie que le joueur ne désire
+     * étant passées en argument; si le multiensemble retourné est vide, cela signifie que le joueur ne désire
      * pas (ou ne peut pas) choisir l'une de ces possibilités.
      *
      * @param options
      *              les possibilités de cartes pour s'emparer d'un tunnel
-     *
      * @return un multiensemble vide si le joueur ne désire pas (ou ne peut pas) choisir l'une de ces possibilités.
      */
     SortedBag<Card> chooseAdditionalCards(List<SortedBag<Card>> options);
@@ -122,7 +119,7 @@ public interface Player {
         CLAIM_ROUTE;
 
         /**
-         * Liste contenant tous les différentes action d'un tour de jeu.
+         * Liste contenant toutes les différentes actions d'un tour de jeu.
          */
         public static final List<TurnKind> ALL = List.of(values());
 

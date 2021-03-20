@@ -44,7 +44,7 @@ public class PublicGameState {
 
         this.cardState = Objects.requireNonNull(cardState);
         this.currentPlayerId = Objects.requireNonNull(currentPlayerId);
-        this.playerState = Map.copyOf(Objects.requireNonNull(playerState));
+        this.playerState = Map.copyOf(playerState);
         this.ticketsCount = ticketsCount;
         this.lastPlayer = lastPlayer;
     }

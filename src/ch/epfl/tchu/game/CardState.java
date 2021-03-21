@@ -120,6 +120,7 @@ public final class CardState extends PublicCardState {
     public CardState withMoreDiscardedCards(SortedBag<Card> additionalDiscards) {
         return new CardState(faceUpCards(), deck, discards.union(additionalDiscards));
     }
+
 }
 
 

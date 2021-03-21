@@ -32,7 +32,7 @@ public final class GameState extends PublicGameState {
     /**
      * Retourne l'état initial d'une partie de tCHu dans laquelle la pioche des billets contient les billets donnés
      * et la pioche des cartes contient toutes les cartes du jeu, sans les 8 (2×4) du dessus, distribuées
-     * aux joueurs;
+     * aux joueurs.
      *
      * @param tickets
      *          billets donnés
@@ -45,7 +45,7 @@ public final class GameState extends PublicGameState {
         Deck<Card> cardsDeck = Deck.of(Constants.ALL_CARDS, rng);
 
         Map<PlayerId, PlayerState> playerState = new EnumMap<>(PlayerId.class);
-        for (PlayerId playerId: PlayerId.ALL) {
+        for (PlayerId playerId : PlayerId.ALL) {
             playerState.put(playerId, PlayerState.initial(cardsDeck.topCards(4)));
             cardsDeck = cardsDeck.withoutTopCards(4);
         }

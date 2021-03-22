@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Représente un joueur de tCHu
+ * Représente un joueur de tCHu.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
@@ -122,7 +122,6 @@ public interface Player {
          * Liste contenant toutes les différentes actions d'un tour de jeu.
          */
         public static final List<TurnKind> ALL = List.of(values());
-
     }
 
 }

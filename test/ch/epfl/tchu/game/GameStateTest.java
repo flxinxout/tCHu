@@ -30,47 +30,38 @@ public class GameStateTest {
     //PlayerState playerState1 = new PlayerState()
 
     @Test
-    void failTopTicket() {
+    void topTicketFailsWithNegativeCount() {
         assertThrows(IllegalArgumentException.class, () -> {
             gameState.topTickets(-1);
         });
     }
 
     @Test
-    void failTopTicket2() {
+    void TopTicketFailsWithTooBigCount() {
         assertThrows(IllegalArgumentException.class, () -> {
             gameState.topTickets(3);
         });
     }
 
     @Test
-    void failWithoutTopTickets() {
+    void withoutTopTicketsFailsWithNegativeCount() {
         assertThrows(IllegalArgumentException.class, () -> {
             gameState.withoutTopTickets(-1);
         });
     }
 
     @Test
-    void failWithoutTopTickets2() {
+    void withoutTopTicketsFailsWithTooBigCount() {
         assertThrows(IllegalArgumentException.class, () -> {
-            gameState.withoutTopTickets(3);
+            gameState.withoutTopTickets(5);
         });
     }
 
     @Test
-    void failTopCard() {
+    void topCardFails() {
         assertThrows(IllegalArgumentException.class, () -> {
             gameState.withoutTopTickets(3);
         });
-    }
-
-    @Test
-    void initialWorks() {
-        //TODO BUG
-        System.out.println("cards randomizer: " + Deck.of(Constants.ALL_CARDS, r).topCards(8));
-        System.out.println("current player id: " + gameState.currentPlayerId());
-        System.out.println("cards of player 1: " + gameState.playerState(gameState.currentPlayerId()).cards().toString());
-        System.out.println("cards of the other player: " + gameState.playerState(gameState.currentPlayerId().next()).cards().toString());
     }
 
     @Test
@@ -85,7 +76,7 @@ public class GameStateTest {
     void withCardsDeckRecreatedIfNeededWorksWithNonEmptyDeck() {
         CardState cardState = (CardState) gameState.withCardsDeckRecreatedIfNeeded(r).cardState();
         // Test with a getter now removed
-       // assertEquals(SortedBag.of().toString(), cardState.getDiscards().toString());
+        // assertEquals(SortedBag.of().toString(), cardState.getDiscards().toString());
     }
 
    /* @Test
@@ -100,15 +91,23 @@ public class GameStateTest {
         assertEquals(1, cardState2.getDeck().size());
     }*/
 
-    
+    @Test
+    void withChosenAdditionalTicketsFailsWithNonContainigTickets(){
+        SortedBag<Ticket> drawnTickets = SortedBag.of(List.of(
+                new Ticket(s1, s2, 2),
+                new Ticket(s3, s4, 3),
+                new Ticket(s5, s6, 4),
+                new Ticket(s2, s6, 8)));
 
+        SortedBag<Ticket> chosenTickets = SortedBag.of(List.of(
+                new Ticket(s1, s2, 2),
+                new Ticket(s2, s6, 8)));
 
-
+        assertThrows(IllegalArgumentException.class, () -> {
+            gameState.withChosenAdditionalTickets(chosenTickets, drawnTickets);
+        });
+    }
 }
-
-
-
-
 
 
 

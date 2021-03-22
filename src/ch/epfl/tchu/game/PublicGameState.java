@@ -114,6 +114,7 @@ public class PublicGameState {
      * @return la totalité des routes dont l'un ou l'autre des joueurs s'est emparé
      */
     public List<Route> claimedRoutes() {
+        //TODO: stream?
         List<Route> routes = new ArrayList<>();
         for(PublicPlayerState ps : playerState.values()) {
             routes.addAll(ps.routes());

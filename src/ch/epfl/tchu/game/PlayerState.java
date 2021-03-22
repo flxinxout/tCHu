@@ -3,10 +3,7 @@ package ch.epfl.tchu.game;
 import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Représente l'état complet d'un joueur.
@@ -156,7 +153,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return la liste de cartes mentionnée
      */
     public List<SortedBag<Card>> possibleAdditionalCards(int additionalCardsCount, SortedBag<Card> initialCards, SortedBag<Card> drawnCards) {
-        Preconditions.checkArgument(additionalCardsCount > 0 && additionalCardsCount <= Constants.ADDITIONAL_TUNNEL_CARDS);
+        Preconditions.checkArgument(additionalCardsCount >= 1 && additionalCardsCount <= Constants.ADDITIONAL_TUNNEL_CARDS);
         Preconditions.checkArgument(!initialCards.isEmpty() && initialCards.toSet().size() <= 2);
         Preconditions.checkArgument(drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
 
@@ -176,7 +173,9 @@ public final class PlayerState extends PublicPlayerState {
         SortedBag<Card> possibleCardsInHand = possibleCardsBuilder.build().difference(initialCards);
 
         //2. Create all possible subsets and put it in a list
-        Set<SortedBag<Card>> optionsSet = possibleCardsInHand.subsetsOfSize(additionalCardsCount);
+        Set<SortedBag<Card>> optionsSet = new HashSet<>();
+        if (possibleCardsInHand.size() >= additionalCardsCount)
+            optionsSet = possibleCardsInHand.subsetsOfSize(additionalCardsCount);
         List<SortedBag<Card>> optionsList = new ArrayList<>(optionsSet);
 
         //3. Sort the list
@@ -211,12 +210,17 @@ public final class PlayerState extends PublicPlayerState {
      */
     public int ticketPoints(){
         int maxIndex = 0;
+        //TODO: stream?
         for (Route route: routes()) {
-            maxIndex = route.station1().id() > maxIndex ? route.station1().id() : maxIndex;
-            maxIndex = route.station2().id() > maxIndex ? route.station2().id() : maxIndex;
+            maxIndex = Math.max(maxIndex, route.station1().id());
+            maxIndex = Math.max(maxIndex, route.station2().id());
         }
 
         StationPartition.Builder connectivityBuilder = new StationPartition.Builder(maxIndex + 1);
+        //TODO: stream?
+        for (Route route: routes()) {
+            connectivityBuilder.connect(route.station1(), route.station2());
+        }
         StationPartition connectivity = connectivityBuilder.build();
 
         int points = 0;

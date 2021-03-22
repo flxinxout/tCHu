@@ -24,9 +24,9 @@ public final class GameState extends PublicGameState {
                       Map<PlayerId, PlayerState> playerState, PlayerId lastPlayer) {
         super(tickets.size(), cardState, currentPlayerId, Map.copyOf(playerState), lastPlayer);
 
-        this.tickets = tickets;
-        this.playerState = Map.copyOf(Objects.requireNonNull(playerState));
+        this.playerState = Map.copyOf(playerState);
         this.cardState = Objects.requireNonNull(cardState);
+        this.tickets = tickets;
     }
 
     /**
@@ -58,23 +58,10 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * Convertit une map avec des PlayerState comme valeur en une map avec des PublicPlayerState en valeur.
-     * @param nonPublicMap
-     *              la map avec les PlayerState comme valeur
-     * @return la nouvelle map avec la conversion effectuée.
-     */
-    private static Map<PlayerId, PublicPlayerState> makePublic(Map<PlayerId, PlayerState> nonPublicMap) {
-        Map<PlayerId, PublicPlayerState> publicMap = new EnumMap(PlayerId.class);
-        publicMap.putAll(nonPublicMap);
-
-        return publicMap;
-    }
-
-    /**
      * Retourne l'état complet du joueur d'identité donnée.
      *
      * @param playerId
-     *          le joueur donné
+     *          le joueur d'identité donnée
      * @return l'état complet du joueur d'identité donnée
      */
     @Override
@@ -152,8 +139,8 @@ public final class GameState extends PublicGameState {
     public GameState withCardsDeckRecreatedIfNeeded(Random rng){
         if (cardState.isDeckEmpty())
             return new GameState(tickets, cardState.withDeckRecreatedFromDiscards(rng), currentPlayerId(), playerState, lastPlayer());
-
-        return new GameState(tickets, cardState, currentPlayerId(), playerState, lastPlayer());
+        else
+            return new GameState(tickets, cardState, currentPlayerId(), playerState, lastPlayer());
     }
 
     /**
@@ -250,7 +237,7 @@ public final class GameState extends PublicGameState {
         Map<PlayerId, PlayerState> newPlayerState = new EnumMap<>(playerState);
         newPlayerState.put(currentPlayerId(), currentPlayerState().withClaimedRoute(route, cards));
 
-        return new GameState(tickets, this.cardState, currentPlayerId(), newPlayerState, lastPlayer());
+        return new GameState(tickets, cardState.withMoreDiscardedCards(cards), currentPlayerId(), newPlayerState, lastPlayer());
     }
 
     /**
@@ -272,7 +259,7 @@ public final class GameState extends PublicGameState {
      * @see GameState#lastTurnBegins()
      */
     public GameState forNextTurn(){
-        PlayerId lastPlayer = lastTurnBegins() ? currentPlayerId() : null;
+        PlayerId lastPlayer = lastTurnBegins() ? currentPlayerId() : lastPlayer();
 
         return new GameState(tickets, cardState, currentPlayerId().next(), playerState, lastPlayer);
     }

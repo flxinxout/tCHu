@@ -68,8 +68,7 @@ public final class GameState extends PublicGameState {
     public PlayerState playerState(PlayerId playerId) { return playerState.get(playerId); }
 
     /**
-     * Retourne l'état complet du joueur courant.
-     * @return Retourne l'état complet du joueur courant.
+     * @return l'état complet du joueur courant
      */
     @Override
     public PlayerState currentPlayerState() { return playerState.get(currentPlayerId()); }
@@ -83,6 +82,7 @@ public final class GameState extends PublicGameState {
      * @return le nombre de billets retournés du sommet de la pioche
      */
     public SortedBag<Ticket> topTickets(int count){
+        Preconditions.checkArgument(count >= 0 && count <= cardState().deckSize());
         return tickets.topCards(count);
     }
 
@@ -95,6 +95,7 @@ public final class GameState extends PublicGameState {
      * @return un état identique au récepteur, mais sans les {@code count} billets du sommet de la pioche
      */
     public GameState withoutTopTickets(int count){
+        Preconditions.checkArgument(count >= 0 && count <= tickets.size());
         return new GameState(tickets.withoutTopCards(count), cardState, currentPlayerId(), playerState, lastPlayer());
     }
 
@@ -105,6 +106,7 @@ public final class GameState extends PublicGameState {
      * @return la carte au sommet de la pioche
      */
     public Card topCard() {
+        Preconditions.checkArgument(!cardState.isDeckEmpty());
         return cardState.topDeckCard();
     }
 
@@ -115,6 +117,7 @@ public final class GameState extends PublicGameState {
      * @return un état identique au récepteur mais sans la carte au sommet de la pioche
      */
     public GameState withoutTopCard(){
+        Preconditions.checkArgument(!cardState.isDeckEmpty());
         return new GameState(tickets, cardState.withoutTopDeckCard(), currentPlayerId(), playerState, lastPlayer());
     }
 

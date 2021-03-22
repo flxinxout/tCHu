@@ -16,6 +16,15 @@ class TicketTest {
     }
 
     @Test
+    void constructorFailsWithDifferentFromStations() {
+        var s1 = new Station(0, "From");
+        var s2 = new Station(1, "To");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Ticket(List.of(new Trip(s1, s2, 15), new Trip(s2, s1, 16)));
+        });
+    }
+
+    @Test
     void textIsCorrectForSimpleTicket() {
         var s1 = new Station(0, "From");
         var s2 = new Station(1, "To");

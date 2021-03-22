@@ -34,42 +34,29 @@ public final class Route {
      * Construit une route avec l'identité, les gares, la longueur,
      * le niveau et la couleur donnée.
      *
-     * @param id
-     *            l'identité de la route (non nulle)
-     * @param station1
-     *            la première gare (non nulle)
-     * @param station2
-     *            la deuxième gare (non nulle)
-     * @param length
-     *            la longueur de la route (doit être comprise dans les limites acceptables)
-     * @param level
-     *            le niveau de la route (sous/sur-terrain) (non nul)
-     * @param color
-     *            la couleur de la route (peut être nulle)
-     * @throws IllegalArgumentException
-     *            si les deux gares sont les mêmes
-     *            ou si la longueur n'est pas comprise dans les limites acceptables
-     * @throws NullPointerException
-     *            si l'identité est nulle,
-     *            ou si la première gare est nulle,
-     *            ou si la deuxième gare est nulle,
-     *            ou si le niveau est nul
+     * @param id       l'identité de la route (non null)
+     * @param station1 la première gare (non null)
+     * @param station2 la deuxième gare (non null)
+     * @param length   la longueur de la route
+     * @param level    le niveau de la route (non null)
+     * @param color    la couleur de la route (peut être nulle)
+     * @throws IllegalArgumentException si {@code station1} = {@code station2} ou
+     *                                  si la longueur n'est pas comprise dans les limites acceptables
      */
     public Route(String id, Station station1, Station station2, int length, Level level, Color color) {
         Preconditions.checkArgument(!station1.equals(station2)
-                                    && length >= Constants.MIN_ROUTE_LENGTH
-                                    && length <= Constants.MAX_ROUTE_LENGTH);
+                && length >= Constants.MIN_ROUTE_LENGTH
+                && length <= Constants.MAX_ROUTE_LENGTH);
 
-        Objects.requireNonNull(this.id = id);
-        Objects.requireNonNull(this.station1 = station1);
-        Objects.requireNonNull(this.station2 = station2);
-        Objects.requireNonNull(this.level = level);
+        this.id = Objects.requireNonNull(id);
+        this.station1 = Objects.requireNonNull(station1);
+        this.station2 = Objects.requireNonNull(station2);
+        this.level = Objects.requireNonNull(level);
         this.length = length;
         this.color = color;
     }
 
     /**
-     * Retourne l'identité de cette route.
      * @return l'identité de cette route
      */
     public String id() {
@@ -77,7 +64,6 @@ public final class Route {
     }
 
     /**
-     * Retourne la première gare de cette route.
      * @return la première gare de cette route
      */
     public Station station1() {
@@ -85,7 +71,6 @@ public final class Route {
     }
 
     /**
-     * Retourne la deuxième gare de cette route.
      * @return la deuxième gare de cette route
      */
     public Station station2() {
@@ -93,7 +78,6 @@ public final class Route {
     }
 
     /**
-     * Retourne la longueur de cette route.
      * @return la longueur de cette route
      */
     public int length() {
@@ -101,7 +85,6 @@ public final class Route {
     }
 
     /**
-     * Retourne le niveau de cette route.
      * @return le niveau de cette route
      */
     public Level level() {
@@ -109,7 +92,6 @@ public final class Route {
     }
 
     /**
-     * Retourne la couleur de cette route (peut être null)
      * @return la couleur de cette route
      */
     public Color color() {
@@ -119,6 +101,7 @@ public final class Route {
     /**
      * Retourne la liste des deux gares de cette route,
      * dans l'ordre dans lequel elles ont été passées au constructeur.
+     *
      * @return la liste des deux gares de cette route
      */
     public List<Station> stations() {
@@ -126,39 +109,33 @@ public final class Route {
     }
 
     /**
-     * Retourne la gare de la route qui n'est pas celle donnée.
+     * Retourne la gare de la route qui n'est pas {@code station}.
      *
-     * @param station
-     *            gare de la route à ne pas retourner
-     * @throws IllegalArgumentException
-     *            si la gare donnée n'est égale à aucune des deux de cette route
-     * @return la gare de la route qui n'est pas celle donnée
+     * @param station gare à ne pas retourner
+     * @return la gare de la route qui n'est pas {@code station}
+     * @throws IllegalArgumentException si {@code station} n'est égale à aucune des deux gares de cette route
      */
-    public Station stationOpposite(Station station){
+    public Station stationOpposite(Station station) {
         Preconditions.checkArgument(station1.equals(station) || station2.equals(station));
         return station1.equals(station) ? station2 : station1;
     }
 
     /**
-     * Retourne la liste de tous les ensembles de cartes qui pourraient être joués
-     * pour (tenter de) s'emparer de la route,
-     * trié par ordre croissant de nombre de cartes locomotive, puis par couleur.
+     * Retourne la liste de tous les ensembles de cartes qui pourraient être joués pour (tenter de)
+     * s'emparer de la route, triée par ordre croissant de nombre de cartes locomotive, puis par couleur.
      *
      * @return la liste de tous les ensembles de cartes qui pourraient être joués
-     * pour (tenter de) s'emparer de la route
+     * pour s'emparer de la route
      */
-    public List<SortedBag<Card>> possibleClaimCards(){
+    public List<SortedBag<Card>> possibleClaimCards() {
         List<SortedBag<Card>> possibleClaimCardsList = new ArrayList<>();
 
         //Si la route n'est pas de couleur neutre
         if (color != null) {
-
-            //Premier ensemble : color - color - ... - color
-            SortedBag<Card> colorCards = SortedBag.of(length, Card.of(color));
-            possibleClaimCardsList.add(colorCards);
+            possibleClaimCardsList.add(SortedBag.of(length, Card.of(color)));
 
             //Si la route est un tunnel
-            if (level == Level.UNDERGROUND){
+            if (level == Level.UNDERGROUND) {
                 for (int i = 1; i <= length; i++) {
                     SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
 
@@ -170,15 +147,15 @@ public final class Route {
         }
         //Si la route est de couleur neutre
         else {
-
-            for (Card car : Card.CARS) {
-                SortedBag<Card> colorCards = SortedBag.of(length, car);
-                possibleClaimCardsList.add(colorCards);
-            }
+            //TODO: lambda or foreach?
+            Card.CARS.forEach(car -> possibleClaimCardsList.add(SortedBag.of(length, car)));
+            /*for (Card car : Card.CARS)
+                possibleClaimCardsList.add(SortedBag.of(length, car));*/
 
             //Si la route est un tunnel
             if (level == Level.UNDERGROUND) {
                 for (int i = 1; i < length; i++) {
+                    //TODO: lambda or foreach?
                     for (Card car : Card.CARS) {
                         SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
                         cardsBuilder.add(length - i, car);
@@ -195,43 +172,47 @@ public final class Route {
     }
 
     /**
-     * Retourne le nombre de cartes additionnelles à jouer
-     * pour s'emparer de la route (en tunnel).
-     * @param claimCards
-     *              cartes initialement posées par le joueur
-     * @param drawnCards
-     *              cartes tirées du sommet de la pioche
+     * Retourne le nombre de cartes additionnelles à jouer pour s'emparer de la route (en tunnel).
+     *
+     * @param claimCards cartes initialement posées par le joueur
+     * @param drawnCards cartes tirées du sommet de la pioche
      * @return le nombre de cartes additionnelles à jouer pour s'emparer de la route
+     * @throws IllegalArgumentException si {@code this} n'est pas un tunnel ou
+     *                                  si {@code drawnCards} ne contient pas exactement 3 cartes
      */
-    public int additionalClaimCardsCount(SortedBag<Card> claimCards, SortedBag<Card> drawnCards){
+    public int additionalClaimCardsCount(SortedBag<Card> claimCards, SortedBag<Card> drawnCards) {
         Preconditions.checkArgument(level == Level.UNDERGROUND
-                                    || drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
+                && drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
+
         int additionalCards = 0;
         Color claimColor = null;
 
         if (!claimCards.isEmpty())
             claimColor = claimCards.get(0).color();
 
-        for(Card card : drawnCards) {
+        //TODO: stream or foreach below
+        Color finalClaimColor = claimColor;
+        additionalCards = (int) drawnCards.stream()
+                .filter(card -> card == Card.LOCOMOTIVE || card.color() == finalClaimColor)
+                .count();
+
+        /*for (Card card : drawnCards) {
             if (card == Card.LOCOMOTIVE)
                 additionalCards++;
             else {
                 if (card.color() == claimColor)
                     additionalCards++;
             }
-        }
+        }*/
 
         return additionalCards;
 
     }
 
     /**
-     * Retourne le nombre de points de construction
-     * qu'un joueur obtient lorsqu'il s'empare de cette route.
-     *
      * @return le nombre de points de construction de cette route
      */
-    public int claimPoints(){
+    public int claimPoints() {
         return Constants.ROUTE_CLAIM_POINTS.get(length);
     }
 }

@@ -14,15 +14,11 @@ public final class Station {
     private final String name;
 
     /**
-     * Construit une gare avec le numéro d'identification
-     * et le nom donnés.
+     * Construit une gare avec le numéro d'identification et le nom donnés.
      *
-     * @param id
-     *            le numéro d'identification (doit être positif)
-     * @param name
-     *            le nom
-     * @throws IllegalArgumentException
-     *             si le numéro d'identification est strictement négatif
+     * @param id   le numéro d'identification (doit être positif)
+     * @param name le nom
+     * @throws IllegalArgumentException si le numéro d'identification est strictement négatif
      */
     public Station(int id, String name) {
         Preconditions.checkArgument(id >= 0);
@@ -31,7 +27,6 @@ public final class Station {
     }
 
     /**
-     * Retourne le numéro d'identification de cette gare.
      * @return le numéro d'identification de cette gare
      */
     public int id() {
@@ -39,7 +34,6 @@ public final class Station {
     }
 
     /**
-     * Retourne le nom de cette gare.
      * @return le nom de cette gare
      */
     public String name() {

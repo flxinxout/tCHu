@@ -54,7 +54,7 @@ public interface Player {
      * (via la méthode précédente) il garde.
      *
      * @see Player#setInitialTicketChoice(SortedBag)
-     * @return les billets que le joueur qu'on lui a donné initialement.
+     * @return les billets que le joueur garde parmi ceux qu'on lui a donné initialement.
      */
     SortedBag<Ticket> chooseInitialTickets();
 
@@ -112,7 +112,7 @@ public interface Player {
     /**
      * Énumération qui représente les trois types d'actions qu'un joueur de tCHu peut effectuer durant un tour.
      */
-    enum TurnKind {
+    public enum TurnKind {
 
         DRAW_TICKETS,
         DRAW_CARDS,

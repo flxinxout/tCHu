@@ -3,7 +3,7 @@ package ch.epfl.tchu.game;
 import java.util.List;
 
 /**
- * Énumération des différentes couleurs du jeu
+ * Énumération des différentes couleurs des éléments du jeu.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
@@ -20,11 +20,12 @@ public enum Color {
     WHITE;
 
     /**
-     * Liste contenant toutes les différentes couleurs
+     * Une liste contenant toutes les différentes couleurs.
      */
     public static final List<Color> ALL = List.of(values());
+
     /**
-     * Nombre de couleurs distinctes disponibles
+     * Le nombre de couleurs distinctes disponibles.
      */
     public static final int COUNT = ALL.size();
 }

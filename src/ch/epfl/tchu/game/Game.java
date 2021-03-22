@@ -25,10 +25,10 @@ public final class Game {
      *          si l'une des deux tables associatives a une taille différente de 2.
      */
     public static void play(Map<PlayerId, Player> players, Map<PlayerId, String> playerNames, SortedBag<Ticket> tickets, Random rng) {
-        /*Preconditions.checkArgument(players.size() == 2 && playerNames.size() == 2);
+        Preconditions.checkArgument(players.size() == 2 && playerNames.size() == 2);
 
+        //1. Initialization
         GameState gameState = GameState.initial(tickets, rng);
-
 
         players.forEach((id, player) -> {
             player.initPlayers(id, playerNames);
@@ -39,17 +39,20 @@ public final class Game {
             player.receiveInfo(new Info(playerNames.get(id)).keptTickets(chosenTickets.size()));
         });
 
+        //2. In game
         Player currentPlayer = players.get(gameState.currentPlayerId());
-
         switch (currentPlayer.nextTurn()) {
             case DRAW_TICKETS:
-                currentPlayer.chooseTickets(gameState.topTickets(Constants.IN_GAME_TICKETS_COUNT));
+                SortedBag<Ticket> drawnTickets = gameState.topTickets(Constants.IN_GAME_TICKETS_COUNT);
+                SortedBag<Ticket> chosenTickets = currentPlayer.chooseTickets(drawnTickets);
+                gameState = gameState.withChosenAdditionalTickets(drawnTickets, chosenTickets);
                 break;
 
             case DRAW_CARDS:
                 for (int i = 0; i < 2; i++) {
-                    currentPlayer.drawSlot();
-                    currentPlayer.drawSlot();
+                    int slot = currentPlayer.drawSlot();
+                    gameState = slot >= 0 && slot <= 4 ?
+                            gameState.withDrawnFaceUpCard(slot) : gameState.withBlindlyDrawnCard();
                 }
                 break;
 
@@ -57,12 +60,9 @@ public final class Game {
                 Route claimedRoute = currentPlayer.claimedRoute();
                 SortedBag<Card> initialCards = currentPlayer.initialClaimCards();
 
-                if(claimedRoute.level() == Route.Level.UNDERGROUND && gameState.) {
-                    if()
-                    currentPlayer.chooseAdditionalCards(gameState.playerState(gameState.currentPlayerId())
-                            .possibleAdditionalCards(, initialCards, ));
-                }
-        }*/
+                gameState = gameState.withClaimedRoute(claimedRoute, initialCards);
+                //if(claimedRoute.level() == Route.Level.UNDERGROUND && claimedRoute.additionalClaimCardsCount())
+        }
     }
 
     private static void sendInformation(Player player, String info) {

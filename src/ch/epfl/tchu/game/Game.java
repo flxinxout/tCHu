@@ -4,13 +4,12 @@ import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.gui.Info;
 
+import java.lang.management.PlatformLoggingMXBean;
 import java.security.cert.CRLReason;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 public final class Game {
+
     private Game() {
     }
 
@@ -37,6 +36,8 @@ public final class Game {
             player.setInitialTicketChoice(gameState.topTickets(Constants.INITIAL_TICKETS_COUNT));
             gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
             SortedBag<Ticket> chosenTickets = player.chooseInitialTickets();
+
+            //TODO écrit que c'est uniquement lorsqe tout les joueurs ont faire leur choix ! donc faut sortir de la boucle
             player.receiveInfo(new Info(playerNames.get(id)).keptTickets(chosenTickets.size()));
         }
 
@@ -46,20 +47,32 @@ public final class Game {
         while (isPlaying){
 
             Player currentPlayer = players.get(gameState.currentPlayerId());
+            String nameOfPlayer = playerNames.get(gameState.currentPlayerId());
+            Collection<Player> values = players.values();
+            sendInformation(new Info(nameOfPlayer).canPlay(), values);
 
             switch (currentPlayer.nextTurn()) {
                 case DRAW_TICKETS:
                     SortedBag<Ticket> drawnTickets = gameState.topTickets(Constants.IN_GAME_TICKETS_COUNT);
+                    sendInformation(new Info(nameOfPlayer).drewTickets(drawnTickets.size()), values);
+
                     SortedBag<Ticket> chosenTickets = currentPlayer.chooseTickets(drawnTickets);
                     gameState = gameState.withChosenAdditionalTickets(drawnTickets, chosenTickets);
+                    sendInformation(new Info(nameOfPlayer).keptTickets(chosenTickets.size()), values);
                     break;
 
                 case DRAW_CARDS:
                     for (int i = 0; i < 2; i++) {
                         int slot = currentPlayer.drawSlot();
                         gameState = gameState.withCardsDeckRecreatedIfNeeded(rng);
-                        gameState = slot != Constants.DECK_SLOT ?
-                                gameState.withDrawnFaceUpCard(slot) : gameState.withBlindlyDrawnCard();
+                        if(slot != Constants.DECK_SLOT) {
+                            gameState = gameState.withDrawnFaceUpCard(slot);
+                            sendInformation(new Info(nameOfPlayer).drewVisibleCard(gameState.cardState().faceUpCard(slot)),
+                                    values);
+                        } else {
+                            gameState = gameState.withBlindlyDrawnCard();
+                            sendInformation(new Info(nameOfPlayer).drewBlindCard(), values);
+                        }
                     }
                     break;
 
@@ -67,8 +80,11 @@ public final class Game {
                     Route claimedRoute = currentPlayer.claimedRoute();
                     SortedBag<Card> initialCards = currentPlayer.initialClaimCards();
 
+                    //TODO ENCORE METTRE LE FAIL DE CLAIM JSAIS PAS OU MDR
+
                     if (claimedRoute.level() == Route.Level.UNDERGROUND) {
                         SortedBag<Card> additionalCards = SortedBag.of();
+                        sendInformation(new Info(nameOfPlayer).attemptsTunnelClaim(claimedRoute, initialCards), values);
 
                         //Draw cards from top of the deck
                         SortedBag.Builder drawnCardsBuilder = new SortedBag.Builder();
@@ -78,8 +94,9 @@ public final class Game {
                             gameState = gameState.withoutTopCard();
                         }
                         SortedBag<Card> drawnCards = drawnCardsBuilder.build();
-
                         int additionalCardsCount = claimedRoute.additionalClaimCardsCount(initialCards, drawnCards);
+                        sendInformation(new Info(nameOfPlayer).drewAdditionalCards(drawnCards, additionalCardsCount), values);
+
                         if (additionalCardsCount > 0) {
                             List<SortedBag<Card>> options = gameState
                                     .currentPlayerState()
@@ -91,19 +108,25 @@ public final class Game {
 
                         if (!additionalCards.isEmpty())
                             gameState = gameState.withClaimedRoute(claimedRoute, initialCards.union(additionalCards));
-                    } else
+                    } else {
                         gameState = gameState.withClaimedRoute(claimedRoute, initialCards);
+                        sendInformation(new Info(nameOfPlayer).claimedRoute(claimedRoute, initialCards), values);
+                    }
             }
 
             if (gameState.lastPlayer() != null)
+                sendInformation(new Info(nameOfPlayer)
+                        .lastTurnBegins(gameState.playerState(gameState.currentPlayerId()).carCount()), values);
                 isPlaying = false;
 
             gameState = gameState.forNextTurn();
         }
+
+        //TODO LAST 2 INFORMATIONS
     }
 
-    private static void sendInformation(Player player, String info) {
-        player.receiveInfo(info);
+    private static void sendInformation(String info, Collection<Player> players) {
+        players.forEach(p -> p.receiveInfo(info));
     }
 
     private static void sendStateUpdate() {

@@ -210,17 +210,13 @@ public final class PlayerState extends PublicPlayerState {
      */
     public int ticketPoints(){
         int maxIndex = 0;
-        //TODO: stream?
         for (Route route: routes()) {
             maxIndex = Math.max(maxIndex, route.station1().id());
             maxIndex = Math.max(maxIndex, route.station2().id());
         }
 
         StationPartition.Builder connectivityBuilder = new StationPartition.Builder(maxIndex + 1);
-        //TODO: stream?
-        for (Route route: routes()) {
-            connectivityBuilder.connect(route.station1(), route.station2());
-        }
+        routes().forEach(c -> connectivityBuilder.connect(c.station1(), c.station2()));
         StationPartition connectivity = connectivityBuilder.build();
 
         int points = 0;

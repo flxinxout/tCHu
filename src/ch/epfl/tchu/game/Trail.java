@@ -1,6 +1,7 @@
 package ch.epfl.tchu.game;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -35,11 +36,9 @@ public final class Trail {
 
         List<Trail> allTrails = computeTrivialTrails(routes);
 
-        //TODO: stream ici
-        Trail maxLengthTrail = allTrails.get(0);
-        for (Trail trail : allTrails) {
-            maxLengthTrail = trail.length() > maxLengthTrail.length() ? trail : maxLengthTrail;
-        }
+        Trail maxLengthTrail = allTrails.stream()
+                .max(Comparator.comparing(t -> t.length()))
+                .get();
 
         while (!allTrails.isEmpty()) {
             List<Trail> tempTrails = new ArrayList<>();

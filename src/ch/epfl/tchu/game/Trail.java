@@ -12,30 +12,32 @@ import java.util.List;
 public final class Trail {
 
     private final List<Route> routes;
-    private final int length;
     private final Station from;
     private final Station to;
+    private final int length;
 
     private Trail(List<Route> routes, Station from, Station to) {
-        this.routes = routes;
-        this.length = computeLength(routes, from, to);
+        this.routes = List.copyOf(routes);
         this.from = from;
         this.to = to;
+        this.length = computeLength(routes, from, to);
     }
 
     /**
-     * Retourne le chemin le plus long d'une liste de route données
-     * @param routes
-     *          la liste de routes à comparer
-     * @return le chemin le plus long
+     * Retourne le plus long chemin du réseau constitué de {@code routes}.
+     *
+     * @param routes les routes composant le réseau
+     * @return le plus long chemin
      */
     public static Trail longest(List<Route> routes) {
         if (routes.isEmpty())
             return new Trail(List.of(), null, null);
 
         List<Trail> allTrails = computeTrivialTrails(routes);
+
+        //TODO: stream ici
         Trail maxLengthTrail = allTrails.get(0);
-        for(Trail trail : allTrails) {
+        for (Trail trail : allTrails) {
             maxLengthTrail = trail.length() > maxLengthTrail.length() ? trail : maxLengthTrail;
         }
 
@@ -64,7 +66,7 @@ public final class Trail {
     private static List<Trail> computeTrivialTrails(List<Route> routes) {
         List<Trail> trivialTrailsList = new ArrayList<>();
 
-        for(Route route : routes) {
+        for (Route route : routes) {
             trivialTrailsList.add(new Trail(List.of(route), route.station1(), route.station2()));
             trivialTrailsList.add(new Trail(List.of(route), route.station2(), route.station1()));
         }
@@ -80,10 +82,9 @@ public final class Trail {
         //TODO: changer contains par removeAll
         if (!trailToExtend.routes.contains(route)) {
             //Si elle peut prolonger le chemin, retourne le chemin prolongé
-            if (route.station1().equals(trailToExtend.station2())){
+            if (route.station1().equals(trailToExtend.station2())) {
                 return extend(trailToExtend, route, route.station2());
-            }
-            else if (route.station2().equals(trailToExtend.station2())){
+            } else if (route.station2().equals(trailToExtend.station2())) {
                 return extend(trailToExtend, route, route.station1());
             }
             //Sinon retourne null
@@ -106,6 +107,7 @@ public final class Trail {
 
     /**
      * Retourne la longueur du chemin (somme de la longueur des routes le constituant)
+     *
      * @return la longueur du chemin
      */
     public int length() {
@@ -114,14 +116,15 @@ public final class Trail {
 
     /**
      * Calcul la longueur du chemin constitué de ces routes (somme de la longueur des routes)
+     *
      * @return la longueur du chemin
      */
-    private static int computeLength(List<Route> routes, Station station1, Station station2){
+    private static int computeLength(List<Route> routes, Station station1, Station station2) {
         if (station1 == null || station2 == null)
             return 0;
 
         int length = 0;
-        for (Route route: routes) {
+        for (Route route : routes) {
             length += route.length();
         }
         return length;
@@ -129,6 +132,7 @@ public final class Trail {
 
     /**
      * Retourne la station de départ du chemin
+     *
      * @return la station de départ du chemin
      */
     public Station station1() {
@@ -137,6 +141,7 @@ public final class Trail {
 
     /**
      * Retourne la station d'arrivée du chemin
+     *
      * @return la station d'arrivée du chemin
      */
     public Station station2() {
@@ -145,6 +150,7 @@ public final class Trail {
 
     /**
      * Retourne une représentation textuelle du chemin.
+     *
      * @return une représentation textuelle du chemin
      */
     @Override
@@ -155,13 +161,12 @@ public final class Trail {
         if (from != null) {
             stationNames.add(from.name());
             lastStationName = from.name();
-        }
-        else
+        } else
             return "Chemin inexistant";
 
-        for (Route route: routes) {
+        for (Route route : routes) {
             String name = lastStationName.equals(route.station1().name()) ?
-                            route.station2().name() : route.station1().name();
+                    route.station2().name() : route.station1().name();
             stationNames.add(name);
             lastStationName = name;
         }

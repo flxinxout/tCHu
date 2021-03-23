@@ -143,7 +143,7 @@ public final class GameState extends PublicGameState {
         if (cardState.isDeckEmpty())
             return new GameState(tickets, cardState.withDeckRecreatedFromDiscards(rng), currentPlayerId(), playerState, lastPlayer());
         else
-            return new GameState(tickets, cardState, currentPlayerId(), playerState, lastPlayer());
+            return this;
     }
 
     /**

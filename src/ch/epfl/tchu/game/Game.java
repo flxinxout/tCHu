@@ -13,50 +13,55 @@ public final class Game {
     }
 
     /**
-     * Fait jouer une partie de tCHu aux joueurs donnés, dont les noms figurent dans la table playerNames.
+     * Fait jouer une partie de tCHu aux joueurs donnés, dont les noms figurent dans la table {@code playerNames} ;
+     * les billets disponibles pour cette partie sont ceux de {@code tickets},
+     * et le générateur aléatoire {@code rng} est utilisé pour créer l'état initial du jeu et pour mélanger les cartes
+     * de la défausse pour en faire une nouvelle pioche quand cela est nécessaire.
      *
      * @param players     table associant les joueurs à leur identité
      * @param playerNames table associant le nom des joueurs à leur identité
      * @param tickets     les billets disponibles pour cette partie
      * @param rng         générateur aléatoire utilisé pour créer l'état initial du jeu et pour mélanger les cartes de la défausse
-     * @throws IllegalArgumentException si l'une des deux tables associatives a une taille différente de 2.
+     * @throws IllegalArgumentException si {@code players} ou {@code playerNames} ont une taille différente de 2
      */
-    public static void play(Map<PlayerId, Player> players, Map<PlayerId, String> playerNames, SortedBag<Ticket> tickets, Random rng) {
+    public static void play(Map<PlayerId, Player> players, Map<PlayerId, String> playerNames,
+                            SortedBag<Ticket> tickets, Random rng) {
         Preconditions.checkArgument(players.size() == 2 && playerNames.size() == 2);
+
+        //Initialize players
+        players.forEach((id, player) -> player.initPlayers(id, playerNames));
 
         Collection<Player> playersValues = players.values();
 
-        //1. Initialization
-        //Init players
-        players.forEach((id, player) -> player.initPlayers(id, playerNames));
-
-        //Start game (for real)
+        //Initialize game
         GameState gameState = GameState.initial(tickets, rng);
         sendInformation(new Info(playerNames.get(gameState.currentPlayerId())).willPlayFirst(), playersValues);
 
-        //Distribute initial tickets
+        //Display initial tickets choices and ask to choose three them
         for (Player player : playersValues) {
             player.setInitialTicketChoice(gameState.topTickets(Constants.INITIAL_TICKETS_COUNT));
             gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
         }
 
+        //TODO: better than map
         Map<PlayerId, SortedBag<Ticket>> playerTickets = new HashMap<>();
+        sendStateUpdate(gameState, players);
         for (Map.Entry<PlayerId, Player> entry : players.entrySet()) {
-            sendStateUpdate(gameState, players);
             playerTickets.put(entry.getKey(), entry.getValue().chooseInitialTickets());
         }
 
         playerTickets.forEach((id, ticketsBag) -> sendInformation(new Info(playerNames.get(id))
                 .keptTickets(ticketsBag.size()), playersValues));
 
-        //2. In game
+        //Game starts
         boolean isPlaying = true;
         while (isPlaying) {
 
             Player currentPlayer = players.get(gameState.currentPlayerId());
             Info currentPlayerInfo = new Info(playerNames.get(gameState.currentPlayerId()));
 
-            if (gameState.lastPlayer() != null) {
+            //Check if it's the last turn
+            if (gameState.lastTurnBegins()) {
                 sendInformation(currentPlayerInfo
                         .lastTurnBegins(gameState.playerState(gameState.currentPlayerId()).carCount()), playersValues);
                 isPlaying = false;
@@ -65,6 +70,7 @@ public final class Game {
             sendInformation(currentPlayerInfo.canPlay(), playersValues);
             sendStateUpdate(gameState, players);
 
+            //Ask what the player wants to do during its turn
             switch (currentPlayer.nextTurn()) {
                 case DRAW_TICKETS:
                     //TODO: check size?

@@ -28,129 +28,68 @@ public final class Trail {
      * Retourne le plus long chemin du réseau constitué de {@code routes}.
      *
      * @param routes les routes composant le réseau
-     * @return le plus long chemin
+     * @return le plus long chemin du réseau
      */
     public static Trail longest(List<Route> routes) {
-        if (routes.isEmpty())
-            return new Trail(List.of(), null, null);
-
         List<Trail> allTrails = computeTrivialTrails(routes);
 
         Trail maxLengthTrail = allTrails.stream()
-                .max(Comparator.comparing(t -> t.length()))
-                .get();
+                .max(Comparator.comparing(Trail::length))
+                .orElse(new Trail(List.of(), null, null));
 
         while (!allTrails.isEmpty()) {
             List<Trail> tempTrails = new ArrayList<>();
 
             for (Trail trail : allTrails) {
-                for (Route route : routes) {
+                List<Route> routesNotInTrail = new ArrayList<>(routes);
+                routesNotInTrail.removeAll(trail.routes);
+
+                for (Route route : routesNotInTrail) {
                     Trail newTrail = tryExtend(trail, route);
-                    if (newTrail != null) {
+                    if (!newTrail.equals(trail))
                         tempTrails.add(newTrail);
-                        maxLengthTrail = newTrail.length() > maxLengthTrail.length() ? newTrail : maxLengthTrail;
-                    }
                 }
             }
             allTrails = tempTrails;
+
+            Trail possibleMaxLengthTrail = allTrails.stream()
+                    .max(Comparator.comparing(Trail::length))
+                    .orElse(maxLengthTrail);
+
+            maxLengthTrail = maxLengthTrail.length() < possibleMaxLengthTrail.length() ?
+                    possibleMaxLengthTrail : maxLengthTrail;
         }
 
         return maxLengthTrail;
     }
 
     /**
-     * Retourne tous les chemins constitués d'une seule route
-     * reliant les routes d'une liste de routes
-     */
-    private static List<Trail> computeTrivialTrails(List<Route> routes) {
-        List<Trail> trivialTrailsList = new ArrayList<>();
-
-        for (Route route : routes) {
-            trivialTrailsList.add(new Trail(List.of(route), route.station1(), route.station2()));
-            trivialTrailsList.add(new Trail(List.of(route), route.station2(), route.station1()));
-        }
-        return trivialTrailsList;
-    }
-
-    /**
-     * Essaie d'étendre un chemin avec une route, retourne ce chemin si l'extension a fonctionné,
-     * retourne null sinon.
-     */
-    private static Trail tryExtend(Trail trailToExtend, Route route) {
-        //Si le chemin ne contient pas la route
-        //TODO: changer contains par removeAll
-        if (!trailToExtend.routes.contains(route)) {
-            //Si elle peut prolonger le chemin, retourne le chemin prolongé
-            if (route.station1().equals(trailToExtend.station2())) {
-                return extend(trailToExtend, route, route.station2());
-            } else if (route.station2().equals(trailToExtend.station2())) {
-                return extend(trailToExtend, route, route.station1());
-            }
-            //Sinon retourne null
-            else {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Étend un chemin avec une route.
-     */
-    private static Trail extend(Trail trailToExtend, Route route, Station endStation) {
-        List<Route> newRoads = new ArrayList<>(trailToExtend.routes);
-        newRoads.add(route);
-
-        return new Trail(newRoads, trailToExtend.station1(), endStation);
-    }
-
-    /**
-     * Retourne la longueur du chemin (somme de la longueur des routes le constituant)
+     * Retourne la longueur de ce chemin (somme de la longueur des routes le constituant)
      *
-     * @return la longueur du chemin
+     * @return la longueur de ce chemin
      */
     public int length() {
         return length;
     }
 
     /**
-     * Calcul la longueur du chemin constitué de ces routes (somme de la longueur des routes)
-     *
-     * @return la longueur du chemin
-     */
-    private static int computeLength(List<Route> routes, Station station1, Station station2) {
-        if (station1 == null || station2 == null)
-            return 0;
-
-        int length = 0;
-        for (Route route : routes) {
-            length += route.length();
-        }
-        return length;
-    }
-
-    /**
-     * Retourne la station de départ du chemin
-     *
-     * @return la station de départ du chemin
+     * @return la station de départ de ce chemin
      */
     public Station station1() {
         return length() == 0 ? null : from;
     }
 
     /**
-     * Retourne la station d'arrivée du chemin
-     *
-     * @return la station d'arrivée du chemin
+     * @return la station d'arrivée de ce chemin
      */
     public Station station2() {
         return length() == 0 ? null : to;
     }
 
     /**
-     * Retourne une représentation textuelle du chemin.
+     * Retourne la représentation textuelle de ce chemin. Elle est de forme "Gare1 - Gare2 - ... (points)".
      *
-     * @return une représentation textuelle du chemin
+     * @return la représentation textuelle de ce chemin
      */
     @Override
     public String toString() {
@@ -172,6 +111,56 @@ public final class Trail {
 
         String names = String.join(" - ", stationNames);
         return String.format("%s (%s)", names, length());
+    }
+
+    /**
+     * Retourne tous les chemins constitués d'une seule route de la liste {@code routes}.
+     */
+    private static List<Trail> computeTrivialTrails(List<Route> routes) {
+        List<Trail> trivialTrailsList = new ArrayList<>();
+
+        for (Route route : routes) {
+            trivialTrailsList.add(new Trail(List.of(route), route.station1(), route.station2()));
+            trivialTrailsList.add(new Trail(List.of(route), route.station2(), route.station1()));
+        }
+        return trivialTrailsList;
+    }
+
+    /**
+     * Retourne un chemin similaire à {@code trailToExtend}, seulement étendu avec {@code route},
+     * retourne le nouveau chemin si l'extension a fonctionné, retourne le chemin initial {@code trailToExtend} sinon.
+     */
+    private static Trail tryExtend(Trail trailToExtend, Route route) {
+        if (route.station1().equals(trailToExtend.station2()))
+            return extend(trailToExtend, route, route.station2());
+        else if (route.station2().equals(trailToExtend.station2()))
+            return extend(trailToExtend, route, route.station1());
+        else
+            return trailToExtend;
+    }
+
+    /**
+     * Retourne un nouveau chemin similaire à {@code trail}, seulement étendu avec la route {@code route}.
+     * La gare d'arrivée du nouveau chemin est {@code endStation}.
+     */
+    private static Trail extend(Trail trailToExtend, Route route, Station endStation) {
+        List<Route> newRoads = new ArrayList<>(trailToExtend.routes);
+        newRoads.add(route);
+        return new Trail(newRoads, trailToExtend.station1(), endStation);
+    }
+
+    /**
+     * Calcule la longueur du chemin constitué de ces routes (somme de la longueur des routes).
+     */
+    private static int computeLength(List<Route> routes, Station station1, Station station2) {
+        if (station1 == null || station2 == null)
+            return 0;
+
+        int length = 0;
+        for (Route route : routes) {
+            length += route.length();
+        }
+        return length;
     }
 }
 

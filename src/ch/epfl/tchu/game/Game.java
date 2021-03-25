@@ -55,13 +55,14 @@ public final class Game {
 
         //Game starts
         boolean isPlaying = true;
+        boolean lastTurnBegins = false;
         while (isPlaying) {
 
             Player currentPlayer = players.get(gameState.currentPlayerId());
             Info currentPlayerInfo = new Info(playerNames.get(gameState.currentPlayerId()));
 
             //Check if it's the last turn
-            if (gameState.lastTurnBegins()) {
+            if (lastTurnBegins) {
                 sendInformation(currentPlayerInfo
                         .lastTurnBegins(gameState.playerState(gameState.currentPlayerId()).carCount()), playersValues);
                 isPlaying = false;
@@ -145,9 +146,11 @@ public final class Game {
                     }
             }
 
+            lastTurnBegins = gameState.lastTurnBegins();
             gameState = gameState.forNextTurn();
             sendStateUpdate(gameState, players);
         }
+
 
         Trail[] trails = new Trail[PlayerId.COUNT];
         for (int i = 0; i < trails.length; i++) {

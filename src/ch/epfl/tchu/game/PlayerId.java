@@ -24,7 +24,6 @@ public enum PlayerId {
     public static final int COUNT = ALL.size();
 
     /**
-     * Retourne l'identité du joueur qui suit celui auquel on l'applique.
      * @return l'identité du joueur qui suit celui auquel on l'applique
      */
     public PlayerId next() {

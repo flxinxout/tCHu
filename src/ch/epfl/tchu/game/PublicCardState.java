@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * L'état public (connu des joueurs) des cartes wagon/locomotive qui ne sont pas en main des joueurs.
+ * Partie publique (connue des deux joueurs) de l'état des cartes wagon/locomotive qui ne sont pas en main des joueurs.
+ * Elle est composée des cartes face visible, de la taille de la pioche ainsi que la taille de la défause.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
@@ -18,17 +19,14 @@ public class PublicCardState {
     private final int discardsSize;
 
     /**
-     * Construit un état public des cartes dans lequel les cartes face visible sont celles données,
+     * Construit un état public des cartes dans lequel les cartes face visible sont {@code faceUpCards},
      * la pioche contient {@code deckSize} cartes et la défausse en contient {@code discardsSize}.
-     * @param faceUpCards
-     *          les cartes faces visibles à côté du plateau de jeu
-     * @param deckSize
-     *          la taille de la pioche
-     * @param discardsSize
-     *          la taille de défausse
-     * @throws IllegalArgumentException
-     *          si {@code faceUpCards} ne contient pas le bon nombre d'éléments
-     *          si {@code deckSize} ou {@code discardsSize} < 0
+     *
+     * @param faceUpCards  les cartes faces visibles
+     * @param deckSize     la taille de la pioche
+     * @param discardsSize la taille de défausse
+     * @throws IllegalArgumentException si {@code faceUpCards} ne contient pas 5 éléments
+     *                                  si {@code deckSize} ou {@code discardsSize} < 0
      */
     public PublicCardState(List<Card> faceUpCards, int deckSize, int discardsSize) {
         Preconditions.checkArgument(faceUpCards.size() == Constants.FACE_UP_CARDS_COUNT);
@@ -42,6 +40,7 @@ public class PublicCardState {
     /**
      * Retourne le nombre total de cartes qui ne sont pas en main des joueurs,
      * à savoir les 5 dont la face est visible, celles de la pioche et celles de la défausse
+     *
      * @return le nombre total de cartes qui ne sont pas en main des joueurs
      */
     public int totalSize() {
@@ -50,19 +49,20 @@ public class PublicCardState {
 
     /**
      * Retourne les 5 cartes face visible, sous la forme d'une liste comportant exactement 5 éléments.
-     * @return les 5 cartes face visible, sous la forme d'une liste comportant exactement 5 éléments
+     *
+     * @return les 5 cartes face visible
      */
     public List<Card> faceUpCards() {
         return faceUpCards;
     }
 
     /**
-     * Retourne la carte face visible à l'index donné.
-     * @param slot
-     *          l'index en question
-     * @throws IndexOutOfBoundsException
-     *          si {@code slot} n'est pas compris entre 0 (inclus) et le nombre de cartes face visible (exclu)
-     * @return la carte face visible à l'index donné
+     * Retourne la carte face visible à l'index {@code slot}.
+     *
+     * @param slot l'index donné
+     * @return la carte face visible à l'index {@code slot}
+     * @throws IndexOutOfBoundsException si {@code slot} n'est pas compris entre 0 (inclus)
+     *                                   et le nombre de cartes face visible (exclu)
      */
     public Card faceUpCard(int slot) {
         Objects.checkIndex(slot, faceUpCards.size());
@@ -70,7 +70,6 @@ public class PublicCardState {
     }
 
     /**
-     * Retourne la taille de la pioche.
      * @return la taille de la pioche
      */
     public int deckSize() {
@@ -78,15 +77,13 @@ public class PublicCardState {
     }
 
     /**
-     * Retourne vrai ssi la pioche est vide.
-     * @return vrai ssi la pioche est vide
+     * @return ssi la pioche est vide
      */
     public boolean isDeckEmpty() {
         return deckSize == 0;
     }
 
     /**
-     * Retourne la taille de la défausse.
      * @return la taille de la défausse
      */
     public int discardsSize() {

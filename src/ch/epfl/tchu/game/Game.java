@@ -43,12 +43,19 @@ public final class Game {
             gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
         }
 
-        //TODO: better than map
+        //TODO: find better than map
+
         Map<PlayerId, SortedBag<Ticket>> playerTickets = new HashMap<>();
         sendStateUpdate(gameState, players);
         for (Map.Entry<PlayerId, Player> entry : players.entrySet()) {
             playerTickets.put(entry.getKey(), entry.getValue().chooseInitialTickets());
         }
+
+        //TODO: ca devrait marcher mais bon c'est même pas plus propre
+        /*Map<PlayerId, SortedBag<Ticket>> playerTickets = players.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().chooseInitialTickets()));*/
 
         playerTickets.forEach((id, ticketsBag) -> sendInformation(new Info(playerNames.get(id))
                 .keptTickets(ticketsBag.size()), playersValues));
@@ -151,33 +158,40 @@ public final class Game {
             sendStateUpdate(gameState, players);
         }
 
-
-        Trail[] trails = new Trail[PlayerId.COUNT];
-        for (int i = 0; i < trails.length; i++) {
-            trails[i] = Trail.longest(gameState.playerState(PlayerId.values()[i]).routes());
+        //End of the game
+        //TODO: find better than map?
+        Map<PlayerId, Trail> longestTrails = new HashMap<>();
+        for (PlayerId id: PlayerId.ALL) {
+            longestTrails.put(id, Trail.longest(gameState.playerState(id).routes()));
         }
 
-        int points1 = points(PlayerId.values()[0], trails[0], trails[1], gameState, playerNames, playersValues);
-        int points2 = points(PlayerId.values()[1], trails[1], trails[0], gameState, playerNames, playersValues);
+        Map.Entry<PlayerId, Trail> longestTrailEntry = longestTrails.entrySet().stream()
+                .max(Comparator.comparingInt(entry -> entry.getValue().length()))
+                .orElseThrow();
+
+        PlayerId longestId = longestTrailEntry.getKey();
+        sendInformation(new Info(playerNames.get(longestId))
+                .getsLongestTrailBonus(longestTrailEntry.getValue()), playersValues);
+
+        Map<PlayerId, Integer> points = new HashMap<>();
+        points.put(longestId, gameState.playerState(longestId).finalPoints() + Constants.LONGEST_TRAIL_BONUS_POINTS);
+        points.put(longestId.next(), gameState.playerState(longestId.next()).finalPoints());
 
         sendStateUpdate(gameState, players);
 
-        if (points1 > points2)
-            sendInformation(new Info(playerNames.get(gameState.currentPlayerId())).won(points1, points2), playersValues);
-        else if (points2 > points1)
-            sendInformation(new Info(playerNames.get(gameState.playerState(gameState.currentPlayerId().next()))).won(points2, points1), playersValues);
-        else
-            sendInformation(Info.draw(playerNames.values().stream().collect(Collectors.toList()), points1), playersValues);
+        int player1Points = points.get(PlayerId.PLAYER_1);
+        int player2Points = points.get(PlayerId.PLAYER_2);
 
-    }
-
-    private static int points(PlayerId playerId, Trail trail1, Trail trail2, GameState gameState, Map<PlayerId, String> playerNames, Collection<Player> players){
-        if (trail1.length() > trail2.length()) {
-            sendInformation(new Info(playerNames.get(playerId)).getsLongestTrailBonus(trail1), players);
-            return gameState.playerState(playerId).finalPoints() + Constants.LONGEST_TRAIL_BONUS_POINTS;
-        }
+        if (player1Points > player2Points)
+            sendInformation(new Info(playerNames.get(PlayerId.PLAYER_1))
+                    .won(player1Points, player2Points), playersValues);
+        else if (player2Points > player1Points)
+            sendInformation(new Info(playerNames.get(gameState.playerState(PlayerId.PLAYER_2)))
+                    .won(player2Points, player1Points), playersValues);
         else
-            return gameState.playerState(playerId).finalPoints();
+            sendInformation(Info.draw(playerNames.values().stream()
+                    .collect(Collectors.toList()), player1Points), playersValues);
+
     }
 
     private static void sendInformation(String info, Collection<Player> players) {

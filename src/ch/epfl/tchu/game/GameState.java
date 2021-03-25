@@ -59,7 +59,7 @@ public final class GameState extends PublicGameState {
     /**
      * Retourne l'état complet du joueur d'identité {@code playerId}.
      *
-     * @param playerId le joueur d'identité donnée
+     * @param playerId l'identité donnée
      * @return l'état complet du joueur d'identité {@code playerId}
      */
     @Override

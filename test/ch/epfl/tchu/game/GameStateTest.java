@@ -39,7 +39,7 @@ public class GameStateTest {
     @Test
     void TopTicketFailsWithTooBigCount() {
         assertThrows(IllegalArgumentException.class, () -> {
-            gameState.topTickets(3);
+            gameState.topTickets(5);
         });
     }
 
@@ -60,7 +60,7 @@ public class GameStateTest {
     @Test
     void topCardFails() {
         assertThrows(IllegalArgumentException.class, () -> {
-            gameState.withoutTopTickets(3);
+            gameState.topCard();
         });
     }
 

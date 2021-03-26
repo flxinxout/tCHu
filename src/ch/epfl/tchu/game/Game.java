@@ -5,8 +5,13 @@ import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.gui.Info;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
+/**
+ *
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ */
 public final class Game {
 
     private Game() {
@@ -32,6 +37,7 @@ public final class Game {
         players.forEach((id, player) -> player.initPlayers(id, playerNames));
 
         Collection<Player> playersValues = players.values();
+        Collection<PlayerId> playersId = players.keySet();
 
         //Initialize game
         GameState gameState = GameState.initial(tickets, rng);
@@ -43,32 +49,25 @@ public final class Game {
             gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
         }
 
-        //TODO: find better than map
-
-        Map<PlayerId, SortedBag<Ticket>> playerTickets = new HashMap<>();
-        sendStateUpdate(gameState, players);
-        for (Map.Entry<PlayerId, Player> entry : players.entrySet()) {
-            playerTickets.put(entry.getKey(), entry.getValue().chooseInitialTickets());
+        for (PlayerId id: playersId) {
+            gameState = gameState.withInitiallyChosenTickets(id, players.get(id).chooseInitialTickets());
         }
 
-        //TODO: ca devrait marcher mais bon c'est même pas plus propre
-        /*Map<PlayerId, SortedBag<Ticket>> playerTickets = players.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().chooseInitialTickets()));*/
-
-        playerTickets.forEach((id, ticketsBag) -> sendInformation(new Info(playerNames.get(id))
-                .keptTickets(ticketsBag.size()), playersValues));
+        for (PlayerId id: playersId) {
+            sendInformation(new Info(playerNames.get(id))
+                    .keptTickets(gameState.playerState(id).ticketCount()), playersValues);
+        }
 
         //Game starts
         boolean isPlaying = true;
         boolean lastTurnBegins = false;
+
         while (isPlaying) {
 
             Player currentPlayer = players.get(gameState.currentPlayerId());
             Info currentPlayerInfo = new Info(playerNames.get(gameState.currentPlayerId()));
 
-            //Check if it's the last turn
+            //Vérifie si on entre dans le dernier tour
             if (lastTurnBegins) {
                 sendInformation(currentPlayerInfo
                         .lastTurnBegins(gameState.playerState(gameState.currentPlayerId()).carCount()), playersValues);
@@ -78,10 +77,9 @@ public final class Game {
             sendInformation(currentPlayerInfo.canPlay(), playersValues);
             sendStateUpdate(gameState, players);
 
-            //Ask what the player wants to do during its turn
+            //Demande au joueur l'action qu'il souhaite effectuer
             switch (currentPlayer.nextTurn()) {
                 case DRAW_TICKETS:
-                    //TODO: check size?
                     SortedBag<Ticket> drawnTickets = gameState.topTickets(Constants.IN_GAME_TICKETS_COUNT);
                     sendInformation(currentPlayerInfo.drewTickets(drawnTickets.size()), playersValues);
 
@@ -92,10 +90,12 @@ public final class Game {
 
                 case DRAW_CARDS:
                     for (int i = 0; i < 2; i++) {
+                        gameState = gameState.withCardsDeckRecreatedIfNeeded(rng);
+
                         if (i == 1)
                             sendStateUpdate(gameState, players);
+
                         int slot = currentPlayer.drawSlot();
-                        gameState = gameState.withCardsDeckRecreatedIfNeeded(rng);
                         if (slot != Constants.DECK_SLOT) {
                             gameState = gameState.withDrawnFaceUpCard(slot);
                             sendInformation(currentPlayerInfo
@@ -112,21 +112,25 @@ public final class Game {
                     SortedBag<Card> initialCards = currentPlayer.initialClaimCards();
 
                     if (claimedRoute.level() == Route.Level.UNDERGROUND) {
-                        SortedBag<Card> additionalCards = SortedBag.of();
                         sendInformation(currentPlayerInfo.attemptsTunnelClaim(claimedRoute, initialCards), playersValues);
 
-                        //Draw cards from top of the deck
-                        SortedBag.Builder drawnCardsBuilder = new SortedBag.Builder();
+                        //Tire des cartes du haut de la pioche
+                        SortedBag.Builder<Card> drawnCardsBuilder = new SortedBag.Builder<>();
                         for (int i = 0; i < Constants.ADDITIONAL_TUNNEL_CARDS; i++) {
                             gameState = gameState.withCardsDeckRecreatedIfNeeded(rng);
                             drawnCardsBuilder.add(gameState.topCard());
                             gameState = gameState.withoutTopCard();
                         }
                         SortedBag<Card> drawnCards = drawnCardsBuilder.build();
+
+                        //Calcule les éventuelles cartes additionnelles
                         int additionalCardsCount = claimedRoute.additionalClaimCardsCount(initialCards, drawnCards);
-                        sendInformation(currentPlayerInfo.drewAdditionalCards(drawnCards, additionalCardsCount), playersValues);
+                        sendInformation(currentPlayerInfo
+                                .drewAdditionalCards(drawnCards, additionalCardsCount), playersValues);
 
                         if (additionalCardsCount > 0) {
+                            SortedBag<Card> additionalCards = SortedBag.of();
+
                             List<SortedBag<Card>> options = gameState
                                     .currentPlayerState()
                                     .possibleAdditionalCards(additionalCardsCount, initialCards, drawnCards);
@@ -141,12 +145,10 @@ public final class Game {
                                 gameState = gameState.withClaimedRoute(claimedRoute, usedCards);
                                 sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, usedCards), playersValues);
                             }
-                            //TODO: ce else correct? comme c'est quand même tunnel même si 0 carte additionnelles
                         } else {
                             gameState = gameState.withClaimedRoute(claimedRoute, initialCards);
                             sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, initialCards), playersValues);
                         }
-
                     } else {
                         gameState = gameState.withClaimedRoute(claimedRoute, initialCards);
                         sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, initialCards), playersValues);
@@ -159,8 +161,7 @@ public final class Game {
         }
 
         //End of the game
-        //TODO: find better than map?
-        Map<PlayerId, Trail> longestTrails = new HashMap<>();
+        Map<PlayerId, Trail> longestTrails = new EnumMap<>(PlayerId.class);
         for (PlayerId id: PlayerId.ALL) {
             longestTrails.put(id, Trail.longest(gameState.playerState(id).routes()));
         }
@@ -173,7 +174,7 @@ public final class Game {
         sendInformation(new Info(playerNames.get(longestId))
                 .getsLongestTrailBonus(longestTrailEntry.getValue()), playersValues);
 
-        Map<PlayerId, Integer> points = new HashMap<>();
+        Map<PlayerId, Integer> points = new EnumMap<>(PlayerId.class);
         points.put(longestId, gameState.playerState(longestId).finalPoints() + Constants.LONGEST_TRAIL_BONUS_POINTS);
         points.put(longestId.next(), gameState.playerState(longestId.next()).finalPoints());
 
@@ -186,11 +187,10 @@ public final class Game {
             sendInformation(new Info(playerNames.get(PlayerId.PLAYER_1))
                     .won(player1Points, player2Points), playersValues);
         else if (player2Points > player1Points)
-            sendInformation(new Info(playerNames.get(gameState.playerState(PlayerId.PLAYER_2)))
+            sendInformation(new Info(playerNames.get(PlayerId.PLAYER_2))
                     .won(player2Points, player1Points), playersValues);
         else
-            sendInformation(Info.draw(playerNames.values().stream()
-                    .collect(Collectors.toList()), player1Points), playersValues);
+            sendInformation(Info.draw(new ArrayList<>(playerNames.values()), player1Points), playersValues);
 
     }
 

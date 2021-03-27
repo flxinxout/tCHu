@@ -59,8 +59,11 @@ public final class Game {
         }
 
         //Game starts
+        //TODO: un peu deg ces 3 boolean, le mieux serait de faire une boucle infinie (for(;;))
+        // et de break au bon moment
         boolean isPlaying = true;
         boolean lastTurnBegins = false;
+        int lastTurnCountDown = 2;
 
         while (isPlaying) {
 
@@ -68,11 +71,15 @@ public final class Game {
             Info currentPlayerInfo = new Info(playerNames.get(gameState.currentPlayerId()));
 
             //Vérifie si on entre dans le dernier tour
-            if (lastTurnBegins) {
+            if (lastTurnBegins)
+                --lastTurnCountDown;
+
+            if(lastTurnCountDown == 1) {
                 sendInformation(currentPlayerInfo
                         .lastTurnBegins(gameState.playerState(gameState.currentPlayerId()).carCount()), playersValues);
-                isPlaying = false;
             }
+            else if(lastTurnCountDown == 0)
+                isPlaying = false;
 
             sendInformation(currentPlayerInfo.canPlay(), playersValues);
             sendStateUpdate(gameState, players);
@@ -166,6 +173,7 @@ public final class Game {
             longestTrails.put(id, Trail.longest(gameState.playerState(id).routes()));
         }
 
+        //TODO: erreur dans le cas d'une égalité psk seulement 1 est retourné
         Map.Entry<PlayerId, Trail> longestTrailEntry = longestTrails.entrySet().stream()
                 .max(Comparator.comparingInt(entry -> entry.getValue().length()))
                 .orElseThrow();

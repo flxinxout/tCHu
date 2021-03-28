@@ -178,38 +178,23 @@ public final class Game {
         for (PlayerId id: playersId)
             longestTrails.put(id, Trail.longest(gameState.playerState(id).routes()));
 
-        //Sert à vérifier s'il y a égalité sur la longueur des chemins
-        //Utilisation des streams afin que ça reste compatible en cas d'ajout de joueurs au jeu (> 2)
-        boolean allLongestHaveSameLength = longestTrails.values().stream()
+        //Nous avons choisi d'utiliser des streams afin que ça reste compatible en cas d'ajout de joueurs au jeu (> 2),
+        //Bien que cela complique légèrement le code qui aurait été nécessaire dans le cas spécifique à deux joueurs.
+        int maxLength = longestTrails.values().stream()
                 .mapToInt(Trail::length)
-                .distinct()
-                .count() == 1;
+                .max()
+                .orElse(0);
 
-        if (allLongestHaveSameLength){
-            for (PlayerId id : playersId) {
-                sendInformation(new Info(playerNames.get(id))
-                        .getsLongestTrailBonus(longestTrails.get(id)), playersValues);
+        for (Map.Entry<PlayerId, Trail> idTrail : longestTrails.entrySet()){
+            PlayerId id = idTrail.getKey();
+            Trail tr = idTrail.getValue();
 
+            if (tr.length() == maxLength) {
+                sendInformation(new Info(playerNames.get(id)).getsLongestTrailBonus(tr), playersValues);
                 points.put(id, gameState.playerState(id).finalPoints() + Constants.LONGEST_TRAIL_BONUS_POINTS);
             }
-        } else {
-            //orElseThrow n'est pas censé être appelé
-            Map.Entry<PlayerId, Trail> longestTrailEntry = longestTrails.entrySet().stream()
-                    .max(Comparator.comparingInt(entry -> entry.getValue().length()))
-                    .orElseThrow();
-
-            PlayerId longestId = longestTrailEntry.getKey();
-            sendInformation(new Info(playerNames.get(longestId))
-                    .getsLongestTrailBonus(longestTrailEntry.getValue()), playersValues);
-
-            //Boucle for afin que ça reste compatible en cas d'ajout de joueurs au jeu (> 2)
-            for (PlayerId id : playersId) {
-                if(id == longestId)
-                    points.put(id, gameState
-                            .playerState(id).finalPoints() + Constants.LONGEST_TRAIL_BONUS_POINTS);
-                else
-                    points.put(id, gameState.playerState(id).finalPoints());
-            }
+            else
+                points.put(id, gameState.playerState(id).finalPoints());
         }
 
         sendStateUpdate(gameState, players);

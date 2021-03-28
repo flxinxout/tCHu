@@ -84,7 +84,7 @@ public final class Info {
     /**
      * Retourne le message déclarant que ce joueur a gardé {@code count} billets.
      *
-     * @param count le nombre de billets donné
+     * @param count le nombre de billets gardés
      * @return le message déclarant que ce joueur a gardé {@code count} billets
      */
     public String keptTickets(int count) {

@@ -7,7 +7,7 @@ import ch.epfl.tchu.gui.Info;
 import java.util.*;
 
 /**
- *
+ * Une partie de tCHu.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
@@ -18,7 +18,7 @@ public final class Game {
     }
 
     /**
-     * Fait jouer une partie de tCHu aux joueurs donnés, dont les noms figurent dans la table {@code playerNames} ;
+     * Fait jouer une partie de tCHu aux joueurs donnés, dont les noms figurent dans la table {@code playerNames};
      * les billets disponibles pour cette partie sont ceux de {@code tickets},
      * et le générateur aléatoire {@code rng} est utilisé pour créer l'état initial du jeu et pour mélanger les cartes
      * de la défausse pour en faire une nouvelle pioche quand cela est nécessaire.
@@ -33,11 +33,11 @@ public final class Game {
                             SortedBag<Ticket> tickets, Random rng) {
         Preconditions.checkArgument(players.size() == 2 && playerNames.size() == 2);
 
+        final Collection<Player> playersValues = players.values();
+        final Collection<PlayerId> playersId = players.keySet();
+
         //Initialize players
         players.forEach((id, player) -> player.initPlayers(id, playerNames));
-
-        Collection<Player> playersValues = players.values();
-        Collection<PlayerId> playersId = players.keySet();
 
         //Initialize game
         GameState gameState = GameState.initial(tickets, rng);
@@ -49,6 +49,7 @@ public final class Game {
             gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
         }
 
+        sendStateUpdate(gameState, players);
         for (PlayerId id: playersId) {
             gameState = gameState.withInitiallyChosenTickets(id, players.get(id).chooseInitialTickets());
         }
@@ -59,7 +60,7 @@ public final class Game {
         }
 
         //Game starts
-        //TODO: un peu deg ces 3 boolean, le mieux serait de faire une boucle infinie (for(;;))
+        //TODO: un peu deg ces 3 variables, le mieux serait de faire une boucle infinie (for(;;))
         // et de break au bon moment
         boolean isPlaying = true;
         boolean lastTurnBegins = false;
@@ -136,22 +137,24 @@ public final class Game {
                                 .drewAdditionalCards(drawnCards, additionalCardsCount), playersValues);
 
                         if (additionalCardsCount > 0) {
-                            SortedBag<Card> additionalCards = SortedBag.of();
-
                             List<SortedBag<Card>> options = gameState
                                     .currentPlayerState()
                                     .possibleAdditionalCards(additionalCardsCount, initialCards, drawnCards);
 
-                            if (!options.isEmpty())
+                            SortedBag<Card> additionalCards = SortedBag.of();
+                            if (!options.isEmpty()) {
                                 additionalCards = currentPlayer.chooseAdditionalCards(options);
 
-                            if (additionalCards.isEmpty())
-                                sendInformation(currentPlayerInfo.didNotClaimRoute(claimedRoute), playersValues);
-                            else {
-                                SortedBag<Card> usedCards = initialCards.union(additionalCards);
-                                gameState = gameState.withClaimedRoute(claimedRoute, usedCards);
-                                sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, usedCards), playersValues);
+                                if (!additionalCards.isEmpty()) {
+                                    SortedBag<Card> usedCards = initialCards.union(additionalCards);
+                                    gameState = gameState.withClaimedRoute(claimedRoute, usedCards);
+                                    sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, usedCards), playersValues);
+                                }
                             }
+
+                            if(additionalCards.isEmpty())
+                                sendInformation(currentPlayerInfo.didNotClaimRoute(claimedRoute), playersValues);
+
                         } else {
                             gameState = gameState.withClaimedRoute(claimedRoute, initialCards);
                             sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, initialCards), playersValues);
@@ -167,39 +170,66 @@ public final class Game {
             sendStateUpdate(gameState, players);
         }
 
-        //End of the game
-        Map<PlayerId, Trail> longestTrails = new EnumMap<>(PlayerId.class);
-        for (PlayerId id: PlayerId.ALL) {
-            longestTrails.put(id, Trail.longest(gameState.playerState(id).routes()));
-        }
-
-        //TODO: erreur dans le cas d'une égalité psk seulement 1 est retourné
-        Map.Entry<PlayerId, Trail> longestTrailEntry = longestTrails.entrySet().stream()
-                .max(Comparator.comparingInt(entry -> entry.getValue().length()))
-                .orElseThrow();
-
-        PlayerId longestId = longestTrailEntry.getKey();
-        sendInformation(new Info(playerNames.get(longestId))
-                .getsLongestTrailBonus(longestTrailEntry.getValue()), playersValues);
-
+        //Fin du jeu
         Map<PlayerId, Integer> points = new EnumMap<>(PlayerId.class);
-        points.put(longestId, gameState.playerState(longestId).finalPoints() + Constants.LONGEST_TRAIL_BONUS_POINTS);
-        points.put(longestId.next(), gameState.playerState(longestId.next()).finalPoints());
+        Map<PlayerId, Trail> longestTrails = new EnumMap<>(PlayerId.class);
+
+        //Calcul du chemin le plus long
+        for (PlayerId id: playersId)
+            longestTrails.put(id, Trail.longest(gameState.playerState(id).routes()));
+
+        //Sert à vérifier s'il y a égalité sur la longueur des chemins
+        //Utilisation des streams afin que ça reste compatible en cas d'ajout de joueurs au jeu (> 2)
+        boolean allLongestHaveSameLength = longestTrails.values().stream()
+                .mapToInt(Trail::length)
+                .distinct()
+                .count() == 1;
+
+        if (allLongestHaveSameLength){
+            for (PlayerId id : playersId) {
+                sendInformation(new Info(playerNames.get(id))
+                        .getsLongestTrailBonus(longestTrails.get(id)), playersValues);
+
+                points.put(id, gameState.playerState(id).finalPoints() + Constants.LONGEST_TRAIL_BONUS_POINTS);
+            }
+        } else {
+            //orElseThrow n'est pas censé être appelé
+            Map.Entry<PlayerId, Trail> longestTrailEntry = longestTrails.entrySet().stream()
+                    .max(Comparator.comparingInt(entry -> entry.getValue().length()))
+                    .orElseThrow();
+
+            PlayerId longestId = longestTrailEntry.getKey();
+            sendInformation(new Info(playerNames.get(longestId))
+                    .getsLongestTrailBonus(longestTrailEntry.getValue()), playersValues);
+
+            //Boucle for afin que ça reste compatible en cas d'ajout de joueurs au jeu (> 2)
+            for (PlayerId id : playersId) {
+                if(id == longestId)
+                    points.put(id, gameState
+                            .playerState(id).finalPoints() + Constants.LONGEST_TRAIL_BONUS_POINTS);
+                else
+                    points.put(id, gameState.playerState(id).finalPoints());
+            }
+        }
 
         sendStateUpdate(gameState, players);
 
-        int player1Points = points.get(PlayerId.PLAYER_1);
-        int player2Points = points.get(PlayerId.PLAYER_2);
+        boolean playersAreEqual = points.values().stream()
+                .distinct()
+                .count() == 1;
 
-        if (player1Points > player2Points)
-            sendInformation(new Info(playerNames.get(PlayerId.PLAYER_1))
-                    .won(player1Points, player2Points), playersValues);
-        else if (player2Points > player1Points)
-            sendInformation(new Info(playerNames.get(PlayerId.PLAYER_2))
-                    .won(player2Points, player1Points), playersValues);
-        else
-            sendInformation(Info.draw(new ArrayList<>(playerNames.values()), player1Points), playersValues);
+        if (playersAreEqual)
+            sendInformation(Info.draw(new ArrayList<>(playerNames.values()), points.get(PlayerId.PLAYER_1)), playersValues);
+        else {
+            Map.Entry<PlayerId, Integer> winnerEntry = points.entrySet().stream()
+                    .max(Comparator.comparingInt(Map.Entry::getValue))
+                    .orElseThrow();
 
+            PlayerId winnerId = winnerEntry.getKey();
+
+            sendInformation(new Info(playerNames.get(winnerId))
+                    .won(points.get(winnerId), points.get(winnerId.next())), playersValues);
+        }
     }
 
     private static void sendInformation(String info, Collection<Player> players) {

@@ -228,13 +228,13 @@ public final class GameState extends PublicGameState {
 
     /**
      * Retourne un état identique au récepteur mais dans lequel le joueur courant
-     * s'est emparé de la route {@code route} donnée au moyen des cartes données {@code cards}.
+     * s'est emparé de la route {@code route} au moyen des cartes {@code cards}.
      * Les cartes utilisées sont ajoutées à la défausse.
      *
      * @param route la route dont le joueur s'est emparé
      * @param cards les cartes utilisées pour s'emparer de {@code route}
      * @return un état identique au récepteur mais dans lequel le joueur courant s'est emparé de la route {@code route}
-     * donnée au moyen des cartes données {@code cards}
+     * au moyen des cartes {@code cards}
      */
     public GameState withClaimedRoute(Route route, SortedBag<Card> cards) {
         Map<PlayerId, PlayerState> newPlayerState = new EnumMap<>(playerState);

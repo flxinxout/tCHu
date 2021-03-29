@@ -48,7 +48,7 @@ public final class Trip {
         Preconditions.checkArgument(!from.isEmpty() && !to.isEmpty() && points > 0);
 
         //TODO: better the lambda or the double foreach?
-        List<Trip> trips = new ArrayList<>();
+        final List<Trip> trips = new ArrayList<>();
         from.forEach(f -> to.forEach(t -> trips.add(new Trip(f, t, points))));
 
         /*for (Station f : from) {

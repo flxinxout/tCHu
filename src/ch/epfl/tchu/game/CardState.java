@@ -41,7 +41,7 @@ public final class CardState extends PublicCardState {
 
         //On n'appelle pas deck.topCards(Constants.FACE_UP_CARDS_COUNT) car ça trierait les cartes automatiquement
         //à cause du SortedBag, ce n'est pas le comportement voulu.
-        List<Card> newTopCards = new ArrayList<>();
+        final List<Card> newTopCards = new ArrayList<>();
         for (int slot : Constants.FACE_UP_CARD_SLOTS) {
             newTopCards.add(deck.topCard());
             deck = deck.withoutTopCard();
@@ -65,7 +65,7 @@ public final class CardState extends PublicCardState {
         Objects.checkIndex(slot, faceUpCards().size());
         Preconditions.checkArgument(!isDeckEmpty());
 
-        List<Card> newCardsFaceUp = new ArrayList<>(faceUpCards());
+        final List<Card> newCardsFaceUp = new ArrayList<>(faceUpCards());
         newCardsFaceUp.set(slot, deck.topCard());
 
         return new CardState(newCardsFaceUp, deck.withoutTopCard(), discards);
@@ -87,7 +87,6 @@ public final class CardState extends PublicCardState {
      */
     public CardState withoutTopDeckCard() {
         Preconditions.checkArgument(!isDeckEmpty());
-
         return new CardState(faceUpCards(), deck.withoutTopCard(), discards);
     }
 

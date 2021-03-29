@@ -128,7 +128,7 @@ public final class Route {
      * pour s'emparer de la route
      */
     public List<SortedBag<Card>> possibleClaimCards() {
-        List<SortedBag<Card>> possibleClaimCardsList = new ArrayList<>();
+        final List<SortedBag<Card>> possibleClaimCardsList = new ArrayList<>();
 
         //Si la route n'est pas de couleur neutre
         if (color != null) {
@@ -147,10 +147,7 @@ public final class Route {
         }
         //Si la route est de couleur neutre
         else {
-            //TODO: lambda or foreach?
             Card.CARS.forEach(car -> possibleClaimCardsList.add(SortedBag.of(length, car)));
-            /*for (Card car : Card.CARS)
-                possibleClaimCardsList.add(SortedBag.of(length, car));*/
 
             //Si la route est un tunnel
             if (level == Level.UNDERGROUND) {
@@ -184,7 +181,7 @@ public final class Route {
         Preconditions.checkArgument(level == Level.UNDERGROUND
                 && drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
 
-        int additionalCards = 0;
+        int additionalCards;
         Color claimColor = null;
 
         if (!claimCards.isEmpty())

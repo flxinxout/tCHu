@@ -69,11 +69,9 @@ public final class Ticket implements Comparable<Ticket> {
             return String.format("%s - %s (%s)", firstTrip.from(), firstTrip.to(), firstTrip.points());
 
         //Billet de plus d'un trajet
-        TreeSet<String> stationsToTexts = new TreeSet<>();
-        //TODO: lambda or loop?
+        final TreeSet<String> stationsToTexts = new TreeSet<>();
         tripList.forEach(trip -> stationsToTexts.add(String.format("%s (%s)", trip.to().name(), trip.points())));
-        /*for (Trip trip : tripList)
-            stationsToTexts.add(String.format("%s (%s)", trip.to().name(), trip.points()));*/
+
         return String.format("%s - {%s}", firstTrip.from(), String.join(", ", stationsToTexts));
     }
 
@@ -89,7 +87,7 @@ public final class Ticket implements Comparable<Ticket> {
                 .filter(trip -> connectivity.connected(trip.from(), trip.to()))
                 .collect(Collectors.toList());
 
-        int minPoints = trips.stream()
+        final int minPoints = trips.stream()
                 .mapToInt(trip -> trip.points())
                 .min()
                 .getAsInt();
@@ -97,10 +95,11 @@ public final class Ticket implements Comparable<Ticket> {
         if (connectedTrips.isEmpty())
             return -minPoints;
 
-        int maxPoints = connectedTrips.stream()
+        final int maxPoints = connectedTrips.stream()
                 .mapToInt(trip -> trip.points())
                 .max()
                 .getAsInt();
+
         return maxPoints;
     }
 

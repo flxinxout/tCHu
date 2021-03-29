@@ -34,7 +34,7 @@ public final class Deck<C extends Comparable<C>> {
      * @return le tas de cartes
      */
     public static <C extends Comparable<C>> Deck<C> of(SortedBag<C> cards, Random rng) {
-        List<C> newCardsList = cards.toList();
+        final List<C> newCardsList = cards.toList();
         Collections.shuffle(newCardsList, rng);
         return new Deck<>(newCardsList);
     }
@@ -71,7 +71,7 @@ public final class Deck<C extends Comparable<C>> {
     public Deck<C> withoutTopCard() {
         Preconditions.checkArgument(!isEmpty());
 
-        List<C> newListOfCards = cards.subList(1, size());
+        final List<C> newListOfCards = cards.subList(1, size());
         return new Deck<>(newListOfCards);
     }
 
@@ -85,7 +85,7 @@ public final class Deck<C extends Comparable<C>> {
     public SortedBag<C> topCards(int count) {
         Preconditions.checkArgument(count >= 0 && count <= size());
 
-        SortedBag.Builder<C> builder = new SortedBag.Builder<>();
+        final SortedBag.Builder<C> builder = new SortedBag.Builder<>();
         for (int i = 0; i < count; i++) {
             builder.add(cards.get(i));
         }
@@ -102,7 +102,7 @@ public final class Deck<C extends Comparable<C>> {
     public Deck<C> withoutTopCards(int count) {
         Preconditions.checkArgument(count >= 0 && count <= size());
 
-        List<C> newListOfCards = cards.subList(count, size());
+        final List<C> newListOfCards = cards.subList(count, size());
         return new Deck<>(newListOfCards);
     }
 }

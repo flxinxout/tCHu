@@ -62,6 +62,8 @@ public final class Game {
         //Début de la partie
         //TODO: un peu deg ces 3 variables, le mieux serait de faire une boucle infinie (for(;;))
         // et de break au bon moment
+
+        //TODO:
         boolean isPlaying = true;
         boolean lastTurnBegins = false;
         int lastTurnCountDown = 2;
@@ -102,7 +104,7 @@ public final class Game {
                         if (i == 1)
                             sendStateUpdate(gameState, players);
 
-                        int slot = currentPlayer.drawSlot();
+                        final int slot = currentPlayer.drawSlot();
 
                         if (slot != Constants.DECK_SLOT) {
                             gameState = gameState.withDrawnFaceUpCard(slot);
@@ -165,8 +167,8 @@ public final class Game {
         }
 
         //Fin du jeu
-        Map<PlayerId, Integer> points = new EnumMap<>(PlayerId.class);
-        Map<PlayerId, Trail> longestTrails = new EnumMap<>(PlayerId.class);
+        final Map<PlayerId, Integer> points = new EnumMap<>(PlayerId.class);
+        final Map<PlayerId, Trail> longestTrails = new EnumMap<>(PlayerId.class);
 
         //Calcul du chemin le plus long
         for (PlayerId id : PlayerId.ALL)
@@ -174,7 +176,7 @@ public final class Game {
 
         //Nous avons choisi d'utiliser des streams afin que ça reste compatible en cas d'ajout de joueurs au jeu (> 2),
         //Bien que cela complique légèrement le code qui aurait été nécessaire dans le cas spécifique à deux joueurs.
-        int maxLength = longestTrails.values().stream()
+        final int maxLength = longestTrails.values().stream()
                 .mapToInt(Trail::length)
                 .max()
                 .orElse(0);
@@ -192,7 +194,7 @@ public final class Game {
 
         sendStateUpdate(gameState, players);
 
-        boolean playersAreEqual = points.values().stream()
+        final boolean playersAreEqual = points.values().stream()
                 .distinct()
                 .count() == 1;
 
@@ -203,7 +205,7 @@ public final class Game {
                     .max(Comparator.comparingInt(Map.Entry::getValue))
                     .orElseThrow();
 
-            PlayerId winnerId = winnerEntry.getKey();
+            final PlayerId winnerId = winnerEntry.getKey();
 
             sendInformation(new Info(playerNames.get(winnerId))
                     .won(points.get(winnerId), points.get(winnerId.next())), playersValues);

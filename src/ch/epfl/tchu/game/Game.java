@@ -161,6 +161,12 @@ public final class Game {
                             sendInformation(currentPlayerInfo.didNotClaimRoute(claimedRoute), playersValues);
                             gameState = gameState.withMoreDiscardedCards(drawnCards);
                         }
+
+                      //TODO EUHH J'AI BUGé OU ON LA PAS FAIT ICI pour une route normal ???
+                    } else {
+
+                        sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, initialCards), playersValues);
+                        gameState = gameState.withClaimedRoute(claimedRoute, initialCards);
                     }
 
                 default:

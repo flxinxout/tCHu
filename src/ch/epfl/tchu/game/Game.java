@@ -13,6 +13,7 @@ import java.util.*;
  * @author Giovanni Ranieri (326870)
  */
 public final class Game {
+    private final static int CARDS_DRAWN_COUNT = 2;
 
     private Game() {
     }
@@ -96,7 +97,7 @@ public final class Game {
                     break;
 
                 case DRAW_CARDS:
-                    for (int i = 0; i < 2; i++) {
+                    for (int i = 0; i < CARDS_DRAWN_COUNT; i++) {
                         gameState = gameState.withCardsDeckRecreatedIfNeeded(rng);
 
                         if (i == 1)

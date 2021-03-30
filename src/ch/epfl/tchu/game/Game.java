@@ -37,7 +37,7 @@ public final class Game {
 
         final Collection<Player> playersValues = players.values();
 
-        //Initialisation des joueurs
+        //1. Initialisation des joueurs
         players.forEach((id, player) -> player.initPlayers(id, playerNames));
 
         //Initialisation de la partie
@@ -61,29 +61,11 @@ public final class Game {
                     .keptTickets(gameState.playerState(id).ticketCount()), playersValues);
         }
 
-        //Début de la partie
-        //TODO: un peu deg ces 3 variables, le mieux serait de faire une boucle infinie (for(;;))
-        // et de break au bon moment
-
-        //TODO:
-        boolean isPlaying = true;
-        boolean lastTurnBegins = false;
-        int lastTurnCountDown = 2;
-
-        while (isPlaying) {
+        //2. Début de la partie
+        for (; ; ) {
 
             Player currentPlayer = players.get(gameState.currentPlayerId());
             Info currentPlayerInfo = new Info(playerNames.get(gameState.currentPlayerId()));
-
-            //Vérifie si on entre dans le dernier tour
-            if (lastTurnBegins)
-                --lastTurnCountDown;
-
-            if (lastTurnCountDown == 1) {
-                sendInformation(currentPlayerInfo
-                        .lastTurnBegins(gameState.playerState(gameState.currentPlayerId()).carCount()), playersValues);
-            } else if (lastTurnCountDown == 0)
-                isPlaying = false;
 
             sendInformation(currentPlayerInfo.canPlay(), playersValues);
             sendStateUpdate(gameState, players);
@@ -161,24 +143,29 @@ public final class Game {
                             sendInformation(currentPlayerInfo.didNotClaimRoute(claimedRoute), playersValues);
                             gameState = gameState.withMoreDiscardedCards(drawnCards);
                         }
-
-                      //TODO EUHH J'AI BUGé OU ON LA PAS FAIT ICI pour une route normal ???
                     } else {
-
                         sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, initialCards), playersValues);
                         gameState = gameState.withClaimedRoute(claimedRoute, initialCards);
                     }
+                    break;
 
                 default:
                     break;
             }
 
-            lastTurnBegins = gameState.lastTurnBegins();
+            if (gameState.lastPlayer() == gameState.currentPlayerId()) {
+                sendStateUpdate(gameState, players);
+                break;
+            }
+
+            if (gameState.lastTurnBegins())
+                sendInformation(currentPlayerInfo
+                        .lastTurnBegins(gameState.playerState(gameState.currentPlayerId()).carCount()), playersValues);
+
             gameState = gameState.forNextTurn();
-            sendStateUpdate(gameState, players);
         }
 
-        //Fin du jeu
+        //3. Fin de la partie
         final Map<PlayerId, Integer> points = new EnumMap<>(PlayerId.class);
         final Map<PlayerId, Trail> longestTrails = new EnumMap<>(PlayerId.class);
 
@@ -225,9 +212,7 @@ public final class Game {
     }
 
     /**
-     * Envoye une certaine information à tout les joueurs de la partie.
-     * @param info l'information à transmettre
-     * @param players les joueurs de la partie
+     * Envoie une information à tous les joueurs de la partie.
      */
     private static void sendInformation(String info, Collection<Player> players) {
         players.forEach(p -> p.receiveInfo(info));
@@ -235,8 +220,6 @@ public final class Game {
 
     /**
      * Informe tous les joueurs d'un changement d'état.
-     * @param newState le nouveau state de la partie
-     * @param players la map contenant les id des player et leur interface attribuée
      */
     private static void sendStateUpdate(GameState newState, Map<PlayerId, Player> players) {
         players.forEach((id, p) -> p.updateState(newState, newState.playerState(id)));

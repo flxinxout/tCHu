@@ -4,6 +4,7 @@ import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.gui.Info;
 
+import javax.swing.*;
 import java.util.*;
 
 /**
@@ -32,7 +33,7 @@ public final class Game {
      */
     public static void play(Map<PlayerId, Player> players, Map<PlayerId, String> playerNames,
                             SortedBag<Ticket> tickets, Random rng) {
-        Preconditions.checkArgument(players.size() == 2 && playerNames.size() == 2);
+        Preconditions.checkArgument(players.size() == PlayerId.COUNT && playerNames.size() == PlayerId.COUNT);
 
         final Collection<Player> playersValues = players.values();
 
@@ -155,6 +156,7 @@ public final class Game {
                             SortedBag<Card> usedCards = initialCards.union(additionalCards);
                             gameState = gameState.withClaimedRoute(claimedRoute, usedCards);
                             sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, usedCards), playersValues);
+
                         } else {
                             sendInformation(currentPlayerInfo.didNotClaimRoute(claimedRoute), playersValues);
                             gameState = gameState.withMoreDiscardedCards(drawnCards);
@@ -213,10 +215,20 @@ public final class Game {
         }
     }
 
+    /**
+     * Envoye une certaine information à tout les joueurs de la partie.
+     * @param info l'information à transmettre
+     * @param players les joueurs de la partie
+     */
     private static void sendInformation(String info, Collection<Player> players) {
         players.forEach(p -> p.receiveInfo(info));
     }
 
+    /**
+     * Informe tous les joueurs d'un changement d'état.
+     * @param newState le nouveau state de la partie
+     * @param players la map contenant les id des player et leur interface attribuée
+     */
     private static void sendStateUpdate(GameState newState, Map<PlayerId, Player> players) {
         players.forEach((id, p) -> p.updateState(newState, newState.playerState(id)));
     }

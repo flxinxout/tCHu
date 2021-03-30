@@ -162,6 +162,9 @@ public final class Game {
                             gameState = gameState.withMoreDiscardedCards(drawnCards);
                         }
                     }
+
+                default:
+                    break;
             }
 
             lastTurnBegins = gameState.lastTurnBegins();

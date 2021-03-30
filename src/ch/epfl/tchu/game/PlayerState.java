@@ -100,9 +100,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return vrai ssi le joueur peut s'emparer de la route {@code route}
      */
     public boolean canClaimRoute(Route route) {
-        return carCount() >= route.length() ?
-                route.possibleClaimCards().stream().anyMatch(c -> cards.contains(c)) :
-                false;
+        return carCount() >= route.length() && route.possibleClaimCards().stream().anyMatch(c -> cards.contains(c));
     }
 
     /**
@@ -118,11 +116,9 @@ public final class PlayerState extends PublicPlayerState {
     public List<SortedBag<Card>> possibleClaimCards(Route route) {
         Preconditions.checkArgument(carCount() >= route.length());
 
-        List<SortedBag<Card>> possibleCards = route.possibleClaimCards().stream()
+        return route.possibleClaimCards().stream()
                 .filter(c -> cards.contains(c))
                 .collect(Collectors.toList());
-
-        return possibleCards;
     }
 
     /**
@@ -147,13 +143,13 @@ public final class PlayerState extends PublicPlayerState {
         Preconditions.checkArgument(drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
 
         //1. Create a set of all possible cards in our hands (minus the initial cards)
-        Card initialCardType = initialCards.stream()
+        final Card initialCardType = initialCards.stream()
                 .distinct()
                 .filter(c -> c != Card.LOCOMOTIVE)
                 .findAny()
                 .orElse(Card.LOCOMOTIVE);
 
-        SortedBag<Card> possibleCardsInHand = SortedBag.of(cards.stream()
+        final SortedBag<Card> possibleCardsInHand = SortedBag.of(cards.stream()
                 .filter(c -> c == Card.LOCOMOTIVE || c == initialCardType)
                 .collect(Collectors.toList()))
                 .difference(initialCards);
@@ -162,7 +158,8 @@ public final class PlayerState extends PublicPlayerState {
         Set<SortedBag<Card>> optionsSet = new HashSet<>();
         if (possibleCardsInHand.size() >= additionalCardsCount)
             optionsSet = possibleCardsInHand.subsetsOfSize(additionalCardsCount);
-        List<SortedBag<Card>> optionsList = new ArrayList<>(optionsSet);
+
+        final List<SortedBag<Card>> optionsList = new ArrayList<>(optionsSet);
 
         //3. Sort the list
         optionsList.sort(Comparator.comparingInt(cs -> cs.countOf(Card.LOCOMOTIVE)));
@@ -181,9 +178,9 @@ public final class PlayerState extends PublicPlayerState {
      */
     public PlayerState withClaimedRoute(Route route, SortedBag<Card> claimCards) {
         //TODO: après rendu sem. 6: vérifier que le joueur ait bien les cartes.
-        SortedBag<Card> newCards = cards.difference(claimCards);
+        final SortedBag<Card> newCards = cards.difference(claimCards);
 
-        List<Route> newRoutes = new ArrayList<>(routes());
+        final List<Route> newRoutes = new ArrayList<>(routes());
         newRoutes.add(route);
 
         return new PlayerState(tickets(), newCards, newRoutes);
@@ -195,7 +192,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return le nombre de points obtenus par le joueur grâce à ses billets
      */
     public int ticketPoints() {
-        int maxIndex = Math.max(routes().stream()
+        final int maxIndex = Math.max(routes().stream()
                         .mapToInt(r -> r.station1().id())
                         .max()
                         .orElse(0),
@@ -204,11 +201,11 @@ public final class PlayerState extends PublicPlayerState {
                         .max()
                         .orElse(0));
 
-        StationPartition.Builder connectivityBuilder = new StationPartition.Builder(maxIndex + 1);
+        final StationPartition.Builder connectivityBuilder = new StationPartition.Builder(maxIndex + 1);
         routes().forEach(c -> connectivityBuilder.connect(c.station1(), c.station2()));
-        StationPartition connectivity = connectivityBuilder.build();
+        final StationPartition connectivity = connectivityBuilder.build();
 
-        int points = tickets().stream()
+        final int points = tickets().stream()
                 .mapToInt(t -> t.points(connectivity))
                 .sum();
 

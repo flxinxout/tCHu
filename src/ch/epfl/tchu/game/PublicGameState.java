@@ -2,10 +2,8 @@ package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.Preconditions;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * La partie publique de l'état d'une partie de tCHu.
@@ -109,6 +107,7 @@ public class PublicGameState {
      */
     public List<Route> claimedRoutes() {
         //TODO: stream?
+
         List<Route> routes = new ArrayList<>();
         for (PublicPlayerState ps : playerState.values()) {
             routes.addAll(ps.routes());

@@ -26,8 +26,6 @@ public final class Ticket implements Comparable<Ticket> {
      */
     public Ticket(List<Trip> trips) {
         Preconditions.checkArgument(!trips.isEmpty());
-
-        //TODO: stream ou set
         Preconditions.checkArgument(trips.stream()
                 .map(t -> t.from().name())
                 .distinct()

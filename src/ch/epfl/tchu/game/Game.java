@@ -4,7 +4,6 @@ import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.gui.Info;
 
-import javax.swing.*;
 import java.util.*;
 
 /**
@@ -62,7 +61,8 @@ public final class Game {
         }
 
         //2. Début de la partie
-        for (; ; ) {
+        boolean gameHasEnded = false;
+        while(!gameHasEnded) {
 
             Player currentPlayer = players.get(gameState.currentPlayerId());
             Info currentPlayerInfo = new Info(playerNames.get(gameState.currentPlayerId()));
@@ -135,7 +135,7 @@ public final class Game {
                         }
 
                         if (additionalCardsCount == 0 || !additionalCards.isEmpty()) {
-                            SortedBag<Card> usedCards = initialCards.union(additionalCards);
+                            SortedBag<Card> usedCards = initialCards.union(additionalCards).union(drawnCards);
                             gameState = gameState.withClaimedRoute(claimedRoute, usedCards);
                             sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, usedCards), playersValues);
 
@@ -153,23 +153,23 @@ public final class Game {
                     break;
             }
 
-            if (gameState.lastPlayer() == gameState.currentPlayerId()) {
-                sendStateUpdate(gameState, players);
-                break;
-            }
-
             if (gameState.lastTurnBegins())
                 sendInformation(currentPlayerInfo
                         .lastTurnBegins(gameState.playerState(gameState.currentPlayerId()).carCount()), playersValues);
+
+            if (gameState.lastPlayer() == gameState.currentPlayerId())
+                gameHasEnded = true;
 
             gameState = gameState.forNextTurn();
         }
 
         //3. Fin de la partie
+        sendStateUpdate(gameState, players);
+
         final Map<PlayerId, Integer> points = new EnumMap<>(PlayerId.class);
         final Map<PlayerId, Trail> longestTrails = new EnumMap<>(PlayerId.class);
 
-        //Calcul du chemin le plus long
+        //Calcul du chemin le plus long de chacun des joueurs
         for (PlayerId id : PlayerId.ALL)
             longestTrails.put(id, Trail.longest(gameState.playerState(id).routes()));
 

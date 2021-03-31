@@ -101,11 +101,11 @@ public interface Player {
     /**
      * Appelée lorsque le joueur a décidé de tenter de s'emparer d'un tunnel et que des cartes additionnelles
      * sont nécessaires, afin de savoir quelle(s) carte(s) il désire utiliser pour cela, les possibilités lui
-     * étant passées en argument; si le multiensemble retourné est vide, cela signifie que le joueur ne désire
+     * étant passées en argument; si le multi-ensemble retourné est vide, cela signifie que le joueur ne désire
      * pas (ou ne peut pas) choisir l'une de ces possibilités.
      *
      * @param options les possibilités de cartes pour s'emparer d'un tunnel
-     * @return un multiensemble vide si le joueur ne désire pas (ou ne peut pas) choisir l'une de ces possibilités.
+     * @return un multi-ensemble vide si le joueur ne désire pas (ou ne peut pas) choisir l'une de ces possibilités.
      */
     SortedBag<Card> chooseAdditionalCards(List<SortedBag<Card>> options);
 

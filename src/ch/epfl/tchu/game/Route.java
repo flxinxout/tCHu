@@ -152,7 +152,6 @@ public final class Route {
             //Si la route est un tunnel
             if (level == Level.UNDERGROUND) {
                 for (int i = 1; i < length; i++) {
-                    //TODO: lambda or foreach?
                     for (Card car : Card.CARS) {
                         SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
                         cardsBuilder.add(length - i, car);
@@ -181,29 +180,13 @@ public final class Route {
         Preconditions.checkArgument(level == Level.UNDERGROUND
                 && drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
 
-        int additionalCards;
-        Color claimColor = null;
+        Card claimCard = claimCards.stream()
+                .findFirst()
+                .orElse(Card.LOCOMOTIVE);
 
-        if (!claimCards.isEmpty())
-            claimColor = claimCards.get(0).color();
-
-        //TODO: stream or foreach below
-        Color finalClaimColor = claimColor;
-        additionalCards = (int) drawnCards.stream()
-                .filter(card -> card == Card.LOCOMOTIVE || card.color() == finalClaimColor)
+        return (int) drawnCards.stream()
+                .filter(card -> card == Card.LOCOMOTIVE || card == claimCard)
                 .count();
-
-        /*for (Card card : drawnCards) {
-            if (card == Card.LOCOMOTIVE)
-                additionalCards++;
-            else {
-                if (card.color() == claimColor)
-                    additionalCards++;
-            }
-        }*/
-
-        return additionalCards;
-
     }
 
     /**

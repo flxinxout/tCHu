@@ -135,14 +135,14 @@ public final class Game {
                         }
 
                         if (additionalCardsCount == 0 || !additionalCards.isEmpty()) {
-                            SortedBag<Card> usedCards = initialCards.union(additionalCards).union(drawnCards);
+                            SortedBag<Card> usedCards = initialCards.union(additionalCards);
                             gameState = gameState.withClaimedRoute(claimedRoute, usedCards);
                             sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, usedCards), playersValues);
 
-                        } else {
+                        } else
                             sendInformation(currentPlayerInfo.didNotClaimRoute(claimedRoute), playersValues);
-                            gameState = gameState.withMoreDiscardedCards(drawnCards);
-                        }
+
+                        gameState = gameState.withMoreDiscardedCards(drawnCards);
                     } else {
                         sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, initialCards), playersValues);
                         gameState = gameState.withClaimedRoute(claimedRoute, initialCards);

@@ -35,13 +35,15 @@ public final class Game {
         Preconditions.checkArgument(players.size() == PlayerId.COUNT && playerNames.size() == PlayerId.COUNT);
 
         final Collection<Player> playersValues = players.values();
+        final Map<PlayerId, Info> infos = new EnumMap<>(PlayerId.class);
+        playerNames.forEach((id, name) -> infos.put(id, new Info(name)));
 
         //1. Initialisation des joueurs
         players.forEach((id, player) -> player.initPlayers(id, playerNames));
 
         //Initialisation de la partie
         GameState gameState = GameState.initial(tickets, rng);
-        sendInformation(new Info(playerNames.get(gameState.currentPlayerId())).willPlayFirst(), playersValues);
+        sendInformation(infos.get(gameState.currentPlayerId()).willPlayFirst(), playersValues);
 
         //Affichage et choix des tickets initiaux
         for (Player player : playersValues) { //Affichage
@@ -51,21 +53,18 @@ public final class Game {
 
         sendStateUpdate(gameState, players); //Adapter l'interface graphique
 
-        for (PlayerId id : PlayerId.ALL) { //Choix
+        for (PlayerId id : PlayerId.ALL) //Choix
             gameState = gameState.withInitiallyChosenTickets(id, players.get(id).chooseInitialTickets());
-        }
 
-        for (PlayerId id : PlayerId.ALL) { //Envoi de l'information
-            sendInformation(new Info(playerNames.get(id))
-                    .keptTickets(gameState.playerState(id).ticketCount()), playersValues);
-        }
+        for (PlayerId id : PlayerId.ALL) //Envoi de l'information
+            sendInformation(infos.get(id).keptTickets(gameState.playerState(id).ticketCount()), playersValues);
 
         //2. Début de la partie
         boolean gameHasEnded = false;
         while(!gameHasEnded) {
 
             Player currentPlayer = players.get(gameState.currentPlayerId());
-            Info currentPlayerInfo = new Info(playerNames.get(gameState.currentPlayerId()));
+            Info currentPlayerInfo = infos.get(gameState.currentPlayerId());
 
             sendInformation(currentPlayerInfo.canPlay(), playersValues);
             sendStateUpdate(gameState, players);
@@ -105,7 +104,10 @@ public final class Game {
                     Route claimedRoute = currentPlayer.claimedRoute();
                     SortedBag<Card> initialCards = currentPlayer.initialClaimCards();
 
-                    if (claimedRoute.level() == Route.Level.UNDERGROUND) {
+                    if(claimedRoute.level() == Route.Level.OVERGROUND) {
+                        sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, initialCards), playersValues);
+                        gameState = gameState.withClaimedRoute(claimedRoute, initialCards);
+                    } else {
                         sendInformation(currentPlayerInfo.attemptsTunnelClaim(claimedRoute, initialCards), playersValues);
 
                         //Tire des cartes du haut de la pioche
@@ -122,9 +124,9 @@ public final class Game {
                         sendInformation(currentPlayerInfo
                                 .drewAdditionalCards(drawnCards, additionalCardsCount), playersValues);
 
+                        //S'il y a des cartes additionnelles, calcule les cartes que le joueur pourrait jouer
                         SortedBag<Card> additionalCards = SortedBag.of();
 
-                        //S'il y a des cartes additionnelles, calcule les cartes que le joueur pourrait jouer
                         if (additionalCardsCount > 0) {
                             List<SortedBag<Card>> options = gameState
                                     .currentPlayerState()
@@ -138,14 +140,10 @@ public final class Game {
                             SortedBag<Card> usedCards = initialCards.union(additionalCards);
                             gameState = gameState.withClaimedRoute(claimedRoute, usedCards);
                             sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, usedCards), playersValues);
-
                         } else
                             sendInformation(currentPlayerInfo.didNotClaimRoute(claimedRoute), playersValues);
 
                         gameState = gameState.withMoreDiscardedCards(drawnCards);
-                    } else {
-                        sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, initialCards), playersValues);
-                        gameState = gameState.withClaimedRoute(claimedRoute, initialCards);
                     }
                     break;
 
@@ -154,17 +152,16 @@ public final class Game {
             }
 
             if (gameState.lastTurnBegins())
-                sendInformation(currentPlayerInfo
-                        .lastTurnBegins(gameState.playerState(gameState.currentPlayerId()).carCount()), playersValues);
+                sendInformation(currentPlayerInfo.lastTurnBegins(gameState.currentPlayerState().carCount()), playersValues);
 
-            if (gameState.lastPlayer() == gameState.currentPlayerId())
-                gameHasEnded = true;
+            gameHasEnded = gameState.lastPlayer() == gameState.currentPlayerId();
 
             gameState = gameState.forNextTurn();
         }
 
         //3. Fin de la partie
-        sendStateUpdate(gameState, players);
+        GameState finalGameState = gameState;
+        sendStateUpdate(finalGameState, players);
 
         final Map<PlayerId, Integer> points = new EnumMap<>(PlayerId.class);
         final Map<PlayerId, Trail> longestTrails = new EnumMap<>(PlayerId.class);
@@ -173,25 +170,20 @@ public final class Game {
         for (PlayerId id : PlayerId.ALL)
             longestTrails.put(id, Trail.longest(gameState.playerState(id).routes()));
 
-        //Nous avons choisi d'utiliser des streams afin que ça reste compatible en cas d'ajout de joueurs au jeu (> 2),
+        //Nous avons choisi d'utiliser des streams afin que ça facilite l'ajout de joueurs au jeu (> 2),
         //Bien que cela complique légèrement le code qui aurait été nécessaire dans le cas spécifique à deux joueurs.
         final int maxLength = longestTrails.values().stream()
                 .mapToInt(Trail::length)
                 .max()
                 .orElse(0);
 
-        for (Map.Entry<PlayerId, Trail> idTrail : longestTrails.entrySet()) {
-            PlayerId id = idTrail.getKey();
-            Trail tr = idTrail.getValue();
-
+        longestTrails.forEach((id, tr) -> {
             if (tr.length() == maxLength) {
-                sendInformation(new Info(playerNames.get(id)).getsLongestTrailBonus(tr), playersValues);
-                points.put(id, gameState.playerState(id).finalPoints() + Constants.LONGEST_TRAIL_BONUS_POINTS);
+                sendInformation(infos.get(id).getsLongestTrailBonus(tr), playersValues);
+                points.put(id, finalGameState.playerState(id).finalPoints() + Constants.LONGEST_TRAIL_BONUS_POINTS);
             } else
-                points.put(id, gameState.playerState(id).finalPoints());
-        }
-
-        sendStateUpdate(gameState, players);
+                points.put(id, finalGameState.playerState(id).finalPoints());
+        });
 
         final boolean playersAreEqual = points.values().stream()
                 .distinct()
@@ -200,14 +192,12 @@ public final class Game {
         if (playersAreEqual)
             sendInformation(Info.draw(new ArrayList<>(playerNames.values()), points.get(PlayerId.PLAYER_1)), playersValues);
         else {
-            Map.Entry<PlayerId, Integer> winnerEntry = points.entrySet().stream()
+            PlayerId winnerId = points.entrySet().stream()
                     .max(Comparator.comparingInt(Map.Entry::getValue))
-                    .orElseThrow();
+                    .orElseThrow()
+                    .getKey();
 
-            final PlayerId winnerId = winnerEntry.getKey();
-
-            sendInformation(new Info(playerNames.get(winnerId))
-                    .won(points.get(winnerId), points.get(winnerId.next())), playersValues);
+            sendInformation(infos.get(winnerId).won(points.get(winnerId), points.get(winnerId.next())), playersValues);
         }
     }
 

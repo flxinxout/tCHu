@@ -3,7 +3,10 @@ package ch.epfl.tchu.game;
 import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
 /**
  * Partie totale (publique et privée) de l'état des cartes wagon/locomotive qui ne sont pas en main des joueurs.

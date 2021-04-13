@@ -2,7 +2,9 @@ package ch.epfl.tchu.net;
 
 import ch.epfl.tchu.SortedBag;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -61,22 +63,7 @@ public interface Serde<E> {
      * @return le serde correspondant à la sérialisation et la désérialisation du paramètre donné.
      */
     static <T> Serde<T> oneOf(List<T> values) {
-
-        return new Serde<T>() {
-            @Override
-            public String serialize(T obj) {
-                return Integer.toString(values.indexOf(obj));
-            }
-
-            @Override
-            public T deserialize(String str) {
-                return values.get(Integer.parseInt(str));
-            }
-        };
-
-       /* //PAS SUR DU CAST...
-        return Serde.of(i -> Serdes.SERDE_OF_INTEGERS.serialize(values.indexOf(i)),
-                i -> );*/
+        return Serde.of(i -> Integer.toString(values.indexOf(i)), s -> values.get(Integer.parseInt(s)));
     }
 
     /**

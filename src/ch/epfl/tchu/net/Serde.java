@@ -5,7 +5,6 @@ import ch.epfl.tchu.SortedBag;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -78,18 +77,18 @@ public interface Serde<E> {
      * @param <T> le paramètre de type de la méthode
      * @return un serde capable de (dé)sérialiser des listes de valeurs (dé)sérialisées par le serde donné
      */
-    static <T> Serde<List<T>> listOf(Serde<T> serde, String delimiter) {
+    static <T> Serde<List<T>> listOf(Serde<T> serde, char delimiter) {
         return new Serde<>() {
             @Override
             public String serialize(List<T> list) {
                 return list.stream()
                         .map(t -> serde.serialize(t))
-                        .collect(Collectors.joining(delimiter));
+                        .collect(Collectors.joining(String.valueOf(delimiter)));
             }
 
             @Override
             public List<T> deserialize(String str) {
-                String[] splits = str.split(Pattern.quote(delimiter), -1);
+                String[] splits = str.split(Pattern.quote(String.valueOf(delimiter)), -1);
                 return Arrays.stream(splits)
                         .map(s -> serde.deserialize(s))
                         .collect(Collectors.toList());
@@ -101,27 +100,25 @@ public interface Serde<E> {
      * Retourne un serde capable de (dé)sérialiser un {@code SortedBag} de valeurs (dé)sérialisées par le serde donné.
      *
      * @param serde le serde donné
-     * @param separationChar le caractère de séparation
+     * @param delimiter le caractère de séparation
      * @param <T> le paramètre de type de la méthode
      * @return un serde capable de (dé)sérialiser des listes de valeurs (dé)sérialisées par le serde donné.
      */
-    static <T extends Comparable<T>> Serde<SortedBag<T>> bagOf(Serde<T> serde, String separationChar) {
+    static <T extends Comparable<T>> Serde<SortedBag<T>> bagOf(Serde<T> serde, char delimiter) {
         return new Serde<>() {
             @Override
-            public String serialize(SortedBag<T> obj) {
-                StringJoiner join = new StringJoiner(separationChar);
-                obj.forEach(o -> join.add(serde.serialize(o)));
-                return join.toString();
+            public String serialize(SortedBag<T> bag) {
+                return bag.stream()
+                        .map(t -> serde.serialize(t))
+                        .collect(Collectors.joining(String.valueOf(delimiter)));
             }
 
             @Override
             public SortedBag<T> deserialize(String str) {
-                String[] strings = str.split(Pattern.quote(separationChar), -1);
-                final SortedBag.Builder<T> sortedBag = new SortedBag.Builder<>();
-                for(String string : strings) {
-                    sortedBag.add(serde.deserialize(string));
-                }
-                return sortedBag.build();
+                String[] splits = str.split(Pattern.quote(String.valueOf(delimiter)), -1);
+                return SortedBag.of(Arrays.stream(splits)
+                        .map(s -> serde.deserialize(s))
+                        .collect(Collectors.toList()));
             }
         };
     }

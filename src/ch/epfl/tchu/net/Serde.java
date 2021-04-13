@@ -1,7 +1,8 @@
 package ch.epfl.tchu.net;
 
-import java.util.Collection;
-import java.util.List;
+import ch.epfl.tchu.SortedBag;
+
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -41,13 +42,13 @@ public interface Serde<E> {
     static <T> Serde<T> of(Function<T, String> serialization, Function<String, T> deserialization) {
         return new Serde<T>() {
             @Override
-            public String serialize(T objectToSerialize) {
-                return serialization.apply(objectToSerialize);
+            public String serialize(T obj) {
+                return serialization.apply(obj);
             }
 
             @Override
-            public T deserialize(String stringToDeserialize) {
-                return deserialization.apply(stringToDeserialize);
+            public T deserialize(String str) {
+                return deserialization.apply(str);
             }
         };
     }
@@ -60,21 +61,22 @@ public interface Serde<E> {
      * @return le serde correspondant à la sérialisation et la désérialisation du paramètre donné.
      */
     static <T> Serde<T> oneOf(List<T> values) {
+
         return new Serde<T>() {
             @Override
-            public String serialize(T objectToSerialize) {
-                //TODO conseil: utiliser join de String
-                StringBuilder string = new StringBuilder();
-                values.forEach(e -> string.append(serialize(e)));
-                return string.toString();
+            public String serialize(T obj) {
+                return Integer.toString(values.indexOf(obj));
             }
 
-            //TODO PAS TROP SUR...
             @Override
-            public T deserialize(String stringToDeserialize) {
-                return deserialize(stringToDeserialize);
+            public T deserialize(String str) {
+                return values.get(Integer.parseInt(str));
             }
         };
+
+       /* //PAS SUR DU CAST...
+        return Serde.of(i -> Serdes.SERDE_OF_INTEGERS.serialize(values.indexOf(i)),
+                i -> );*/
     }
 
     /**
@@ -85,23 +87,27 @@ public interface Serde<E> {
      * @param <T> le paramètre de type de la méthode
      * @return un serde capable de (dé)sérialiser des listes de valeurs (dé)sérialisées par le serde donné.
      */
-    static <T extends Collection<T>> Serde<T> listOf(Serde<T> serde, String character) {
-        return new Serde<T>() {
+    static <T> Serde<List<T>> listOf(Serde<T> serde, String character) {
+        return new Serde<>() {
             @Override
-            public String serialize(T objectToSerialize) {
-                return String.join(Pattern.quote(character), serde.serialize(objectToSerialize));
+            public String serialize(List<T> obj) {
+                StringJoiner join = new StringJoiner(character);
+                obj.forEach(o -> join.add(serde.serialize(o)));
+                return join.toString();
             }
 
-            //TODO PAS TROP COMPRIS NON PLUS
             @Override
-            public T deserialize(String stringToDeserialize) {
-                String[] strings = stringToDeserialize.split(Pattern.quote(character), -1);
-                return null;
+            public List<T> deserialize(String str) {
+                String[] strings = str.split(Pattern.quote(character), -1);
+                final List<T> list = new ArrayList<>();
+                for(String string : strings) {
+                    list.add(serde.deserialize(string));
+                }
+                return list;
             }
         };
     }
 
-    //TODO: TOUT COMME L'AUTRE...
     /**
      * Retourne un serde capable de (dé)sérialiser un sortedBag de valeurs (dé)sérialisées par le serde donné.
      *
@@ -110,23 +116,26 @@ public interface Serde<E> {
      * @param <T> le paramètre de type de la méthode
      * @return un serde capable de (dé)sérialiser des listes de valeurs (dé)sérialisées par le serde donné.
      */
-    static <T extends Collection<T>> Serde<T> bagOf(Serde<T> serde, String character) {
-        return new Serde<T>() {
+    static <T extends Comparable<T>> Serde<SortedBag<T>> bagOf(Serde<T> serde, String character) {
+        return new Serde<>() {
             @Override
-            public String serialize(T objectToSerialize) {
-                return String.join(Pattern.quote(character), serde.serialize(objectToSerialize));
+            public String serialize(SortedBag<T> obj) {
+                StringJoiner join = new StringJoiner(character);
+                obj.forEach(o -> join.add(serde.serialize(o)));
+                return join.toString();
             }
 
-            //TODO PAS TROP COMPRIS NON PLUS
             @Override
-            public T deserialize(String stringToDeserialize) {
-                String[] strings = stringToDeserialize.split(Pattern.quote(character), -1);
-                return null;
-
+            public SortedBag<T> deserialize(String str) {
+                String[] strings = str.split(Pattern.quote(character), -1);
+                final SortedBag.Builder<T> sortedBag = new SortedBag.Builder<>();
+                for(String string : strings) {
+                    sortedBag.add(serde.deserialize(string));
+                }
+                return sortedBag.build();
             }
         };
     }
-
 }
 
 

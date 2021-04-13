@@ -4,9 +4,7 @@ import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -107,6 +105,12 @@ public class Serdes {
     public static final Serde<PlayerState> SERDE_OF_PLAYER_STATE =
             Serde.of(makeFunctionPlayerState(), makeFunctionStringForPlayerState());
 
+    /**
+     * Serde relative aux PublicGameState.
+     */
+    public static final Serde<PublicGameState> SERDE_OF_PUBLIC_GAME_STATE =
+            Serde.of(makeFunctionPublicGameState(), makeFunctionStringForPublicGameState());
+
 
     /**
      * Création de la sérialisation d'un PublicCardState
@@ -199,6 +203,72 @@ public class Serdes {
             return new PlayerState(SERDE_OF_SORTEGBAG_OF_TICKETS.deserialize(elements[0]), SERDE_OF_SORTEGBAG_OF_CARD.deserialize(elements[1]),
                     SERDE_OF_LIST_OF_ROUTES.deserialize(elements[2]));
         };
+    }
+
+    /**
+     * Création de la sérialisation d'un PublicGameState
+     * @return la sérialisation d'un PublicGameState
+     */
+    private static Function<PublicGameState, String> makeFunctionPublicGameState() {
+        return publicGameState -> {
+            StringJoiner joiner = new StringJoiner(":");
+
+            joiner.add(SERDE_OF_INTEGERS.serialize(publicGameState.ticketsCount()));
+            joiner.add(SERDE_OF_PUBLIC_CARD_STATE.serialize(publicGameState.cardState()));
+            joiner.add(SERDE_OF_PLAYER_ID.serialize(publicGameState.currentPlayerId()));
+            joiner.add(SERDE_OF_PUBLIC_PLAYER_STATE.serialize(publicGameState.currentPlayerState()));
+            joiner.add(SERDE_OF_PUBLIC_PLAYER_STATE.serialize(publicGameState.playerState(publicGameState.currentPlayerId().next())));
+
+            if(publicGameState.lastPlayer() == null) {
+                joiner.add("");
+            } else {
+                joiner.add(SERDE_OF_PLAYER_ID.serialize(publicGameState.lastPlayer()));
+            }
+
+            return joiner.toString();
+
+        };
+    }
+
+    /**
+     * Création de la désérialisation d'un PublicGameState
+     * @return la désérialisation d'un PublicGameState
+     */
+    private static Function<String, PublicGameState> makeFunctionStringForPublicGameState() {
+        return s -> {
+            final String[] elements = s.split(Pattern.quote(":"), -1);
+            //40:6,7,2,0,6;30;31:1:10;11;0,1:20;21;: chaine vide à la fin
+            //40   6,7,0,6;30;31   1   10;11;0,1   20;21:""  ""
+
+            return new PublicGameState(
+                    SERDE_OF_INTEGERS.deserialize(elements[0]),
+                    SERDE_OF_PUBLIC_CARD_STATE.deserialize(elements[1]),
+                    SERDE_OF_PLAYER_ID.deserialize(elements[2]),
+                    computeMap(elements[3], elements[4]),
+                    getLastPlayer(elements[5])
+            );
+        };
+    }
+
+    /**
+     * Méthode permettant de créer la map de PublicGameState en fonction de la désérialisation.
+     * @param firstEntry les valeurs du premier PublicPlayerState
+     * @param secondEntry les valeurs du second PublicPlayerState
+     * @return la map de PublicGameState en fonction de la désérialisation.
+     */
+    private static Map<PlayerId, PublicPlayerState> computeMap(String firstEntry, String secondEntry) {
+        final Map<PlayerId, PublicPlayerState> map = new HashMap<>();
+
+        //TODO: est-ce que le player 1 est toujours le premier dans la hashmap ?
+        //TODO: le list.of() peut etre une chaine vide je pense quon verra après ?
+        map.put(PlayerId.PLAYER_1, SERDE_OF_PLAYER_STATE.deserialize(firstEntry));
+        map.put(PlayerId.PLAYER_2, SERDE_OF_PLAYER_STATE.deserialize(secondEntry));
+
+        return map;
+    }
+
+    private static PlayerId getLastPlayer(String element) {
+        return element.equals("") ? null : SERDE_OF_PLAYER_ID.deserialize(element);
     }
 
 }

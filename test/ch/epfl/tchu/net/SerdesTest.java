@@ -1,13 +1,11 @@
 package ch.epfl.tchu.net;
 
-import ch.epfl.tchu.game.Card;
-import ch.epfl.tchu.game.PublicCardState;
+import ch.epfl.tchu.game.*;
 import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Map;
 
 public class SerdesTest {
 
@@ -28,4 +26,55 @@ public class SerdesTest {
         System.out.println("discard: " + t.discardsSize());
     }
 
+    @Test
+    void publicGameStateSerdeTest() {
+        List<Card> fu = List.of(Card.RED, Card.WHITE, Card.BLUE, Card.BLACK, Card.RED);
+        PublicCardState cs = new PublicCardState(fu, 30, 31);
+        List<Route> rs1 = ChMap.routes().subList(0, 2);
+        Map<PlayerId, PublicPlayerState> ps = Map.of(
+                PlayerId.PLAYER_1, new PublicPlayerState(10, 11, rs1),
+                PlayerId.PLAYER_2, new PublicPlayerState(20, 21, List.of()));
+        PublicGameState gs =
+                new PublicGameState(40, cs, PlayerId.PLAYER_2, ps, null);
+
+        String s = Serdes.SERDE_OF_PUBLIC_GAME_STATE.serialize(gs);
+        System.out.println(s);
+        System.out.println("");
+
+        PublicGameState e = Serdes.SERDE_OF_PUBLIC_GAME_STATE.deserialize(s);
+
+        System.out.println("tickets: " + e.ticketsCount());
+
+        for(Card card : e.cardState().faceUpCards()) {
+            System.out.print(card.color());
+        }
+        
+        System.out.println("decksize: " + e.cardState().deckSize());
+        System.out.println("discardsize: " + e.cardState().discardsSize());
+
+        System.out.println("current player: " + e.currentPlayerId());
+        System.out.println("lastplayer: " + e.lastPlayer());
+
+        System.out.println("element 1 de la map: " + e.currentPlayerState().ticketCount() + " ticket, "
+        + e.currentPlayerState().cardCount() + " cards et " + e.currentPlayerState().routes().size() + " routes");
+
+        System.out.println("element 1 de la map: " + e.playerState(e.currentPlayerId().next()).ticketCount() + " ticket, "
+                + e.playerState(e.currentPlayerId().next()).cardCount()
+                + " cards et " + e.playerState(e.currentPlayerId().next()).routes().size() + " routes");
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

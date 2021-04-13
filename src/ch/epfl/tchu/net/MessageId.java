@@ -7,7 +7,6 @@ package ch.epfl.tchu.net;
  * @author Giovanni Ranieri (326870)
  */
 public enum MessageId {
-
     INIT_PLAYERS,
     RECEIVE_INFO,
     UPDATE_STATE,
@@ -19,7 +18,4 @@ public enum MessageId {
     ROUTE,
     CARDS,
     CHOOSE_ADDITIONAL_CARDS
-
-
-
 }

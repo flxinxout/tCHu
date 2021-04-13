@@ -5,23 +5,29 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+/**
+ * Représente un serializer-deserializer, un objet capable de sérialiser et désérialiser des valeurs d'un type donné.
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ */
 public interface Serde<E> {
 
     /**
-     * Sérialise un objet et retourne la chaîne correspondante.
+     * Sérialise {@code obj} et retourne la chaîne correspondante.
      *
-     * @param objectToSerialize l'objet à sérialiser
-     * @return la chaîne après la sérialisation de l'objet.
+     * @param obj l'objet à sérialiser
+     * @return la chaîne correspondant à la sérialisation de {@code obj}
      */
-    String serialize(E objectToSerialize);
+    String serialize(E obj);
 
     /**
-     * Désérialise une chaîne de caractères et retourne l'objet correspondant.
+     * Désérialise {@code str} et retourne l'objet correspondant.
      *
-     * @param stringToDeserialize la chaîne à désérialiser
-     * @return l'objet après la désérialisation.
+     * @param str la chaîne à désérialiser
+     * @return l'objet correspondant à la désérialisation de {@code str}
      */
-    E deserialize(String stringToDeserialize);
+    E deserialize(String str);
 
     /**
      * Retourne la Serde correspondant aux fonctions de sérialisation et désérialisation données {@code serialization}

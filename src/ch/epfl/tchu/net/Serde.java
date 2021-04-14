@@ -105,20 +105,17 @@ public interface Serde<E> {
      * @return un serde capable de (dé)sérialiser des listes de valeurs (dé)sérialisées par le serde donné.
      */
     static <T extends Comparable<T>> Serde<SortedBag<T>> bagOf(Serde<T> serde, char delimiter) {
+        Serde<List<T>> listSerde = Serde.listOf(serde, delimiter);
+
         return new Serde<>() {
             @Override
             public String serialize(SortedBag<T> bag) {
-                return bag.stream()
-                        .map(t -> serde.serialize(t))
-                        .collect(Collectors.joining(String.valueOf(delimiter)));
+                return listSerde.serialize(bag.toList());
             }
 
             @Override
             public SortedBag<T> deserialize(String str) {
-                String[] splits = str.split(Pattern.quote(String.valueOf(delimiter)), -1);
-                return SortedBag.of(Arrays.stream(splits)
-                        .map(s -> serde.deserialize(s))
-                        .collect(Collectors.toList()));
+                return SortedBag.of(listSerde.deserialize(str));
             }
         };
     }

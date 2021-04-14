@@ -1,7 +1,6 @@
 package ch.epfl.tchu.net;
 
 import ch.epfl.tchu.game.*;
-import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -15,9 +14,9 @@ public class SerdesTest {
     @Test
     void publicCardStateSerdeTest() {
         PublicCardState publicCardState = new PublicCardState(FACE_UP_CARDS, 20, 10);
-        String s = Serdes.SERDE_OF_PUBLIC_CARD_STATE.serialize(publicCardState);
+        String s = Serdes.OF_PUBLIC_CARD_STATE.serialize(publicCardState);
         System.out.println(s);
-        PublicCardState t = Serdes.SERDE_OF_PUBLIC_CARD_STATE.deserialize(s);
+        PublicCardState t = Serdes.OF_PUBLIC_CARD_STATE.deserialize(s);
         for(Card c : t.faceUpCards()) {
             System.out.print(c.color());
         }
@@ -37,11 +36,11 @@ public class SerdesTest {
         PublicGameState gs =
                 new PublicGameState(40, cs, PlayerId.PLAYER_2, ps, null);
 
-        String s = Serdes.SERDE_OF_PUBLIC_GAME_STATE.serialize(gs);
+        String s = Serdes.OF_PUBLIC_GAME_STATE.serialize(gs);
         System.out.println(s);
         System.out.println("");
 
-        PublicGameState e = Serdes.SERDE_OF_PUBLIC_GAME_STATE.deserialize(s);
+        PublicGameState e = Serdes.OF_PUBLIC_GAME_STATE.deserialize(s);
 
         System.out.println("tickets: " + e.ticketsCount());
 

@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Classes possédant la totalité des serdes utiles au projet.
@@ -86,7 +87,7 @@ public class Serdes {
      * Serde relatif aux listes de {@code SortedBag} de {@code Card}.
      */
     public static final Serde<List<SortedBag<Card>>> OF_LIST_OF_SORTEDBAG_OF_CARDS =
-            Serde.listOf(Serde.bagOf(Serdes.OF_CARDS, ','), ';');
+            Serde.listOf(OF_SORTEDBAG_OF_CARD, ';');
 
     /**
      * Serde relatif aux {@code PublicCardState}.
@@ -172,7 +173,7 @@ public class Serdes {
 
             return new PublicPlayerState(Serdes.OF_INTEGERS.deserialize(elements[0]),
                     Serdes.OF_INTEGERS.deserialize(elements[1]),
-                    Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]));
+                    !elements[2].equals("") ? Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]) : List.of());
         };
     }
 
@@ -201,9 +202,9 @@ public class Serdes {
         return s -> {
             final String[] elements = s.split(Pattern.quote(";"), -1);
 
-            return new PlayerState(Serdes.OF_SORTEDBAG_OF_TICKETS.deserialize(elements[0]),
-                    Serdes.OF_SORTEDBAG_OF_CARD.deserialize(elements[1]),
-                    Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]));
+            return new PlayerState(!elements[0].equals("") ? Serdes.OF_SORTEDBAG_OF_TICKETS.deserialize(elements[0]) : SortedBag.of(),
+                    !elements[1].equals("") ? Serdes.OF_SORTEDBAG_OF_CARD.deserialize(elements[1]) : SortedBag.of(),
+                    !elements[2].equals("") ? Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]) : List.of());
         };
     }
 
@@ -237,8 +238,7 @@ public class Serdes {
     private static Function<String, PublicGameState> deserFuncPublicGameState() {
         return s -> {
             final String[] elements = s.split(Pattern.quote(":"), -1);
-            //40:6,7,2,0,6;30;31:1:10;11;0,1:20;21;: chaine vide à la fin
-            //40   6,7,0,6;30;31   1   10;11;0,1   20;21:""  ""
+
             final Map<PlayerId, PublicPlayerState> playerState = Map.of(
                     PlayerId.PLAYER_1, Serdes.OF_PUBLIC_PLAYER_STATE.deserialize(elements[3]),
                     PlayerId.PLAYER_2, Serdes.OF_PUBLIC_PLAYER_STATE.deserialize(elements[4]));

@@ -21,7 +21,7 @@ public enum Card {
     LOCOMOTIVE(null);
 
     /**
-     * Une liste contenant tous les différents types de cartes
+     * La liste contenant tous les différents types de cartes
      */
     public static final List<Card> ALL = List.of(values());
 
@@ -31,7 +31,7 @@ public enum Card {
     public static final int COUNT = ALL.size();
 
     /**
-     * Une liste des cartes colorées (non-locomotive) distinctes disponibles
+     * La liste des cartes colorées (non-locomotive) distinctes disponibles
      */
     public static final List<Card> CARS = List.copyOf(ALL.subList(0, COUNT - 1));
 

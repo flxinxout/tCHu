@@ -16,6 +16,11 @@ import java.util.Random;
  */
 public final class GameState extends PublicGameState {
 
+    /**
+     * Le nombre de wagons maximal à partir duquel la fin de partie est annoncée.
+     */
+    private static final int END_CAR_COUNT = 2;
+
     private final Deck<Ticket> tickets;
     private final Map<PlayerId, PlayerState> playerState;
     private final CardState cardState;
@@ -48,8 +53,8 @@ public final class GameState extends PublicGameState {
 
         final Map<PlayerId, PlayerState> playerState = new EnumMap<>(PlayerId.class);
         for (PlayerId playerId : PlayerId.ALL) {
-            playerState.put(playerId, PlayerState.initial(cardsDeck.topCards(4)));
-            cardsDeck = cardsDeck.withoutTopCards(4);
+            playerState.put(playerId, PlayerState.initial(cardsDeck.topCards(Constants.INITIAL_CARDS_COUNT)));
+            cardsDeck = cardsDeck.withoutTopCards(Constants.INITIAL_CARDS_COUNT);
         }
 
         final CardState cardState = CardState.of(cardsDeck);
@@ -160,7 +165,7 @@ public final class GameState extends PublicGameState {
      * @throws IllegalArgumentException si le joueur d'identité {@code playerId} possède déjà au moins un billet
      */
     public GameState withInitiallyChosenTickets(PlayerId playerId, SortedBag<Ticket> chosenTickets) {
-        Preconditions.checkArgument(playerState(playerId).tickets().size() == 0);
+        Preconditions.checkArgument(playerState(playerId).tickets().isEmpty());
 
         final Map<PlayerId, PlayerState> newPlayerState = new EnumMap<>(playerState);
         newPlayerState.put(playerId, playerState(playerId).withAddedTickets(chosenTickets));
@@ -181,7 +186,7 @@ public final class GameState extends PublicGameState {
     public GameState withChosenAdditionalTickets(SortedBag<Ticket> drawnTickets, SortedBag<Ticket> chosenTickets) {
         Preconditions.checkArgument(drawnTickets.contains(chosenTickets));
 
-        final Map<PlayerId, PlayerState> newPlayerState = new EnumMap<>(this.playerState);
+        final Map<PlayerId, PlayerState> newPlayerState = new EnumMap<>(playerState);
         newPlayerState.put(currentPlayerId(), currentPlayerState().withAddedTickets(chosenTickets));
 
         return new GameState(tickets.withoutTopCards(drawnTickets.size()),
@@ -254,7 +259,7 @@ public final class GameState extends PublicGameState {
      * @return vrai ssi le dernier tour commence
      */
     public boolean lastTurnBegins() {
-        return lastPlayer() == null && currentPlayerState().carCount() <= 2;
+        return lastPlayer() == null && currentPlayerState().carCount() <= END_CAR_COUNT;
     }
 
     /**

@@ -177,7 +177,7 @@ public final class PlayerState extends PublicPlayerState {
      * si ce n'est que ce joueur s'est de plus emparé de la route {@code route} au moyen des cartes {@code claimCards}
      */
     public PlayerState withClaimedRoute(Route route, SortedBag<Card> claimCards) {
-        //TODO: après rendu sem. 6: vérifier que le joueur ait bien les cartes.
+        //TODO: Après rendu intermédiaire, vérifier que le joueur ait bien les cartes en main
         final SortedBag<Card> newCards = cards.difference(claimCards);
 
         final List<Route> newRoutes = new ArrayList<>(routes());

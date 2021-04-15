@@ -15,7 +15,9 @@ import java.util.Objects;
  */
 public class PublicGameState {
 
-    //Nombre de cartes tirées à la fois en cours de partie.
+    /**
+     *  Nombre de cartes tirées à la fois en cours de partie.
+     */
     private static final int IN_GAME_CARDS_COUNT = 2;
 
     private final int ticketsCount;

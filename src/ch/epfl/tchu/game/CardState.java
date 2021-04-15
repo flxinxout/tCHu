@@ -69,9 +69,9 @@ public final class CardState extends PublicCardState {
         Preconditions.checkArgument(!isDeckEmpty());
 
         final List<Card> newCardsFaceUp = new ArrayList<>(faceUpCards());
-        newCardsFaceUp.set(slot, deck.topCard());
+        newCardsFaceUp.set(slot, this.deck.topCard());
 
-        return new CardState(newCardsFaceUp, deck.withoutTopCard(), discards);
+        return new CardState(newCardsFaceUp, this.deck.withoutTopCard(), this.discards);
     }
 
     /**
@@ -80,7 +80,7 @@ public final class CardState extends PublicCardState {
      */
     public Card topDeckCard() {
         Preconditions.checkArgument(!isDeckEmpty());
-        return deck.topCard();
+        return this.deck.topCard();
     }
 
     /**
@@ -90,7 +90,7 @@ public final class CardState extends PublicCardState {
      */
     public CardState withoutTopDeckCard() {
         Preconditions.checkArgument(!isDeckEmpty());
-        return new CardState(faceUpCards(), deck.withoutTopCard(), discards);
+        return new CardState(faceUpCards(), this.deck.withoutTopCard(), this.discards);
     }
 
     /**
@@ -104,7 +104,7 @@ public final class CardState extends PublicCardState {
     public CardState withDeckRecreatedFromDiscards(Random rng) {
         Preconditions.checkArgument(isDeckEmpty());
 
-        Deck<Card> newDeck = Deck.of(discards, rng);
+        Deck<Card> newDeck = Deck.of(this.discards, rng);
         return new CardState(faceUpCards(), newDeck, SortedBag.of());
     }
 
@@ -113,7 +113,7 @@ public final class CardState extends PublicCardState {
      * mais avec les cartes données ajoutées à la défausse
      */
     public CardState withMoreDiscardedCards(SortedBag<Card> additionalDiscards) {
-        return new CardState(faceUpCards(), deck, discards.union(additionalDiscards));
+        return new CardState(faceUpCards(), this.deck, this.discards.union(additionalDiscards));
     }
 }
 

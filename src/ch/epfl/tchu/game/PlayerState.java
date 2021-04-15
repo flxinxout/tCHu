@@ -47,27 +47,13 @@ public final class PlayerState extends PublicPlayerState {
     }
 
     /**
-     * @return les tickets du joueur
-     */
-    public SortedBag<Ticket> tickets() {
-        return tickets;
-    }
-
-    /**
      * Retourne un état identique au récepteur, si ce n'est que ce joueur possède en plus les billets {@code newTickets}.
      *
      * @param newTickets les billets données
      * @return un état identique au récepteur, si ce n'est que ce joueur possède en plus les billets {@code newTickets}
      */
     public PlayerState withAddedTickets(SortedBag<Ticket> newTickets) {
-        return new PlayerState(tickets.union(newTickets), cards, routes());
-    }
-
-    /**
-     * @return les cartes wagon/locomotive de ce joueur
-     */
-    public SortedBag<Card> cards() {
-        return cards;
+        return new PlayerState(this.tickets.union(newTickets), this.cards, routes());
     }
 
     /**
@@ -77,7 +63,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return un état identique au récepteur, si ce n'est que ce joueur possède en plus la carte {@code card}
      */
     public PlayerState withAddedCard(Card card) {
-        return new PlayerState(tickets(), cards.union(SortedBag.of(card)), routes());
+        return new PlayerState(tickets(), this.cards.union(SortedBag.of(card)), routes());
     }
 
     /**
@@ -89,7 +75,7 @@ public final class PlayerState extends PublicPlayerState {
      * si ce n'est que ce joueur possède en plus les cartes {@code additionalCards}
      */
     public PlayerState withAddedCards(SortedBag<Card> additionalCards) {
-        return new PlayerState(tickets(), cards.union(additionalCards), routes());
+        return new PlayerState(tickets(), this.cards.union(additionalCards), routes());
     }
 
     /**
@@ -100,7 +86,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return vrai ssi le joueur peut s'emparer de la route {@code route}
      */
     public boolean canClaimRoute(Route route) {
-        return carCount() >= route.length() && route.possibleClaimCards().stream().anyMatch(c -> cards.contains(c));
+        return carCount() >= route.length() && route.possibleClaimCards().stream().anyMatch(this.cards::contains);
     }
 
     /**
@@ -117,7 +103,7 @@ public final class PlayerState extends PublicPlayerState {
         Preconditions.checkArgument(carCount() >= route.length());
 
         return route.possibleClaimCards().stream()
-                .filter(c -> cards.contains(c))
+                .filter(this.cards::contains)
                 .collect(Collectors.toList());
     }
 
@@ -136,7 +122,8 @@ public final class PlayerState extends PublicPlayerState {
      *                                  ou si l'ensemble des cartes tirées ne contient pas exactement 3 cartes.
      */
     public List<SortedBag<Card>> possibleAdditionalCards(int additionalCardsCount,
-                                                         SortedBag<Card> initialCards, SortedBag<Card> drawnCards) {
+                                                         SortedBag<Card> initialCards,
+                                                         SortedBag<Card> drawnCards) {
         Preconditions.checkArgument(additionalCardsCount >= 1 &&
                 additionalCardsCount <= Constants.ADDITIONAL_TUNNEL_CARDS);
         Preconditions.checkArgument(!initialCards.isEmpty() && initialCards.toSet().size() <= 2);
@@ -178,7 +165,7 @@ public final class PlayerState extends PublicPlayerState {
      */
     public PlayerState withClaimedRoute(Route route, SortedBag<Card> claimCards) {
         //TODO: Après rendu intermédiaire, vérifier que le joueur ait bien les cartes en main
-        final SortedBag<Card> newCards = cards.difference(claimCards);
+        final SortedBag<Card> newCards = this.cards.difference(claimCards);
 
         final List<Route> newRoutes = new ArrayList<>(routes());
         newRoutes.add(route);
@@ -217,6 +204,20 @@ public final class PlayerState extends PublicPlayerState {
      */
     public int finalPoints() {
         return claimPoints() + ticketPoints();
+    }
+
+    /**
+     * @return les tickets du joueur
+     */
+    public SortedBag<Ticket> tickets() {
+        return this.tickets;
+    }
+
+    /**
+     * @return les cartes wagon/locomotive de ce joueur
+     */
+    public SortedBag<Card> cards() {
+        return this.cards;
     }
 }
 

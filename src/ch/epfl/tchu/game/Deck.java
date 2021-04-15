@@ -39,26 +39,12 @@ public final class Deck<C extends Comparable<C>> {
     }
 
     /**
-     * @return le nombre de cartes que ce tas contient
-     */
-    public int size() {
-        return cards.size();
-    }
-
-    /**
-     * @return ssi ce tas est vide
-     */
-    public boolean isEmpty() {
-        return cards.isEmpty();
-    }
-
-    /**
      * @return la carte au sommet de ce tas
      * @throws IllegalArgumentException si le tas est vide
      */
     public C topCard() {
         Preconditions.checkArgument(!isEmpty());
-        return cards.get(0);
+        return this.cards.get(0);
     }
 
     /**
@@ -70,7 +56,7 @@ public final class Deck<C extends Comparable<C>> {
     public Deck<C> withoutTopCard() {
         Preconditions.checkArgument(!isEmpty());
 
-        final List<C> newListOfCards = cards.subList(1, size());
+        final List<C> newListOfCards = this.cards.subList(1, size());
         return new Deck<>(newListOfCards);
     }
 
@@ -86,7 +72,7 @@ public final class Deck<C extends Comparable<C>> {
 
         final SortedBag.Builder<C> builder = new SortedBag.Builder<>();
         for (int i = 0; i < count; i++) {
-            builder.add(cards.get(i));
+            builder.add(this.cards.get(i));
         }
         return builder.build();
     }
@@ -101,7 +87,21 @@ public final class Deck<C extends Comparable<C>> {
     public Deck<C> withoutTopCards(int count) {
         Preconditions.checkArgument(count >= 0 && count <= size());
 
-        final List<C> newListOfCards = cards.subList(count, size());
+        final List<C> newListOfCards = this.cards.subList(count, size());
         return new Deck<>(newListOfCards);
+    }
+
+    /**
+     * @return le nombre de cartes que ce tas contient
+     */
+    public int size() {
+        return this.cards.size();
+    }
+
+    /**
+     * @return ssi ce tas est vide
+     */
+    public boolean isEmpty() {
+        return this.cards.isEmpty();
     }
 }

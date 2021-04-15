@@ -57,55 +57,13 @@ public final class Route {
     }
 
     /**
-     * @return l'identité de cette route
-     */
-    public String id() {
-        return id;
-    }
-
-    /**
-     * @return la première gare de cette route
-     */
-    public Station station1() {
-        return station1;
-    }
-
-    /**
-     * @return la deuxième gare de cette route
-     */
-    public Station station2() {
-        return station2;
-    }
-
-    /**
-     * @return la longueur de cette route
-     */
-    public int length() {
-        return length;
-    }
-
-    /**
-     * @return le niveau de cette route
-     */
-    public Level level() {
-        return level;
-    }
-
-    /**
-     * @return la couleur de cette route
-     */
-    public Color color() {
-        return color;
-    }
-
-    /**
      * Retourne la liste des deux gares de cette route,
      * dans l'ordre dans lequel elles ont été passées au constructeur.
      *
      * @return la liste des deux gares de cette route
      */
     public List<Station> stations() {
-        return List.of(station1, station2);
+        return List.of(this.station1, this.station2);
     }
 
     /**
@@ -180,7 +138,7 @@ public final class Route {
         Preconditions.checkArgument(level == Level.UNDERGROUND
                 && drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
 
-        Card claimCard = claimCards.stream()
+        final Card claimCard = claimCards.stream()
                 .findFirst()
                 .orElse(Card.LOCOMOTIVE);
 
@@ -194,5 +152,47 @@ public final class Route {
      */
     public int claimPoints() {
         return Constants.ROUTE_CLAIM_POINTS.get(length);
+    }
+
+    /**
+     * @return l'identité de cette route
+     */
+    public String id() {
+        return this.id;
+    }
+
+    /**
+     * @return la première gare de cette route
+     */
+    public Station station1() {
+        return this.station1;
+    }
+
+    /**
+     * @return la deuxième gare de cette route
+     */
+    public Station station2() {
+        return this.station2;
+    }
+
+    /**
+     * @return la longueur de cette route
+     */
+    public int length() {
+        return this.length;
+    }
+
+    /**
+     * @return le niveau de cette route
+     */
+    public Level level() {
+        return this.level;
+    }
+
+    /**
+     * @return la couleur de cette route
+     */
+    public Color color() {
+        return this.color;
     }
 }

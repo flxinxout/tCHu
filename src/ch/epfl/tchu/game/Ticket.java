@@ -47,13 +47,6 @@ public final class Ticket implements Comparable<Ticket> {
     }
 
     /**
-     * @return la représentation textuelle du billet
-     */
-    public String text() {
-        return text;
-    }
-
-    /**
      * Crée la représentation textuelle du billet.
      *
      * @param tripList les trajets du billet
@@ -86,7 +79,7 @@ public final class Ticket implements Comparable<Ticket> {
                 .collect(Collectors.toList());
 
         final int minPoints = trips.stream()
-                .mapToInt(trip -> trip.points())
+                .mapToInt(Trip::points)
                 .min()
                 .getAsInt();
 
@@ -94,7 +87,7 @@ public final class Ticket implements Comparable<Ticket> {
             return -minPoints;
 
         final int maxPoints = connectedTrips.stream()
-                .mapToInt(trip -> trip.points())
+                .mapToInt(Trip::points)
                 .max()
                 .getAsInt();
 
@@ -111,12 +104,19 @@ public final class Ticket implements Comparable<Ticket> {
      */
     @Override
     public int compareTo(Ticket that) {
-        return text.compareTo(that.text());
+        return this.text.compareTo(that.text());
     }
 
     @Override
     public String toString() {
-        return text;
+        return this.text;
+    }
+
+    /**
+     * @return la représentation textuelle du billet
+     */
+    public String text() {
+        return this.text;
     }
 }
 

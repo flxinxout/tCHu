@@ -38,25 +38,6 @@ public class PublicCardState {
     }
 
     /**
-     * Retourne le nombre total de cartes qui ne sont pas en main des joueurs,
-     * à savoir les 5 dont la face est visible, celles de la pioche et celles de la défausse
-     *
-     * @return le nombre total de cartes qui ne sont pas en main des joueurs
-     */
-    public int totalSize() {
-        return faceUpCards.size() + deckSize + discardsSize;
-    }
-
-    /**
-     * Retourne les 5 cartes face visible, sous la forme d'une liste comportant exactement 5 éléments.
-     *
-     * @return les 5 cartes face visible
-     */
-    public List<Card> faceUpCards() {
-        return faceUpCards;
-    }
-
-    /**
      * Retourne la carte face visible à l'index {@code slot}.
      *
      * @param slot l'index donné
@@ -65,29 +46,48 @@ public class PublicCardState {
      *                                   et le nombre de cartes face visible (exclu)
      */
     public Card faceUpCard(int slot) {
-        Objects.checkIndex(slot, faceUpCards.size());
-        return faceUpCards.get(slot);
+        Objects.checkIndex(slot, this.faceUpCards.size());
+        return this.faceUpCards.get(slot);
+    }
+
+    /**
+     * Retourne le nombre total de cartes qui ne sont pas en main des joueurs,
+     * à savoir les 5 dont la face est visible, celles de la pioche et celles de la défausse
+     *
+     * @return le nombre total de cartes qui ne sont pas en main des joueurs
+     */
+    public int totalSize() {
+        return this.faceUpCards.size() + this.deckSize + this.discardsSize;
+    }
+
+    /**
+     * Retourne les 5 cartes face visible, sous la forme d'une liste comportant exactement 5 éléments.
+     *
+     * @return les 5 cartes face visible
+     */
+    public List<Card> faceUpCards() {
+        return this.faceUpCards;
     }
 
     /**
      * @return la taille de la pioche
      */
     public int deckSize() {
-        return deckSize;
+        return this.deckSize;
     }
 
     /**
      * @return ssi la pioche est vide
      */
     public boolean isDeckEmpty() {
-        return deckSize == 0;
+        return this.deckSize == 0;
     }
 
     /**
      * @return la taille de la défausse
      */
     public int discardsSize() {
-        return discardsSize;
+        return this.discardsSize;
     }
 }
 

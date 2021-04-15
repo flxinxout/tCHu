@@ -46,7 +46,7 @@ public final class StationPartition implements StationConnectivity {
         public Builder(int stationCount) {
             Preconditions.checkArgument(stationCount >= 0);
 
-            relations = new int[stationCount];
+            this.relations = new int[stationCount];
             for (int i = 0; i < stationCount; i++) {
                 relations[i] = i;
             }
@@ -61,7 +61,7 @@ public final class StationPartition implements StationConnectivity {
          * @return {@code this}
          */
         public Builder connect(Station s1, Station s2) {
-            relations[representative(s2.id())] = representative(s1.id());
+            this.relations[representative(s2.id())] = representative(s1.id());
             return this;
         }
 

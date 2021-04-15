@@ -64,29 +64,6 @@ public final class Trail {
     }
 
     /**
-     * Retourne la longueur de ce chemin (somme de la longueur des routes le constituant)
-     *
-     * @return la longueur de ce chemin
-     */
-    public int length() {
-        return length;
-    }
-
-    /**
-     * @return la station de départ de ce chemin
-     */
-    public Station station1() {
-        return length() == 0 ? null : from;
-    }
-
-    /**
-     * @return la station d'arrivée de ce chemin
-     */
-    public Station station2() {
-        return length() == 0 ? null : to;
-    }
-
-    /**
      * Retourne la représentation textuelle de ce chemin. Elle est de forme "Gare1 - Gare2 - ... (points)".
      *
      * @return la représentation textuelle de ce chemin
@@ -157,10 +134,33 @@ public final class Trail {
             return 0;
 
         final int length = routes.stream()
-                .mapToInt(r -> r.length())
+                .mapToInt(Route::length)
                 .sum();
 
         return length;
+    }
+
+    /**
+     * Retourne la longueur de ce chemin (somme de la longueur des routes le constituant)
+     *
+     * @return la longueur de ce chemin
+     */
+    public int length() {
+        return this.length;
+    }
+
+    /**
+     * @return la station de départ de ce chemin
+     */
+    public Station station1() {
+        return length() == 0 ? null : this.from;
+    }
+
+    /**
+     * @return la station d'arrivée de ce chemin
+     */
+    public Station station2() {
+        return length() == 0 ? null : this.to;
     }
 }
 

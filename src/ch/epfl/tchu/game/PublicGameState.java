@@ -55,41 +55,13 @@ public class PublicGameState {
     }
 
     /**
-     * @return la taille de la pioche de billets
-     */
-    public int ticketsCount() {
-        return ticketsCount;
-    }
-
-    /**
-     * @return vrai ssi il est possible de tirer des billets, c-à-d si la pioche n'est pas vide
-     */
-    public boolean canDrawTickets() {
-        return ticketsCount != 0;
-    }
-
-    /**
-     * @return la partie publique de l'état des cartes wagon/locomotive
-     */
-    public PublicCardState cardState() {
-        return cardState;
-    }
-
-    /**
      * Retourne vrai ssi il est possible de tirer des cartes, c-à-d si la pioche
      * et la défausse contiennent entre elles au moins 5 cartes.
      *
      * @return ssi il est possible de tirer des cartes
      */
     public boolean canDrawCards() {
-        return cardState.deckSize() + cardState.discardsSize() >= IN_GAME_CARDS_COUNT + Constants.ADDITIONAL_TUNNEL_CARDS;
-    }
-
-    /**
-     * @return l'identité du joueur actuel
-     */
-    public PlayerId currentPlayerId() {
-        return currentPlayerId;
+        return this.cardState.deckSize() + this.cardState.discardsSize() >= IN_GAME_CARDS_COUNT + Constants.ADDITIONAL_TUNNEL_CARDS;
     }
 
     /**
@@ -99,14 +71,14 @@ public class PublicGameState {
      * @return la partie publique de l'état du joueur d'identité {@code playerId}
      */
     public PublicPlayerState playerState(PlayerId playerId) {
-        return playerState.get(playerId);
+        return this.playerState.get(playerId);
     }
 
     /**
      * @return la partie publique de l'état du joueur courant
      */
     public PublicPlayerState currentPlayerState() {
-        return playerState.get(currentPlayerId);
+        return this.playerState.get(this.currentPlayerId);
     }
 
     /**
@@ -114,7 +86,7 @@ public class PublicGameState {
      */
     public List<Route> claimedRoutes() {
         List<Route> routes = new ArrayList<>();
-        for (PublicPlayerState ps : playerState.values()) {
+        for (PublicPlayerState ps : this.playerState.values()) {
             routes.addAll(ps.routes());
         }
 
@@ -125,6 +97,34 @@ public class PublicGameState {
      * @return l'identité du dernier joueur ({@code null} si elle n'est pas encore connue)
      */
     public PlayerId lastPlayer() {
-        return lastPlayer;
+        return this.lastPlayer;
+    }
+
+    /**
+     * @return l'identité du joueur actuel
+     */
+    public PlayerId currentPlayerId() {
+        return this.currentPlayerId;
+    }
+
+    /**
+     * @return la taille de la pioche de billets
+     */
+    public int ticketsCount() {
+        return this.ticketsCount;
+    }
+
+    /**
+     * @return vrai ssi il est possible de tirer des billets, c-à-d si la pioche n'est pas vide
+     */
+    public boolean canDrawTickets() {
+        return this.ticketsCount != 0;
+    }
+
+    /**
+     * @return la partie publique de l'état des cartes wagon/locomotive
+     */
+    public PublicCardState cardState() {
+        return this.cardState;
     }
 }

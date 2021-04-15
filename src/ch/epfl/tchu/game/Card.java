@@ -57,7 +57,7 @@ public enum Card {
      * @return la couleur de cette carte
      */
     public Color color() {
-        return color;
+        return this.color;
     }
 
 }

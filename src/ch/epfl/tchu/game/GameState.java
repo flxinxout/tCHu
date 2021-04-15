@@ -70,7 +70,7 @@ public final class GameState extends PublicGameState {
      * @return l'état complet du joueur d'identité {@code playerId}
      */
     @Override
-    public PlayerState playerState(final PlayerId playerId) {
+    public PlayerState playerState(PlayerId playerId) {
         return this.playerState.get(playerId);
     }
 

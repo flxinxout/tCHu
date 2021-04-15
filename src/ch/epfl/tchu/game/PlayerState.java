@@ -86,7 +86,8 @@ public final class PlayerState extends PublicPlayerState {
      * @return vrai ssi le joueur peut s'emparer de la route {@code route}
      */
     public boolean canClaimRoute(Route route) {
-        return carCount() >= route.length() && route.possibleClaimCards().stream().anyMatch(this.cards::contains);
+        return carCount() >= route.length() && route.possibleClaimCards().stream()
+                .anyMatch(this.cards::contains);
     }
 
     /**

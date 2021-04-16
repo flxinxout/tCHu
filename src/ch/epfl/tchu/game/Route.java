@@ -67,10 +67,10 @@ public final class Route {
     }
 
     /**
-     * Retourne la gare de la route qui n'est pas {@code station}.
+     * Retourne la gare de cette route qui n'est pas {@code station}.
      *
      * @param station gare à ne pas retourner
-     * @return la gare de la route qui n'est pas {@code station}
+     * @return la gare de cette route qui n'est pas {@code station}
      * @throws IllegalArgumentException si {@code station} n'est égale à aucune des deux gares de cette route
      */
     public Station stationOpposite(Station station) {
@@ -80,10 +80,9 @@ public final class Route {
 
     /**
      * Retourne la liste de tous les ensembles de cartes qui pourraient être joués pour (tenter de)
-     * s'emparer de la route, triée par ordre croissant de nombre de cartes locomotive, puis par couleur.
+     * s'emparer de cette route, triée par ordre croissant de nombre de cartes locomotive, puis par couleur.
      *
-     * @return la liste de tous les ensembles de cartes qui pourraient être joués
-     * pour s'emparer de la route
+     * @return la liste de tous les ensembles de cartes qui pourraient être joués pour s'emparer de cette route
      */
     public List<SortedBag<Card>> possibleClaimCards() {
         final List<SortedBag<Card>> possibleClaimCardsList = new ArrayList<>();
@@ -126,11 +125,11 @@ public final class Route {
     }
 
     /**
-     * Retourne le nombre de cartes additionnelles à jouer pour s'emparer de la route (en tunnel).
+     * Retourne le nombre de cartes additionnelles à jouer pour s'emparer de cette route (en tunnel).
      *
      * @param claimCards cartes initialement posées par le joueur
      * @param drawnCards cartes tirées du sommet de la pioche
-     * @return le nombre de cartes additionnelles à jouer pour s'emparer de la route
+     * @return le nombre de cartes additionnelles à jouer pour s'emparer de cette route
      * @throws IllegalArgumentException si {@code this} n'est pas un tunnel ou
      *                                  si {@code drawnCards} ne contient pas exactement 3 cartes
      */
@@ -148,6 +147,8 @@ public final class Route {
     }
 
     /**
+     * Retourne le nombre de points de construction de cette route.
+     *
      * @return le nombre de points de construction de cette route
      */
     public int claimPoints() {
@@ -155,6 +156,8 @@ public final class Route {
     }
 
     /**
+     * Retourne l'identité de cette route.
+     *
      * @return l'identité de cette route
      */
     public String id() {
@@ -162,6 +165,8 @@ public final class Route {
     }
 
     /**
+     * Retourne la première gare de cette route.
+     *
      * @return la première gare de cette route
      */
     public Station station1() {
@@ -169,6 +174,8 @@ public final class Route {
     }
 
     /**
+     * Retourne la deuxième gare de cette route.
+     *
      * @return la deuxième gare de cette route
      */
     public Station station2() {
@@ -176,6 +183,8 @@ public final class Route {
     }
 
     /**
+     * Retourne la longueur de cette route.
+     *
      * @return la longueur de cette route
      */
     public int length() {
@@ -183,6 +192,8 @@ public final class Route {
     }
 
     /**
+     * Retourne le niveau de cette route.
+     *
      * @return le niveau de cette route
      */
     public Level level() {
@@ -190,6 +201,8 @@ public final class Route {
     }
 
     /**
+     * Retourne la couleur de cette route.
+     *
      * @return la couleur de cette route
      */
     public Color color() {

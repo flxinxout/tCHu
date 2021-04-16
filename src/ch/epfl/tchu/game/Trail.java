@@ -64,46 +64,6 @@ public final class Trail {
     }
 
     /**
-     * Retourne la représentation textuelle de ce chemin. Elle est de forme "Gare1 - Gare2 - ... (points)".
-     *
-     * @return la représentation textuelle de ce chemin
-     */
-    @Override
-    public String toString() {
-        final List<String> stationNames = new ArrayList<>();
-        String lastStationName;
-
-        if (from != null) {
-            stationNames.add(from.name());
-            lastStationName = from.name();
-        } else
-            return "Chemin inexistant";
-
-        for (Route route : routes) {
-            final String name = lastStationName.equals(route.station1().name()) ?
-                    route.station2().name() : route.station1().name();
-            stationNames.add(name);
-            lastStationName = name;
-        }
-
-        final String names = String.join(" - ", stationNames);
-        return String.format("%s (%s)", names, length());
-    }
-
-    /**
-     * Retourne tous les chemins constitués d'une seule route de la liste {@code routes}.
-     */
-    private static List<Trail> computeTrivialTrails(List<Route> routes) {
-        final List<Trail> trivialTrailsList = new ArrayList<>();
-
-        for (Route route : routes) {
-            trivialTrailsList.add(new Trail(List.of(route), route.station1(), route.station2()));
-            trivialTrailsList.add(new Trail(List.of(route), route.station2(), route.station1()));
-        }
-        return trivialTrailsList;
-    }
-
-    /**
      * Retourne un chemin similaire à {@code trailToExtend}, seulement étendu avec {@code route},
      * retourne le nouveau chemin si l'extension a fonctionné, retourne le chemin initial {@code trailToExtend} sinon.
      */
@@ -141,6 +101,46 @@ public final class Trail {
     }
 
     /**
+     * Retourne tous les chemins constitués d'une seule route de la liste {@code routes}.
+     */
+    private static List<Trail> computeTrivialTrails(List<Route> routes) {
+        final List<Trail> trivialTrailsList = new ArrayList<>();
+
+        for (Route route : routes) {
+            trivialTrailsList.add(new Trail(List.of(route), route.station1(), route.station2()));
+            trivialTrailsList.add(new Trail(List.of(route), route.station2(), route.station1()));
+        }
+        return trivialTrailsList;
+    }
+
+    /**
+     * Retourne la représentation textuelle de ce chemin. Elle est de forme "Gare1 - Gare2 - ... (points)".
+     *
+     * @return la représentation textuelle de ce chemin
+     */
+    @Override
+    public String toString() {
+        final List<String> stationNames = new ArrayList<>();
+        String lastStationName;
+
+        if (from != null) {
+            stationNames.add(from.name());
+            lastStationName = from.name();
+        } else
+            return "Chemin inexistant";
+
+        for (Route route : routes) {
+            final String name = lastStationName.equals(route.station1().name()) ?
+                    route.station2().name() : route.station1().name();
+            stationNames.add(name);
+            lastStationName = name;
+        }
+
+        final String names = String.join(" - ", stationNames);
+        return String.format("%s (%s)", names, length());
+    }
+
+    /**
      * Retourne la longueur de ce chemin (somme de la longueur des routes le constituant)
      *
      * @return la longueur de ce chemin
@@ -150,6 +150,8 @@ public final class Trail {
     }
 
     /**
+     * Retourne la station de départ de ce chemin.
+     *
      * @return la station de départ de ce chemin
      */
     public Station station1() {
@@ -157,6 +159,8 @@ public final class Trail {
     }
 
     /**
+     * Retourne la station d'arrivée de ce chemin.
+     *
      * @return la station d'arrivée de ce chemin
      */
     public Station station2() {

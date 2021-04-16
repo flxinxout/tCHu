@@ -35,8 +35,7 @@ public final class CardState extends PublicCardState {
      * la pioche est constituée des cartes de {@code deck} restantes, et la défausse est vide.
      *
      * @param deck le tas de cartes donné
-     * @return un état dans lequel les 5 cartes disposées faces visibles sont les 5 premières de {@code deck},
-     * la pioche est constituée des cartes de {@code deck} restantes, et la défausse est vide.
+     * @return un état construit à partir du tas de cartes {@code deck}
      * @throws IllegalArgumentException si {@code deck} contient moins de 5 cartes
      */
     public static CardState of(Deck<Card> deck) {
@@ -54,13 +53,12 @@ public final class CardState extends PublicCardState {
     }
 
     /**
-     * Retourne un ensemble de cartes identique au récepteur ({@code this}),
-     * si ce n'est que la carte face visible d'index {@code slot} a été remplacée
-     * par celle se trouvant au sommet de la pioche, qui en est du même coup retirée.
+     * Retourne un état de cartes à celui-ci, si ce n'est que la carte face visible d'index {@code slot}
+     * a été remplacée par celle se trouvant au sommet de la pioche, qui en est du même coup retirée.
      *
      * @param slot l'index des cartes face visible à remplacer
-     * @return un ensemble de cartes identique au récepteur ({@code this}), si ce n'est que la carte face visible
-     * d'index {@code slot} a été remplacée par celle se trouvant au sommet de la pioche
+     * @return un état de cartes identique à celui-ci, si ce n'est que la carte face visible d'index {@code slot}
+     * a été remplacée par celle se trouvant au sommet de la pioche
      * @throws IndexOutOfBoundsException si {@code slot} ne se trouve pas entre 0 (inclus) et 5 (exclu)
      * @throws IllegalArgumentException  si la pioche est vide
      */
@@ -75,7 +73,9 @@ public final class CardState extends PublicCardState {
     }
 
     /**
-     * @return la carte se trouvant au sommet de la pioche
+     * Retourne la carte se trouvant au sommet de la pioche de cet état de cartes.
+     *
+     * @return la carte se trouvant au sommet de la pioche de cet état de cartes
      * @throws IllegalArgumentException si la pioche est vide
      */
     public Card topDeckCard() {
@@ -84,8 +84,9 @@ public final class CardState extends PublicCardState {
     }
 
     /**
-     * @return un ensemble de cartes identique au récepteur ({@code this}),
-     * mais sans la carte se trouvant au sommet de la pioche
+     * Retourne un état de cartes identique à celui-ci mais sans la carte se trouvant au sommet de la pioche.
+     *
+     * @return un état de cartes identique à celui-ci mais sans la carte se trouvant au sommet de la pioche
      * @throws IllegalArgumentException si la pioche est vide
      */
     public CardState withoutTopDeckCard() {
@@ -94,11 +95,11 @@ public final class CardState extends PublicCardState {
     }
 
     /**
-     * Retourne un ensemble de cartes identique au récepteur ({@code this}), si ce n'est que les cartes de la défausse
+     * Retourne un état de cartes identique à celui-ci, si ce n'est que les cartes de la défausse
      * ont été mélangée au moyen du générateur aléatoire {@code rng} afin de constituer la nouvelle pioche.
      *
-     * @return un ensemble de cartes identique au récepteur ({@code this}), si ce n'est que les cartes de la défausse
-     * ont été mélangée au moyen du générateur aléatoire {@code rng} afin de constituer la nouvelle pioche.
+     * @param rng le générateur aléatoire utilisé
+     * @return un état de cartes identique à celui-ci, si ce n'est que la pioche a été reconstituée.
      * @throws IllegalArgumentException si la pioche n'est pas vide
      */
     public CardState withDeckRecreatedFromDiscards(Random rng) {
@@ -109,8 +110,10 @@ public final class CardState extends PublicCardState {
     }
 
     /**
-     * @return un ensemble de cartes identique au récepteur ({@code this}),
-     * mais avec les cartes données ajoutées à la défausse
+     * Retourne un état de cartes identique à celui-ci, mais avec les cartes données ajoutées à la défausse.
+     *
+     * @param additionalDiscards les cartes à ajouter à la défausse
+     * @return un état de cartes identique à celui-ci, mais avec les cartes données ajoutées à la défausse
      */
     public CardState withMoreDiscardedCards(SortedBag<Card> additionalDiscards) {
         return new CardState(faceUpCards(), this.deck, this.discards.union(additionalDiscards));

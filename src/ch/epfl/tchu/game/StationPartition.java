@@ -22,7 +22,6 @@ public final class StationPartition implements StationConnectivity {
         this.relations = relations.clone();
     }
 
-
     @Override
     public boolean connected(Station s1, Station s2) {
         return s1.id() < relations.length && s2.id() < relations.length ?

@@ -26,7 +26,7 @@ public final class GameState extends PublicGameState {
     private final CardState cardState;
 
     /**
-     * Construit l'état de partie de tCHu.
+     * Construit l'état d'une partie de tCHu.
      */
     private GameState(Deck<Ticket> tickets, CardState cardState, PlayerId currentPlayerId,
                       Map<PlayerId, PlayerState> playerState, PlayerId lastPlayer) {
@@ -75,6 +75,8 @@ public final class GameState extends PublicGameState {
     }
 
     /**
+     * Retourne l'état complet du joueur courant.
+     *
      * @return l'état complet du joueur courant
      */
     @Override
@@ -85,7 +87,7 @@ public final class GameState extends PublicGameState {
     /**
      * Retourne les {@code count} billets du sommet de la pioche.
      *
-     * @param count le nombre de billets à retourner du sommet de la pioche
+     * @param count le nombre de billets à retourner
      * @return les {@code count} billets du sommet de la pioche
      * @throws IllegalArgumentException si {@code count} n'est pas compris entre 0 et la taille de la pioche (inclus)
      */
@@ -95,10 +97,10 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * Retourne un état identique au récepteur, mais sans les {@code count} billets du sommet de la pioche.
+     * Retourne un état identique à celui-ci, mais sans les {@code count} billets du sommet de la pioche.
      *
      * @param count le nombre de billets enlevés du sommet de la pioche
-     * @return un état identique au récepteur, mais sans les {@code count} billets du sommet de la pioche
+     * @return un état identique à celui-ci, mais sans les {@code count} billets du sommet de la pioche
      * @throws IllegalArgumentException si {@code count} n'est pas compris entre 0 et la taille de la pioche (inclus)
      */
     public GameState withoutTopTickets(int count) {
@@ -118,9 +120,9 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * Retourne un état identique au récepteur mais sans la carte au sommet de la pioche.
+     * Retourne un état identique à celui-ci mais sans la carte du sommet de la pioche.
      *
-     * @return un état identique au récepteur mais sans la carte au sommet de la pioche
+     * @return un état identique à celui-ci mais sans la carte du sommet de la pioche
      * @throws IllegalArgumentException si la pioche est vide
      */
     public GameState withoutTopCard() {
@@ -129,10 +131,10 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * Retourne un état identique au récepteur mais avec les cartes {@code discardedCards} ajoutées à la défausse.
+     * Retourne un état identique à celui-ci mais avec les cartes {@code discardedCards} ajoutées à la défausse.
      *
      * @param discardedCards les cartes à ajouter à la défausse
-     * @return un état identique au récepteur mais avec les cartes {@code discardedCards} ajoutées à la défausse.
+     * @return un état identique à celui-ci mais avec les cartes {@code discardedCards} ajoutées à la défausse.
      */
     public GameState withMoreDiscardedCards(SortedBag<Card> discardedCards) {
         return new GameState(this.tickets, this.cardState.withMoreDiscardedCards(discardedCards),
@@ -140,12 +142,11 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * Retourne un état identique au récepteur sauf si la pioche de cartes est vide, auquel cas elle est recréée
+     * Retourne un état identique à celui-ci sauf si la pioche de cartes est vide, auquel cas elle est recréée
      * à partir de la défausse, mélangée au moyen du générateur aléatoire {@code rng}.
      *
      * @param rng le générateur aléatoire utilisé
-     * @return un état identique au récepteur sauf si la pioche de cartes est vide, auquel cas elle est recréée
-     * à partir de la défausse
+     * @return un état identique à celui-ci, si ce n'est que la pioche est recréée si nécessaire
      */
     public GameState withCardsDeckRecreatedIfNeeded(Random rng) {
         return this.cardState.isDeckEmpty() ?
@@ -155,12 +156,12 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * Retourne un état identique au récepteur mais dans lequel les billets {@code chosenTickets} ont été
+     * Retourne un état identique à celui-ci mais dans lequel les billets {@code chosenTickets} ont été
      * ajoutés à la main du joueur d'identité {@code playerId}. Destinée à être appelée au début de partie uniquement.
      *
      * @param playerId      l'identité du joueur auquel les billets sont ajoutés
      * @param chosenTickets les billets à ajouter
-     * @return un état identique au récepteur mais dans lequel les billets {@code chosenTickets} ont été
+     * @return un état identique à celui-ci mais dans lequel les billets {@code chosenTickets} ont été
      * ajoutés à la main du joueur {@code playerId}
      * @throws IllegalArgumentException si le joueur d'identité {@code playerId} possède déjà au moins un billet
      */
@@ -174,12 +175,12 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * Retourne un état identique au récepteur, mais dans lequel le joueur courant a tiré les billets
+     * Retourne un état identique à celui-ci, mais dans lequel le joueur courant a tiré les billets
      * {@code drawnTickets} du sommet de la pioche, et choisi de garder ceux contenus dans {@code chosenTicket}.
      *
      * @param drawnTickets  les billets tirés par le joueur
      * @param chosenTickets les billets gardés par le joueur
-     * @return un état identique au récepteur, mais dans lequel le joueur courant a tiré les billets
+     * @return un état identique à celui-ci, mais dans lequel le joueur courant a tiré les billets
      * {@code drawnTickets} du sommet de la pioche, et choisi de garder ceux contenus dans {@code chosenTicket}
      * @throws IllegalArgumentException si {@code chosenTickets} n'est pas inclus dans {@code drawnTickets}
      */
@@ -194,11 +195,11 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * Retourne un état identique au récepteur si ce n'est que la carte face retournée à l'emplacement {@code slot}
+     * Retourne un état identique à celui-ci si ce n'est que la carte face retournée à l'emplacement {@code slot}
      * a été placée dans la main du joueur courant, et remplacée par celle au sommet de la pioche.
      *
      * @param slot l'emplacement de la carte à remplacer
-     * @return un état identique au récepteur si ce n'est que la carte face retournée à l'emplacement {@code slot}
+     * @return un état identique à celui-ci si ce n'est que la carte face retournée à l'emplacement {@code slot}
      * a été placée dans la main du joueur courant, et remplacée par celle au sommet de la pioche
      * @throws IllegalArgumentException s'il n'est pas possible de tirer des cartes,
      *                                  c-à-d si {@code canDrawCards} retourne faux
@@ -215,10 +216,10 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * Retourne un état identique au récepteur si ce n'est que la carte du sommet de la pioche a été placée
+     * Retourne un état identique à celui-ci si ce n'est que la carte du sommet de la pioche a été placée
      * dans la main du joueur courant.
      *
-     * @return un état identique au récepteur si ce n'est que la carte du sommet de la pioche a été placée dans
+     * @return un état identique à celui-ci si ce n'est que la carte du sommet de la pioche a été placée dans
      * la main du joueur courant
      * @throws IllegalArgumentException s'il n'est pas possible de tirer des cartes,
      *                                  c-à-d si {@code canDrawCards} retourne faux
@@ -234,13 +235,12 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * Retourne un état identique au récepteur mais dans lequel le joueur courant
-     * s'est emparé de la route {@code route} au moyen des cartes {@code cards}.
-     * Les cartes utilisées sont ajoutées à la défausse.
+     * Retourne un état identique à celui-ci mais dans lequel le joueur courant s'est emparé de la route {@code route}
+     * au moyen des cartes {@code cards}. Les cartes utilisées sont ajoutées à la défausse.
      *
      * @param route la route dont le joueur s'est emparé
      * @param cards les cartes utilisées pour s'emparer de {@code route}
-     * @return un état identique au récepteur mais dans lequel le joueur courant s'est emparé de la route {@code route}
+     * @return un état identique à celui-ci mais dans lequel le joueur courant s'est emparé de la route {@code route}
      * au moyen des cartes {@code cards}
      */
     public GameState withClaimedRoute(Route route, SortedBag<Card> cards) {
@@ -263,11 +263,11 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * Termine le tour du joueur courant, c-à-d retourne un état identique au récepteur si ce n'est que le joueur
+     * Termine le tour du joueur courant, c-à-d retourne un état identique à celui-ci, si ce n'est que le joueur
      * courant est celui qui suit le joueur courant actuel;
      * de plus, si {@code lastTurnBegins()} retourne vrai, le joueur courant actuel devient le dernier joueur.
      *
-     * @return un état identique au récepteur si ce n'est que le joueur le tour des joueurs a été inversé
+     * @return un état identique à celui-ci, si ce n'est que le le tour des joueurs a été inversé
      * @see GameState#lastTurnBegins()
      */
     public GameState forNextTurn() {

@@ -47,10 +47,10 @@ public final class Ticket implements Comparable<Ticket> {
     }
 
     /**
-     * Crée la représentation textuelle du billet.
+     * Crée la représentation textuelle de ce billet.
      *
      * @param tripList les trajets du billet
-     * @return la représentation textuelle du billet.
+     * @return la représentation textuelle de ce billet.
      */
     private static String computeText(List<Trip> tripList) {
         Trip firstTrip = tripList.get(0);
@@ -67,10 +67,10 @@ public final class Ticket implements Comparable<Ticket> {
     }
 
     /**
-     * Retourne le nombre de points que vaut le billet,
+     * Retourne le nombre de points que vaut ce billet,
      * sachant que la connectivité donnée est celle du joueur possédant le billet.
      *
-     * @param connectivity connectivité du joueur possédant le billet
+     * @param connectivity connectivité du joueur possédant ce billet
      * @return le nombre de points du billet pour la connectivité donnée
      */
     public int points(StationConnectivity connectivity) {
@@ -113,7 +113,9 @@ public final class Ticket implements Comparable<Ticket> {
     }
 
     /**
-     * @return la représentation textuelle du billet
+     * Retourne la représentation textuelle de ce billet.
+     *
+     * @return la représentation textuelle de ce billet
      */
     public String text() {
         return this.text;

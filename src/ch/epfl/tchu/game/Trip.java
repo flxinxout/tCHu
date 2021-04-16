@@ -54,6 +54,8 @@ public final class Trip {
     }
 
     /**
+     * Retourne la gare de départ de ce trajet.
+     *
      * @return la gare de départ de ce trajet
      */
     public Station from() {
@@ -61,6 +63,8 @@ public final class Trip {
     }
 
     /**
+     * Retourne la gare d'arrivée de ce trajet.
+     *
      * @return la gare d'arrivée de ce trajet
      */
     public Station to() {
@@ -68,6 +72,8 @@ public final class Trip {
     }
 
     /**
+     * Retourne le nombre de points de ce trajet
+     *
      * @return le nombre de points de ce trajet
      */
     public int points() {

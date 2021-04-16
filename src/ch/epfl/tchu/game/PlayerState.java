@@ -47,31 +47,31 @@ public final class PlayerState extends PublicPlayerState {
     }
 
     /**
-     * Retourne un état identique au récepteur, si ce n'est que ce joueur possède en plus les billets {@code newTickets}.
+     * Retourne un état identique à celui-ci, si ce n'est que ce joueur possède en plus les billets {@code newTickets}.
      *
      * @param newTickets les billets données
-     * @return un état identique au récepteur, si ce n'est que ce joueur possède en plus les billets {@code newTickets}
+     * @return un état identique à celui-ci, si ce n'est que ce joueur possède en plus les billets {@code newTickets}
      */
     public PlayerState withAddedTickets(SortedBag<Ticket> newTickets) {
         return new PlayerState(this.tickets.union(newTickets), this.cards, routes());
     }
 
     /**
-     * Retourne un état identique au récepteur, si ce n'est que ce joueur possède en plus la carte {@code card}.
+     * Retourne un état identique à celui-ci, si ce n'est que ce joueur possède en plus la carte {@code card}.
      *
      * @param card la carte donnée
-     * @return un état identique au récepteur, si ce n'est que ce joueur possède en plus la carte {@code card}
+     * @return un état identique à celui-ci, si ce n'est que ce joueur possède en plus la carte {@code card}
      */
     public PlayerState withAddedCard(Card card) {
         return new PlayerState(tickets(), this.cards.union(SortedBag.of(card)), routes());
     }
 
     /**
-     * Retourne un état identique au récepteur,
+     * Retourne un état identique à celui-ci,
      * si ce n'est que ce joueur possède en plus les cartes {@code additionalCards}.
      *
      * @param additionalCards les cartes additionnelles
-     * @return un état identique au récepteur,
+     * @return un état identique à celui-ci,
      * si ce n'est que ce joueur possède en plus les cartes {@code additionalCards}
      */
     public PlayerState withAddedCards(SortedBag<Card> additionalCards) {
@@ -79,11 +79,11 @@ public final class PlayerState extends PublicPlayerState {
     }
 
     /**
-     * Retourne vrai ssi le joueur peut s'emparer de la route {@code route}, c-à-d s'il lui
+     * Retourne ssi le joueur peut s'emparer de la route {@code route}, c-à-d s'il lui
      * reste assez de wagons et s'il possède les cartes nécessaires.
      *
      * @param route la route concernée
-     * @return vrai ssi le joueur peut s'emparer de la route {@code route}
+     * @return ssi le joueur peut s'emparer de la route {@code route}
      */
     public boolean canClaimRoute(Route route) {
         return carCount() >= route.length() && route.possibleClaimCards().stream()
@@ -92,12 +92,12 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * Retourne la liste de tous les ensembles de cartes
-     * que le joueur pourrait utiliser pour prendre possession de la route {@code route}.
+     * que ce joueur pourrait utiliser pour prendre possession de la route {@code route}.
      *
      * @param route la route donnée
-     * @return la liste de tous les ensembles de cartes que le joueur
+     * @return la liste de tous les ensembles de cartes que ce joueur
      * pourrait utiliser pour prendre possession de la route {@code route}
-     * @throws IllegalArgumentException si le nombre de wagon que possède le joueur est inférieur
+     * @throws IllegalArgumentException si le nombre de wagon que possède ce joueur est inférieur
      *                                  à la longueur de la route
      */
     public List<SortedBag<Card>> possibleClaimCards(Route route) {
@@ -156,12 +156,12 @@ public final class PlayerState extends PublicPlayerState {
     }
 
     /**
-     * Retourne un état identique au récepteur,
+     * Retourne un état identique à celui-ci,
      * si ce n'est que ce joueur s'est de plus emparé de la route {@code route} au moyen des cartes {@code claimCards}.
      *
      * @param route      la route dont le joueur s'est emparée
      * @param claimCards cartes posées pour s'emparer de la route
-     * @return un état identique au récepteur,
+     * @return un état identique à celui-ci,
      * si ce n'est que ce joueur s'est de plus emparé de la route {@code route} au moyen des cartes {@code claimCards}
      */
     public PlayerState withClaimedRoute(Route route, SortedBag<Card> claimCards) {
@@ -175,9 +175,9 @@ public final class PlayerState extends PublicPlayerState {
     }
 
     /**
-     * Retourne le nombre de points (éventuellement négatif) obtenus par le joueur grâce à ses billets.
+     * Retourne le nombre de points (éventuellement négatif) obtenus par ce joueur grâce à ses billets.
      *
-     * @return le nombre de points obtenus par le joueur grâce à ses billets
+     * @return le nombre de points obtenus par ce joueur grâce à ses billets
      */
     public int ticketPoints() {
         final int maxIndex = Math.max(routes().stream()
@@ -201,6 +201,8 @@ public final class PlayerState extends PublicPlayerState {
     }
 
     /**
+     * Retourne la totalité des points obtenus par ce joueur à la fin de la partie.
+     *
      * @return la totalité des points obtenus par ce joueur à la fin de la partie
      */
     public int finalPoints() {
@@ -208,13 +210,17 @@ public final class PlayerState extends PublicPlayerState {
     }
 
     /**
-     * @return les tickets du joueur
+     * Retourne les billets de ce joueur.
+     *
+     * @return les billets de ce joueur
      */
     public SortedBag<Ticket> tickets() {
         return this.tickets;
     }
 
     /**
+     * Retourne les cartes wagon/locomotive de ce joueur.
+     *
      * @return les cartes wagon/locomotive de ce joueur
      */
     public SortedBag<Card> cards() {

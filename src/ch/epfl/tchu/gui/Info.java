@@ -75,6 +75,44 @@ public final class Info {
     }
 
     /**
+     * Retourne la représentation textuelle de {@code route}.
+     */
+    private static String nameOf(Route route) {
+        return (route.station1().name() + EN_DASH_SEPARATOR + route.station2().name());
+    }
+
+    /**
+     * Retourne la représentation textuelle de la route donnée.
+     */
+    private static String nameOf(Trail trail) {
+        return (trail.station1().name() + EN_DASH_SEPARATOR + trail.station2().name());
+    }
+
+    /**
+     * Retourne la description de l'ensemble de cartes donné.
+     */
+    private static String descriptionOf(SortedBag<Card> cards) {
+        final List<String> singleCardNames = new ArrayList<>();
+
+        for (Card c : cards.toSet()) {
+            int n = cards.countOf(c);
+            singleCardNames.add(n + " " + cardName(c, n));
+        }
+
+        final int lastCardIndex = singleCardNames.size() - 1;
+        String joined;
+        if (singleCardNames.size() == 1) {
+            joined = singleCardNames.get(0);
+        } else {
+            joined = String.join(AND_SEPARATOR,
+                    String.join(", ", singleCardNames.subList(0, lastCardIndex)),
+                    singleCardNames.get(lastCardIndex));
+        }
+
+        return joined;
+    }
+
+    /**
      * @return le message déclarant que ce joueur jouera en premier
      */
     public String willPlayFirst() {
@@ -226,58 +264,4 @@ public final class Info {
                 loserPoints,
                 plural(loserPoints));
     }
-
-
-    /**
-     * Retourne la représentation textuelle de {@code route}.
-     */
-    private static String nameOf(Route route) {
-        return (route.station1().name() + EN_DASH_SEPARATOR + route.station2().name());
-    }
-
-    /**
-     * Retourne la représentation textuelle de la route donnée.
-     */
-    private static String nameOf(Trail trail) {
-        return (trail.station1().name() + EN_DASH_SEPARATOR + trail.station2().name());
-    }
-
-    /**
-     * Retourne la description de l'ensemble de cartes donné.
-     */
-    private static String descriptionOf(SortedBag<Card> cards) {
-        final List<String> singleCardNames = new ArrayList<>();
-
-        for (Card c : cards.toSet()) {
-            int n = cards.countOf(c);
-            singleCardNames.add(n + " " + cardName(c, n));
-        }
-
-        final int lastCardIndex = singleCardNames.size() - 1;
-        String joined;
-        if (singleCardNames.size() == 1) {
-            joined = singleCardNames.get(0);
-        } else {
-            joined = String.join(AND_SEPARATOR,
-                    String.join(", ", singleCardNames.subList(0, lastCardIndex)),
-                    singleCardNames.get(lastCardIndex));
-        }
-
-        return joined;
-    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

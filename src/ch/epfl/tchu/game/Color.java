@@ -20,7 +20,7 @@ public enum Color {
     WHITE;
 
     /**
-     * Une liste contenant toutes les différentes couleurs.
+     * La liste contenant toutes les différentes couleurs.
      */
     public static final List<Color> ALL = List.of(values());
 

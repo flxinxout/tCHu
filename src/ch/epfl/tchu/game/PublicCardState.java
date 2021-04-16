@@ -7,7 +7,7 @@ import java.util.Objects;
 
 /**
  * Partie publique (connue des deux joueurs) de l'état des cartes wagon/locomotive qui ne sont pas en main des joueurs.
- * Elle est composée des cartes face visible, de la taille de la pioche ainsi que la taille de la défause.
+ * Elle est composée des cartes face visible, de la taille de la pioche ainsi que la taille de la défausse.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
@@ -70,6 +70,8 @@ public class PublicCardState {
     }
 
     /**
+     * Retourne la taille de la pioche.
+     *
      * @return la taille de la pioche
      */
     public int deckSize() {
@@ -77,6 +79,8 @@ public class PublicCardState {
     }
 
     /**
+     * Retourne ssi la pioche est vide.
+     *
      * @return ssi la pioche est vide
      */
     public boolean isDeckEmpty() {
@@ -84,6 +88,8 @@ public class PublicCardState {
     }
 
     /**
+     * Retourne la taille de la défausse.
+     *
      * @return la taille de la défausse
      */
     public int discardsSize() {

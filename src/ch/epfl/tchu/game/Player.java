@@ -32,10 +32,10 @@ public interface Player {
     void receiveInfo(String info);
 
     /**
-     * Appelée chaque fois que l'état du jeu a changé, pour informer le joueur de la composante publique de ce nouvel
-     * état, {@code newState}, ainsi que de son propre état, {@code ownState}.
+     * Appelée chaque fois que l'état du jeu a changé, pour informer ce joueur de la composante publique du nouvel
+     * état de la partie {@code newState}, ainsi que de son propre état {@code ownState}.
      *
-     * @param newState le nouvel état du joueur
+     * @param newState le nouvel état de la partie
      * @param ownState l'état du joueur
      */
     void updateState(PublicGameState newState, PlayerState ownState);
@@ -48,64 +48,63 @@ public interface Player {
     void setInitialTicketChoice(SortedBag<Ticket> tickets);
 
     /**
-     * Appelée au début de la partie pour demander au joueur lesquels des billets qu'on lui a distribué initialement
-     * (via la méthode précédente) il garde.
+     * Appelée au début de la partie pour demander au joueur lesquels des billets
+     * qu'on lui a distribué initialement il garde.
      *
-     * @return les billets que le joueur garde parmi ceux qu'on lui a donné initialement.
+     * @return les billets que le joueur garde parmi ceux qu'on lui a distribués initialement
      * @see Player#setInitialTicketChoice(SortedBag)
      */
     SortedBag<Ticket> chooseInitialTickets();
 
     /**
-     * Appelée au début du tour d'un joueur, pour savoir quel type d'action il désire effectuer durant ce tour.
+     * Appelée au début du tour de ce joueur, pour savoir quel type d'action il désire effectuer durant ce tour.
      *
      * @return l'action que veut effectuer le joueur.
      */
     TurnKind nextTurn();
 
     /**
-     * Appelée lorsque le joueur a décidé de tirer des billets supplémentaires en cours de partie, afin de lui
+     * Appelée lorsque ce joueur a décidé de tirer des billets supplémentaires en cours de partie, afin de lui
      * communiquer les billets tirés et de savoir lesquels il garde.
      *
      * @param options les billets tirés
-     * @return les billets gardés
+     * @return les billets gardés par ce joueur
      */
     SortedBag<Ticket> chooseTickets(SortedBag<Ticket> options);
 
     /**
-     * Appelée lorsque le joueur a décidé de tirer des cartes wagon/locomotive, afin de savoir d'où il désire les
+     * Appelée lorsque ce joueur a décidé de tirer des cartes wagon/locomotive, afin de savoir d'où il désire les
      * tirer: d'un des emplacements contenant une carte face visible — auquel cas la valeur retournée est comprise
      * entre 0 et 4 inclus —, ou de la pioche — auquel cas la valeur retournée vaut Constants.DECK_SLOT (c-à-d -1).
      *
-     * @return entre 0 et 4 inclus:= si le joueur tire des cartes faces visibles / Constants.DECK_SLOT (-1) si c'est
-     * dans la pioche
+     * @return entre 0 et 4 inclus:= si ce joueur tire des cartes faces visibles / Constants.DECK_SLOT (-1) s'il tire
+     * une carte de la pioche
      */
     int drawSlot();
 
     /**
-     * Appelée lorsque le joueur a décidé de (tenter de) s'emparer d'une route, afin de savoir de quelle route
-     * il s'agit.
+     * Appelée lorsque ce joueur a décidé de (tenter de) s'emparer d'une route, afin de savoir de quelle route il s'agit.
      *
-     * @return la route dont le joueur tente de s'emparer
+     * @return la route dont ce joueur tente de s'emparer
      */
     Route claimedRoute();
 
     /**
-     * Appelée lorsque le joueur a décidé de (tenter de) s'emparer d'une route, afin de savoir quelle(s) carte(s)
+     * Appelée lorsque ce joueur a décidé de (tenter de) s'emparer d'une route, afin de savoir quelle(s) carte(s)
      * il désire initialement utiliser pour cela.
      *
-     * @return les cartes que le joueur veut utiliser pour s'emparer d'une route
+     * @return les cartes que ce joueur veut utiliser pour s'emparer d'une route
      */
     SortedBag<Card> initialClaimCards();
 
     /**
-     * Appelée lorsque le joueur a décidé de tenter de s'emparer d'un tunnel et que des cartes additionnelles
+     * Appelée lorsque ce joueur a décidé de tenter de s'emparer d'un tunnel et que des cartes additionnelles
      * sont nécessaires, afin de savoir quelle(s) carte(s) il désire utiliser pour cela, les possibilités lui
      * étant passées en argument; si le multi-ensemble retourné est vide, cela signifie que le joueur ne désire
      * pas (ou ne peut pas) choisir l'une de ces possibilités.
      *
-     * @param options les possibilités de cartes pour s'emparer d'un tunnel
-     * @return un multi-ensemble vide si le joueur ne désire pas (ou ne peut pas) choisir l'une de ces possibilités.
+     * @param options les possibilités de cartes pour s'emparer du tunnel
+     * @return les cartes additionnelles jouées par ce joueur
      */
     SortedBag<Card> chooseAdditionalCards(List<SortedBag<Card>> options);
 
@@ -119,29 +118,9 @@ public interface Player {
         CLAIM_ROUTE;
 
         /**
-         * Liste contenant toutes les différentes actions d'un tour de jeu.
+         * La liste de toutes les différentes actions d'un tour de jeu.
          */
         public static final List<TurnKind> ALL = List.of(values());
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

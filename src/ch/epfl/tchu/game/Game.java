@@ -27,7 +27,7 @@ public final class Game {
      * @param players     table associant les joueurs à leur identité
      * @param playerNames table associant le nom des joueurs à leur identité
      * @param tickets     les billets disponibles pour cette partie
-     * @param rng         générateur aléatoire utilisé pour créer l'état initial du jeu et pour mélanger les cartes de la défausse
+     * @param rng         générateur aléatoire utilisé
      * @throws IllegalArgumentException si {@code players} ou {@code playerNames} ont une taille différente de 2
      */
     public static void play(Map<PlayerId, Player> players, Map<PlayerId, String> playerNames,

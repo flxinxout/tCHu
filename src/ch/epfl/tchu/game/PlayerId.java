@@ -14,17 +14,18 @@ public enum PlayerId {
     PLAYER_2;
 
     /**
-     * Liste contenant les différents joueurs.
+     * La liste contenant les différentes identités joueurs.
      */
     public static final List<PlayerId> ALL = List.of(values());
 
     /**
-     * Nombre de joueurs disponibles.
+     * Le nombre de joueurs disponibles.
      */
     public static final int COUNT = ALL.size();
 
     /**
-     * @return l'identité du joueur qui suit celui auquel on l'applique.
+     * Retourne l'identité du joueur qui suit celui auquel on l'applique.
+     * @return l'identité du joueur qui suit celui auquel on l'applique
      */
     public PlayerId next() {
         return this == PLAYER_1 ? PLAYER_2 : PLAYER_1;

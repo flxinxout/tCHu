@@ -25,12 +25,12 @@ public final class Deck<C extends Comparable<C>> {
     }
 
     /**
-     * Retourne un tas de cartes composé de {@code cards}, mélangées au moyen de {@code rng}.
+     * Retourne un tas de cartes composé des cartes données, mélangées au moyen de {@code rng}.
      *
      * @param cards le multi-ensemble de cartes
      * @param rng   le générateur de nombres aléatoires
      * @param <C>   le type des cartes
-     * @return le tas de cartes
+     * @return le tas de cartes composé des cartes données
      */
     public static <C extends Comparable<C>> Deck<C> of(SortedBag<C> cards, Random rng) {
         final List<C> newCardsList = cards.toList();
@@ -39,8 +39,10 @@ public final class Deck<C extends Comparable<C>> {
     }
 
     /**
+     * Retourne la carte au sommet de ce tas.
+     *
      * @return la carte au sommet de ce tas
-     * @throws IllegalArgumentException si le tas est vide
+     * @throws IllegalArgumentException si ce tas est vide
      */
     public C topCard() {
         Preconditions.checkArgument(!isEmpty());
@@ -48,10 +50,10 @@ public final class Deck<C extends Comparable<C>> {
     }
 
     /**
-     * Retourne un tas identique au récepteur ({@code this}) mais sans la carte au sommet.
+     * Retourne un tas identique à celui-ci mais sans la carte du sommet.
      *
-     * @return un tas identique au récepteur ({@code this}) mais sans la carte au sommet
-     * @throws IllegalArgumentException si le tas est vide
+     * @return un tas identique à celui-ci mais sans la carte du sommet.
+     * @throws IllegalArgumentException si ce tas est vide
      */
     public Deck<C> withoutTopCard() {
         Preconditions.checkArgument(!isEmpty());
@@ -61,11 +63,11 @@ public final class Deck<C extends Comparable<C>> {
     }
 
     /**
-     * Retourne un multi-ensemble contenant les {@code count} cartes se trouvant au sommet de ce tas
+     * Retourne un multi-ensemble contenant les {@code count} cartes se trouvant au sommet de ce tas.
      *
      * @param count le nombre de cartes à retourner
-     * @return un multi-ensemble contenant les {@code count} cartes se trouvant au sommet du tas
-     * @throws IllegalArgumentException si {@code count} n'est pas compris entre 0 et la taille du tas (inclus)
+     * @return un multi-ensemble contenant les {@code count} cartes se trouvant au sommet de ce tas
+     * @throws IllegalArgumentException si {@code count} n'est pas compris entre 0 et la taille de ce tas (inclus)
      */
     public SortedBag<C> topCards(int count) {
         Preconditions.checkArgument(count >= 0 && count <= size());
@@ -78,11 +80,11 @@ public final class Deck<C extends Comparable<C>> {
     }
 
     /**
-     * Retourne un tas identique au récepteur ({@code this}) mais sans les {@code count} cartes du sommet
+     * Retourne un tas identique à celui-ci mais sans les {@code count} cartes du sommet.
      *
      * @param count le nombre de cartes à enlever du sommet de ce tas
-     * @return un tas identique au récepteur ({@code this}) mais sans les {@code count} cartes du sommet
-     * @throws IllegalArgumentException si {@code count} n'est pas compris entre 0 et la taille du tas (inclus)
+     * @return un tas identique à celui-ci mais sans les {@code count} cartes du sommet
+     * @throws IllegalArgumentException si {@code count} n'est pas compris entre 0 et la taille de ce tas (inclus)
      */
     public Deck<C> withoutTopCards(int count) {
         Preconditions.checkArgument(count >= 0 && count <= size());
@@ -92,6 +94,8 @@ public final class Deck<C extends Comparable<C>> {
     }
 
     /**
+     * Retourne le nombre de cartes que ce tas contient.
+     *
      * @return le nombre de cartes que ce tas contient
      */
     public int size() {
@@ -99,6 +103,8 @@ public final class Deck<C extends Comparable<C>> {
     }
 
     /**
+     * Retourne si et seulement si ce tas est vide.
+     *
      * @return ssi ce tas est vide
      */
     public boolean isEmpty() {

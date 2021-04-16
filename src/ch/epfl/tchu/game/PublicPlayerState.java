@@ -45,35 +45,40 @@ public class PublicPlayerState {
     }
 
     /**
-     * @return le nombre de tickets que possède le joueur
+     * Retourne le nombre de tickets que possède ce joueur.
+     * @return le nombre de tickets que possède ce joueur
      */
     public int ticketCount() {
         return this.ticketCount;
     }
 
     /**
-     * @return le nombre de cartes possède le joueur
+     * Retourne le nombre de cartes possède ce joueur.
+     * @return le nombre de cartes possède ce joueur
      */
     public int cardCount() {
         return this.cardCount;
     }
 
     /**
-     * @return les routes dont le joueur s'est emparé
+     * Retourne les routes dont ce joueur s'est emparé.
+     * @return les routes dont ce joueur s'est emparé
      */
     public List<Route> routes() {
         return this.routes;
     }
 
     /**
-     * @return le nombre de wagons que possède le joueur
+     * Retourne le nombre de wagons que possède ce joueur
+     * @return le nombre de wagons que possède ce joueur
      */
     public int carCount() {
         return this.carCount;
     }
 
     /**
-     * @return le nombre de points de construction qu'à obtenu le joueur
+     * Retourne le nombre de points de construction qu'à obtenu ce joueur.
+     * @return le nombre de points de construction qu'à obtenu ce joueur
      */
     public int claimPoints() {
         return this.claimPoints;

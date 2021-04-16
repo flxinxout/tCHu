@@ -27,6 +27,8 @@ public final class Station {
     }
 
     /**
+     * Retourne le numéro d'identification de cette gare.
+     *
      * @return le numéro d'identification de cette gare
      */
     public int id() {
@@ -34,6 +36,8 @@ public final class Station {
     }
 
     /**
+     * Retourne le nom de cette gare.
+     *
      * @return le nom de cette gare
      */
     public String name() {

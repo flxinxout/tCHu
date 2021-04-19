@@ -139,10 +139,6 @@ public class Serdes {
         return s -> {
             final String[] elements = s.split(Pattern.quote(";"), -1);
 
-            System.out.println(Serdes.OF_LIST_OF_CARDS.deserialize(elements[0]));
-            System.out.println(Serdes.OF_INTEGERS.deserialize(elements[1]));
-            System.out.println(Serdes.OF_INTEGERS.deserialize(elements[2]));
-
             return new PublicCardState(Serdes.OF_LIST_OF_CARDS.deserialize(elements[0]),
                     Serdes.OF_INTEGERS.deserialize(elements[1]),
                     Serdes.OF_INTEGERS.deserialize(elements[2]));
@@ -175,7 +171,7 @@ public class Serdes {
 
             return new PublicPlayerState(Serdes.OF_INTEGERS.deserialize(elements[0]),
                     Serdes.OF_INTEGERS.deserialize(elements[1]),
-                    !elements[2].equals("") ? Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]) : List.of());
+                    !elements[2].isEmpty() ? Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]) : List.of());
         };
     }
 
@@ -205,8 +201,8 @@ public class Serdes {
             final String[] elements = s.split(Pattern.quote(";"), -1);
 
             return new PlayerState(!elements[0].equals("") ? Serdes.OF_SORTEDBAG_OF_TICKETS.deserialize(elements[0]) : SortedBag.of(),
-                    !elements[1].equals("") ? Serdes.OF_SORTEDBAG_OF_CARD.deserialize(elements[1]) : SortedBag.of(),
-                    !elements[2].equals("") ? Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]) : List.of());
+                    !elements[1].isEmpty() ? Serdes.OF_SORTEDBAG_OF_CARD.deserialize(elements[1]) : SortedBag.of(),
+                    !elements[2].isEmpty() ? Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]) : List.of());
         };
     }
 

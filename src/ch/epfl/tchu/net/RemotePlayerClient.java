@@ -14,24 +14,50 @@ import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
+/**
+ * Représente un client de joueur distant.
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ */
 public class RemotePlayerClient {
+
     private final Player player;
     private final String name;
     private final int port;
 
+    /**
+     * Construit un client de joueur distant en fonction d'un Player, d'un nom d'hôte et d'un port d'écoute.
+     *
+     * @param player le player qui est représenté par le client
+     * @param name le nom d'hôte
+     * @param port le numéro du port d'écoute
+     */
     public RemotePlayerClient(Player player, String name, int port) {
         this.player = player;
         this.name = name;
         this.port = port;
     }
 
+    /**
+     * Cette méthode permet au client d'écouter sur le port d'un nom d'hôte.<br>
+     * Quand un message peut être lu sur ce port, il est récupéré et désérialisé en fonction de son type de message,
+     * identifié par la première entrée du tableau crée à l'aide de la méthode split de <b>String</b> sur la chaîne de
+     * caractère lue.<p>
+     *
+     * Après sa désérialisation, les arguments sont utilisés pour appeler la méthode associée au type du message.<p>
+     *
+     * Quand plus rien ne peut être lu sur le port en question, la connexion est fermée.
+     */
     public void run(){
-        try (Socket s = new Socket(name, port);
-             BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream(), US_ASCII));
-             BufferedWriter w = new BufferedWriter(new OutputStreamWriter(s.getOutputStream(), US_ASCII))) {
+        try (Socket socket = new Socket(name, port);
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), US_ASCII));
+             final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), US_ASCII))) {
+
+            //TODO reflechir sur \n et flush dans certaines methodes car je sais plus pk on l'a pas mis
 
             String str;
-            while((str = r.readLine()) != null){
+            while((str = reader.readLine()) != null){
                 String[] message = str.split(Pattern.quote(" "), -1);
 
                 switch (MessageId.valueOf(message[0])) {
@@ -58,35 +84,35 @@ public class RemotePlayerClient {
                         break;
 
                     case CHOOSE_INITIAL_TICKETS:
-                        w.write(Serdes.OF_SORTEDBAG_OF_TICKETS.serialize(player.chooseInitialTickets()));
+                        writer.write(Serdes.OF_SORTEDBAG_OF_TICKETS.serialize(player.chooseInitialTickets()));
                         break;
 
                     case NEXT_TURN:
-                        w.write(Serdes.OF_TURN_KIND.serialize(player.nextTurn()));
+                        writer.write(Serdes.OF_TURN_KIND.serialize(player.nextTurn()));
                         break;
 
                     case CHOOSE_TICKETS:
                         SortedBag<Ticket> chosenTickets = player
                                 .chooseTickets(Serdes.OF_SORTEDBAG_OF_TICKETS.deserialize(message[1]));
-                        w.write(Serdes.OF_SORTEDBAG_OF_TICKETS.serialize(chosenTickets));
+                        writer.write(Serdes.OF_SORTEDBAG_OF_TICKETS.serialize(chosenTickets));
                         break;
 
                     case DRAW_SLOT:
-                        w.write(Serdes.OF_INTEGERS.serialize(player.drawSlot()));
+                        writer.write(Serdes.OF_INTEGERS.serialize(player.drawSlot()));
                         break;
 
                     case ROUTE:
-                        w.write(Serdes.OF_ROUTES.serialize(player.claimedRoute()));
+                        writer.write(Serdes.OF_ROUTES.serialize(player.claimedRoute()));
                         break;
 
                     case CARDS:
-                        w.write(Serdes.OF_SORTEDBAG_OF_CARD.serialize(player.initialClaimCards()));
+                        writer.write(Serdes.OF_SORTEDBAG_OF_CARD.serialize(player.initialClaimCards()));
                         break;
 
                     case CHOOSE_ADDITIONAL_CARDS:
                         SortedBag<Card> chosenCards = player
                                 .chooseAdditionalCards(Serdes.OF_LIST_OF_SORTEDBAG_OF_CARDS.deserialize(message[1]));
-                        w.write(Serdes.OF_SORTEDBAG_OF_CARD.serialize(chosenCards));
+                        writer.write(Serdes.OF_SORTEDBAG_OF_CARD.serialize(chosenCards));
                         break;
 
                     default:

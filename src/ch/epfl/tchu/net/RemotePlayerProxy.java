@@ -12,29 +12,26 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
 /**
  * Représente un mandataire (proxy) de joueur distant.
  *
- * @implNote Toutes les méthodes ré-implémentées de l'interface Player sont utilisées pour communiquer des informations
- * de la partie entre les joueurs
- *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
+ * @implNote Toutes les méthodes ré-implémentées de l'interface Player sont utilisées pour communiquer des informations
+ * de la partie entre les joueurs
  */
-public class RemotePlayerProxy implements Player {
+public final class RemotePlayerProxy implements Player {
 
-    private final Socket socket;
     private final BufferedReader bufferedReader;
     private final BufferedWriter bufferedWriter;
 
     /**
-     * Construit un proxy du joueur distant en fonction d'un socket.
+     * Construit un mandataire (proxy) du joueur distant en fonction d'une la prise (socket), qu'il
+     * utilise pour communiquer à travers le réseau avec le client par échange de messages textuels.
      *
-     * @param socket le socket que le proxy utilise à travers le réseau.
+     * @param socket la prise (socket) que le mandataire (proxy) utilise
      */
     public RemotePlayerProxy(Socket socket) {
-        this.socket = socket;
-
         try {
-            this.bufferedReader = new BufferedReader(new InputStreamReader(this.socket.getInputStream(),US_ASCII));
-            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream(), US_ASCII));
+            this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), US_ASCII));
+            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), US_ASCII));
 
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -42,13 +39,14 @@ public class RemotePlayerProxy implements Player {
     }
 
     /**
-     * Méthode permettant d'écrire un message grâce à un BufferWriter.
+     * Envoie un message sur la prise de ce mandataire, étant donné son identité
+     * et les chaînes de caractères correspondants à la sérialisation de ses arguments.
      *
      * @param identity l'identité du message
+     * @param argSers  les séralisations de ses arguments
      * @see MessageId
-     * @param argSers les arguments qui seront écrits
      */
-    private void sendMessage(String identity, String... argSers){
+    private void sendMessage(String identity, String... argSers) {
         try {
             StringJoiner sj = new StringJoiner(" ");
             sj.add(identity);
@@ -63,11 +61,11 @@ public class RemotePlayerProxy implements Player {
     }
 
     /**
-     * Méthode permettant de lire un message (une ligne) grâce à un BufferReader.
+     * Reçoit le message en attente sur la prise de ce mandataire.
      *
-     * @return le message lu par le BufferReader
+     * @return le message reçu
      */
-    private String readMessage(){
+    private String readMessage() {
         try {
             return bufferedReader.readLine();
         } catch (IOException e) {
@@ -76,10 +74,10 @@ public class RemotePlayerProxy implements Player {
     }
 
     /**
-     * Communique les informations sur l'identité du joueur ainsi que les noms des différents joueurs.
+     * Communique les informations sur l'identité du joueur ainsi que le nom des différents joueurs.
      *
      * @param ownId       l'identité du joueur
-     * @param playerNames les noms des différents joueurs
+     * @param playerNames le nom des différents joueurs
      */
     @Override
     public void initPlayers(PlayerId ownId, Map<PlayerId, String> playerNames) {
@@ -87,7 +85,7 @@ public class RemotePlayerProxy implements Player {
         String playerNamesSer = Serdes.OF_LIST_OF_STRINGS.serialize(List.of(playerNames.get(PlayerId.PLAYER_1),
                 playerNames.get(PlayerId.PLAYER_2)));
 
-        sendMessage(MessageId.INIT_PLAYERS.toString(), ownIdSer, playerNamesSer);
+        sendMessage(MessageId.INIT_PLAYERS.name(), ownIdSer, playerNamesSer);
     }
 
     /**
@@ -98,7 +96,7 @@ public class RemotePlayerProxy implements Player {
     @Override
     public void receiveInfo(String info) {
         String infoSer = Serdes.OF_STRINGS.serialize(info);
-        sendMessage(MessageId.RECEIVE_INFO.toString(), infoSer);
+        sendMessage(MessageId.RECEIVE_INFO.name(), infoSer);
     }
 
     /**
@@ -111,7 +109,7 @@ public class RemotePlayerProxy implements Player {
     public void updateState(PublicGameState newState, PlayerState ownState) {
         String newStateSer = Serdes.OF_PUBLIC_GAME_STATE.serialize(newState);
         String ownStateSer = Serdes.OF_PLAYER_STATE.serialize(ownState);
-        sendMessage(MessageId.UPDATE_STATE.toString(), newStateSer, ownStateSer);
+        sendMessage(MessageId.UPDATE_STATE.name(), newStateSer, ownStateSer);
     }
 
     /**
@@ -122,41 +120,43 @@ public class RemotePlayerProxy implements Player {
     @Override
     public void setInitialTicketChoice(SortedBag<Ticket> tickets) {
         String ticketsSer = Serdes.OF_SORTEDBAG_OF_TICKETS.serialize(tickets);
-        sendMessage(MessageId.SET_INITIAL_TICKETS.toString(), ticketsSer);
+        sendMessage(MessageId.SET_INITIAL_TICKETS.name(), ticketsSer);
     }
 
     /**
      * Communique l'information sur lesquels des billets le joueur à initialement gardés.
+     *
      * @return les billets que le joueur à initialement gardés
      */
     @Override
     public SortedBag<Ticket> chooseInitialTickets() {
-        sendMessage(MessageId.CHOOSE_INITIAL_TICKETS.toString());
+        sendMessage(MessageId.CHOOSE_INITIAL_TICKETS.name());
 
         return Serdes.OF_SORTEDBAG_OF_TICKETS.deserialize(readMessage());
     }
 
     /**
      * Communique le type de tour de jeu que le joueur veut effectuer.
+     *
      * @return e type de tour de jeu que le joueur veut effectuer
      */
     @Override
     public TurnKind nextTurn() {
-        sendMessage(MessageId.NEXT_TURN.toString());
+        sendMessage(MessageId.NEXT_TURN.name());
 
         return Serdes.OF_TURN_KIND.deserialize(readMessage());
     }
 
     /**
      * Communique les billets tirés par un joueur ainsi que ceux qu'ils gardent.
-
+     *
      * @param options les billets tirés
      * @return les billets gardés par le joueur
      */
     @Override
     public SortedBag<Ticket> chooseTickets(SortedBag<Ticket> options) {
         String optionsSer = Serdes.OF_SORTEDBAG_OF_TICKETS.serialize(options);
-        sendMessage(MessageId.CHOOSE_TICKETS.toString(), optionsSer);
+        sendMessage(MessageId.CHOOSE_TICKETS.name(), optionsSer);
 
         return Serdes.OF_SORTEDBAG_OF_TICKETS.deserialize(readMessage());
     }
@@ -170,29 +170,31 @@ public class RemotePlayerProxy implements Player {
      */
     @Override
     public int drawSlot() {
-        sendMessage(MessageId.DRAW_SLOT.toString());
+        sendMessage(MessageId.DRAW_SLOT.name());
 
         return Serdes.OF_INTEGERS.deserialize(readMessage());
     }
 
     /**
      * Communique la route que le joueur tente de s'emparer.
+     *
      * @return la route que le joueur tente de s'emparer
      */
     @Override
     public Route claimedRoute() {
-        sendMessage(MessageId.ROUTE.toString());
+        sendMessage(MessageId.ROUTE.name());
 
         return Serdes.OF_ROUTES.deserialize(readMessage());
     }
 
     /**
      * Communique les cartes que le joueur veut initialement utiliser pour s'emparer d'une route.
+     *
      * @return les cartes que le joueur veut initialement utiliser pour s'emparer d'une route
      */
     @Override
     public SortedBag<Card> initialClaimCards() {
-        sendMessage(MessageId.CARDS.toString());
+        sendMessage(MessageId.CARDS.name());
 
         return Serdes.OF_SORTEDBAG_OF_CARD.deserialize(readMessage());
     }
@@ -200,14 +202,14 @@ public class RemotePlayerProxy implements Player {
     /**
      * Communique l'information que le joueur tente de s'emparer d'un tunnel et qu'il doit utiliser des cartes
      * additionnelles, tout en sachant que les possibilités de cartes à employer sont passées en argument.
-
+     *
      * @param options les possibilités de cartes pour s'emparer du tunnel
      * @return les cartes additionnelles jouées par ce joueur
      */
     @Override
     public SortedBag<Card> chooseAdditionalCards(List<SortedBag<Card>> options) {
         String optionsSer = Serdes.OF_LIST_OF_SORTEDBAG_OF_CARDS.serialize(options);
-        sendMessage(MessageId.CHOOSE_ADDITIONAL_CARDS.toString(), optionsSer);
+        sendMessage(MessageId.CHOOSE_ADDITIONAL_CARDS.name(), optionsSer);
 
         return Serdes.OF_SORTEDBAG_OF_CARD.deserialize(readMessage());
     }

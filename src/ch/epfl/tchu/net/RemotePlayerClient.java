@@ -27,9 +27,10 @@ public class RemotePlayerClient {
     private final int port;
 
     /**
-     * Construit un client de joueur distant en fonction d'un Player, d'un nom d'hôte et d'un port d'écoute.
+     * Construit un client de joueur distant basé sur le joueur auquel il doit fournir un accès distant,
+     * ainsi que le nom d'hôte et le port d'écoute à utiliser pour se connecter au mandataire.
      *
-     * @param player le player qui est représenté par le client
+     * @param player le joueur auquel le client fourni un accès distant
      * @param name le nom d'hôte
      * @param port le numéro du port d'écoute
      */
@@ -40,21 +41,15 @@ public class RemotePlayerClient {
     }
 
     /**
-     * Cette méthode permet au client d'écouter sur le port d'un nom d'hôte.<br>
-     * Quand un message peut être lu sur ce port, il est récupéré et désérialisé en fonction de son type de message,
-     * identifié par la première entrée du tableau crée à l'aide de la méthode split de <b>String</b> sur la chaîne de
-     * caractère lue.<p>
-     *
-     * Après sa désérialisation, les arguments sont utilisés pour appeler la méthode associée au type du message.<p>
-     *
+     * Permet au client d'écouter sur toute la durée de la partie sur le port donné du nom d'hôte donné.
+     * Quand un message peut être lu sur ce port, il est récupéré et désérialisé en fonction de son type.
+     * Après leur désérialisation, les arguments sont utilisés pour appeler la méthode associée au type du message.
      * Quand plus rien ne peut être lu sur le port en question, la connexion est fermée.
      */
     public void run(){
         try (Socket socket = new Socket(name, port);
              final BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), US_ASCII));
              final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), US_ASCII))) {
-
-            //TODO reflechir sur \n et flush dans certaines methodes car je sais plus pk on l'a pas mis
 
             String str;
             while((str = reader.readLine()) != null){
@@ -85,34 +80,48 @@ public class RemotePlayerClient {
 
                     case CHOOSE_INITIAL_TICKETS:
                         writer.write(Serdes.OF_SORTEDBAG_OF_TICKETS.serialize(player.chooseInitialTickets()));
+                        writer.write('\n');
+                        writer.flush();
                         break;
 
                     case NEXT_TURN:
                         writer.write(Serdes.OF_TURN_KIND.serialize(player.nextTurn()));
+                        writer.write('\n');
+                        writer.flush();
                         break;
 
                     case CHOOSE_TICKETS:
                         SortedBag<Ticket> chosenTickets = player
                                 .chooseTickets(Serdes.OF_SORTEDBAG_OF_TICKETS.deserialize(message[1]));
                         writer.write(Serdes.OF_SORTEDBAG_OF_TICKETS.serialize(chosenTickets));
+                        writer.write('\n');
+                        writer.flush();
                         break;
 
                     case DRAW_SLOT:
                         writer.write(Serdes.OF_INTEGERS.serialize(player.drawSlot()));
+                        writer.write('\n');
+                        writer.flush();
                         break;
 
                     case ROUTE:
                         writer.write(Serdes.OF_ROUTES.serialize(player.claimedRoute()));
+                        writer.write('\n');
+                        writer.flush();
                         break;
 
                     case CARDS:
                         writer.write(Serdes.OF_SORTEDBAG_OF_CARD.serialize(player.initialClaimCards()));
+                        writer.write('\n');
+                        writer.flush();
                         break;
 
                     case CHOOSE_ADDITIONAL_CARDS:
                         SortedBag<Card> chosenCards = player
                                 .chooseAdditionalCards(Serdes.OF_LIST_OF_SORTEDBAG_OF_CARDS.deserialize(message[1]));
                         writer.write(Serdes.OF_SORTEDBAG_OF_CARD.serialize(chosenCards));
+                        writer.write('\n');
+                        writer.flush();
                         break;
 
                     default:

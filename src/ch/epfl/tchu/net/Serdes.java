@@ -32,8 +32,8 @@ public class Serdes {
      * Serde relatif aux chaînes de caractères.
      */
     public static final Serde<String> OF_STRINGS = Serde.of(
-                    s -> Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8)),
-                    s -> new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8));
+            s -> Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8)),
+            s -> new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8));
 
     /**
      * Serde relatif aux {@code PlayerId}.
@@ -63,7 +63,7 @@ public class Serdes {
     /**
      * Serde relatif aux listes de chaînes de caractères.
      */
-    public static final Serde<List<String>> OF_LIST_OF_STRINGS = Serde.listOf(Serdes.OF_STRINGS,',');
+    public static final Serde<List<String>> OF_LIST_OF_STRINGS = Serde.listOf(Serdes.OF_STRINGS, ',');
 
     /**
      * Serde relatif aux listes de {@code Card}.
@@ -117,6 +117,7 @@ public class Serdes {
 
     /**
      * Retourne la fonction de sérialisation d'un {@code PublicCardState}.
+     *
      * @return la fonction de sérialisation d'un {@code PublicCardState}
      */
     private static Function<PublicCardState, String> serFuncPublicCardState() {
@@ -133,6 +134,7 @@ public class Serdes {
 
     /**
      * Retourne la fonction de désérialisation d'un {@code PublicCardState}.
+     *
      * @return la fonction de désérialisation d'un {@code PublicCardState}
      */
     private static Function<String, PublicCardState> deserFuncPublicCardState() {
@@ -147,6 +149,7 @@ public class Serdes {
 
     /**
      * Retourne la fonction de sérialisation d'un {@code PublicPlayerState}.
+     *
      * @return la fonction de sérialisation d'un {@code PublicPlayerState}
      */
     private static Function<PublicPlayerState, String> serFuncPublicPlayerState() {
@@ -163,6 +166,7 @@ public class Serdes {
 
     /**
      * Retourne la fonction de désérialisation d'un {@code PublicPlayerState}.
+     *
      * @return la fonction de désérialisation d'un {@code PublicPlayerState}
      */
     private static Function<String, PublicPlayerState> deserFuncPublicPlayerState() {
@@ -177,6 +181,7 @@ public class Serdes {
 
     /**
      * Retourne la fonction de sérialisation d'un {@code PlayerState}.
+     *
      * @return la fonction de sérialisation d'un {@code PlayerState}
      */
     private static Function<PlayerState, String> serFuncPlayerState() {
@@ -194,6 +199,7 @@ public class Serdes {
 
     /**
      * Retourne la fonction de désérialisation d'un {@code PlayerState}.
+     *
      * @return la fonction de désérialisation d'un {@code PlayerState}
      */
     private static Function<String, PlayerState> deserFuncPlayerState() {
@@ -208,6 +214,7 @@ public class Serdes {
 
     /**
      * Retourne la fonction de  sérialisation d'un {@code PublicGameState}.
+     *
      * @return la fonction de  sérialisation d'un {@code PublicGameState}
      */
     private static Function<PublicGameState, String> serFuncPublicGameState() {
@@ -220,7 +227,7 @@ public class Serdes {
             joiner.add(Serdes.OF_PUBLIC_PLAYER_STATE.serialize(publicGameState.playerState(PlayerId.PLAYER_1)));
             joiner.add(Serdes.OF_PUBLIC_PLAYER_STATE.serialize(publicGameState.playerState(PlayerId.PLAYER_2)));
 
-            if(publicGameState.lastPlayer() == null)
+            if (publicGameState.lastPlayer() == null)
                 joiner.add("");
             else
                 joiner.add(Serdes.OF_PLAYER_ID.serialize(publicGameState.lastPlayer()));
@@ -231,6 +238,7 @@ public class Serdes {
 
     /**
      * Retourne la fonction de désérialisation d'un {@code PublicGameState}.
+     *
      * @return la fonction de désérialisation d'un {@code PublicGameState}
      */
     private static Function<String, PublicGameState> deserFuncPublicGameState() {

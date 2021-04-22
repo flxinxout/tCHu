@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SerdesTest {
 
@@ -35,7 +36,9 @@ public class SerdesTest {
     @Test
     void stringSerdeTestWorks(){
         String ser = stringSerde.serialize("Charles");
+        String serEmpty = stringSerde.serialize("");
         assertEquals("Q2hhcmxlcw==", ser);
+        assertEquals("", serEmpty);
         String des = stringSerde.deserialize(ser);
         assertEquals("Charles", des);
     }
@@ -56,6 +59,15 @@ public class SerdesTest {
     }
 
     @Test
+    void oneOfEmptyListFails(){
+        List<Integer> integers = new ArrayList<>();
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Serde<Integer> serde = Serde.oneOf(integers);
+        });
+    }
+
+    @Test
     void listOfWorks(){
         List<Integer> integers = new ArrayList<>();
         for (int i = 0; i <= 10; i++)
@@ -71,6 +83,19 @@ public class SerdesTest {
         assertEquals(expected.toString(), ser);
         List<Integer> des = serde.deserialize(ser);
         assertEquals(integers, des);
+    }
+
+    @Test
+    void listOfEmptyWorks(){
+        List<Integer> integers = new ArrayList<>();
+
+        Serde<List<Integer>> serde = Serde.listOf(intSerde, ',');
+
+        String ser = serde.serialize(integers);
+
+        assertEquals("", ser);
+        List<Integer> des = serde.deserialize(ser);
+        assertEquals(new ArrayList<>(), des);
     }
 
     @Test

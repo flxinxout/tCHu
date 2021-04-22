@@ -27,6 +27,7 @@ public final class RemotePlayerProxy implements Player {
      * utilise pour communiquer à travers le réseau avec le client par échange de messages textuels.
      *
      * @param socket la prise (socket) que le mandataire (proxy) utilise
+     * @throws UncheckedIOException en cas d'erreur d'entrée/sortie
      */
     public RemotePlayerProxy(Socket socket) {
         try {
@@ -44,6 +45,7 @@ public final class RemotePlayerProxy implements Player {
      *
      * @param identity l'identité du message
      * @param argSers  les séralisations de ses arguments
+     * @throws UncheckedIOException en cas d'erreur d'entrée/sortie
      * @see MessageId
      */
     private void sendMessage(String identity, String... argSers) {
@@ -64,6 +66,7 @@ public final class RemotePlayerProxy implements Player {
      * Reçoit le message en attente sur la prise de ce mandataire.
      *
      * @return le message reçu
+     * @throws UncheckedIOException en cas d'erreur d'entrée/sortie
      */
     private String readMessage() {
         try {

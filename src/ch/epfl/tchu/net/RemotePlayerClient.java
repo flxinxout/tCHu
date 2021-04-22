@@ -31,8 +31,9 @@ public class RemotePlayerClient {
      * ainsi que le nom d'hôte et le port d'écoute à utiliser pour se connecter au mandataire.
      *
      * @param player le joueur auquel le client fourni un accès distant
-     * @param name le nom d'hôte
-     * @param port le numéro du port d'écoute
+     * @param name   le nom d'hôte
+     * @param port   le numéro du port d'écoute
+     * @throws UncheckedIOException en cas d'erreur d'entrée/sortie
      */
     public RemotePlayerClient(Player player, String name, int port) {
         this.player = player;
@@ -46,13 +47,13 @@ public class RemotePlayerClient {
      * Après leur désérialisation, les arguments sont utilisés pour appeler la méthode associée au type du message.
      * Quand plus rien ne peut être lu sur le port en question, la connexion est fermée.
      */
-    public void run(){
+    public void run() {
         try (Socket socket = new Socket(name, port);
              final BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), US_ASCII));
              final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), US_ASCII))) {
 
             String str;
-            while((str = reader.readLine()) != null){
+            while ((str = reader.readLine()) != null) {
                 String[] message = str.split(Pattern.quote(" "), -1);
 
                 switch (MessageId.valueOf(message[0])) {

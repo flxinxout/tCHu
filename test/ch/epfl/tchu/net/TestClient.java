@@ -36,6 +36,7 @@ public class TestClient {
         public void updateState(PublicGameState newState, PlayerState ownState) {
             System.out.printf("new GameState last player: %s\n", newState.lastPlayer());
             System.out.printf("ownState cards: %s\n", ownState.cards());
+            System.out.printf("ownState routes: %s\n", ownState.routes());
         }
 
         @Override

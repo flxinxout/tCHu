@@ -20,7 +20,7 @@ public class TestServer {
     private static SortedBag<Card> cards = SortedBag.of(3, Card.LOCOMOTIVE, 2, Card.BLUE);
     private static List<SortedBag<Card>> cardsOptions = List.of(SortedBag.of(Card.YELLOW), cards);
     private static SortedBag<Ticket> tickets = SortedBag.of(ChMap.tickets().subList(5, 10));
-    private static List<Route> routes = ChMap.routes().subList(0, 10);
+    private static List<Route> routes = List.of();
     private static Random rng = TestRandomizer.newRandom();
 
     public static void main(String[] args) throws IOException {

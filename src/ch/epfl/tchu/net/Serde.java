@@ -63,6 +63,7 @@ public interface Serde<E> {
      * @param values les valeurs à sérialiser
      * @param <T>    le paramètre de type de la méthode
      * @return le serde correspondant à la sérialisation et la désérialisation de {@code values}
+     * @throws IllegalArgumentException si la liste est vide
      */
     static <T> Serde<T> oneOf(List<T> values) {
         Preconditions.checkArgument(!values.isEmpty());

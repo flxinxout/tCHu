@@ -116,8 +116,8 @@ public final class ObservableGameState {
         return faceUpCards.get(slot);
     }
 
-    public ReadOnlyObjectProperty<PlayerId> route(int slot) {
-        return routes.get(slot);
+    public ReadOnlyObjectProperty<PlayerId> route(int id) {
+        return routes.get(id);
     }
 
     public ReadOnlyIntegerProperty ticketsCount(PlayerId id) {
@@ -158,5 +158,9 @@ public final class ObservableGameState {
 
     public List<SortedBag<Card>> possibleClaimCards(Route route){
         return playerState.possibleClaimCards(route);
+    }
+
+    public ReadOnlyBooleanProperty claimable(Route route){
+        return ReadOnlyBooleanProperty.readOnlyBooleanProperty(new SimpleBooleanProperty(playerState.canClaimRoute(route)));
     }
 }

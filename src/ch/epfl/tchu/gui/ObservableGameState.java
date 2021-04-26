@@ -19,7 +19,7 @@ public final class ObservableGameState {
 
     private final Map<PlayerId, ObjectProperty<Integer>> ticketsCount, cardsCount, carsCount, claimPoints;
 
-    private final ObjectProperty<List<Ticket>> tickets;
+    private final ObjectProperty<SortedBag<Ticket>> tickets;
     private final List<ObjectProperty<Integer>> cards;
     private final List<ObjectProperty<Boolean>> routesClaimed;
 
@@ -68,7 +68,40 @@ public final class ObservableGameState {
             claimPoints.get(pId).setValue(newGameState.playerState(pId).claimPoints());
         }
 
+        tickets.setValue(playerState.tickets());
+        //todo: pas beau mais vasy j'ai pas d'idée
+        for(int i = 0; i < Card.COUNT; i++) {
+            int j = 0;
+            for(Card card : playerState.cards()) {
+                if(card.ordinal() == i) {
+                    j++;
+                }
+            }
+            cards.get(i).setValue(j);
+        }
 
+        for (int i = 0; i < ChMap.routes().size(); i++) {
+            Route route = ChMap.routes().get(i);
+            if(newGameState.currentPlayerId() == playerId) {
+
+                // Vu qu'on sait que c'est le joueur courant, alors pas besoin de for each tout les joueurs.
+                if(!newGameState.currentPlayerState().routes().contains(route)) {
+                    //TODO: savoir si c'est une route double ??
+
+                    // si il ne l'a pas, logiquement on peut continue sur la prochaine carte non ?
+                    routesClaimed.get(i).set(false);
+                    continue;
+                }
+
+                //TODO: est-ce qu'il faut différentier les tunnels des routes ? car la donnée est pas claire...
+                if(!playerState.canClaimRoute(route)) {
+                    // si il ne peut pas, logiquement on peut continue sur la prochaine carte non ?
+                    routesClaimed.get(i).set(false);
+                    continue;
+                }
+            }
+            routesClaimed.get(i).setValue(true);
+        }
     }
 
     public ReadOnlyIntegerProperty ticketsPercentage() {
@@ -103,7 +136,7 @@ public final class ObservableGameState {
         return ReadOnlyIntegerProperty.readOnlyIntegerProperty(claimPoints.get(id));
     }
 
-    public ReadOnlyObjectProperty<List<Ticket>> tickets() {
+    public ReadOnlyObjectProperty<SortedBag<Ticket>> tickets() {
         return tickets;
     }
 

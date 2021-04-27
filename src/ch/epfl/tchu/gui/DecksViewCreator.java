@@ -2,11 +2,9 @@ package ch.epfl.tchu.gui;
 
 import ch.epfl.tchu.game.Card;
 import ch.epfl.tchu.game.Constants;
-import ch.epfl.tchu.game.Deck;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
@@ -16,7 +14,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
-import static ch.epfl.tchu.game.Card.*;
+import java.util.List;
+
+import static ch.epfl.tchu.game.Card.ALL;
+import static ch.epfl.tchu.game.Card.LOCOMOTIVE;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawCardHandler;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawTicketHandler;
 
@@ -36,19 +37,19 @@ class DecksViewCreator {
     private final static String BACKGROUND_SC = "background";
     private final static String FOREGROUND_SC = "foreground";
 
-    private final static double OUTSIDE_WIDTH = 60D;
-    private final static double OUTSIDE_HEIGHT = 90D;
-    private final static double INSIDE_WIDTH = 40D;
-    private final static double INSIDE_HEIGHT = 70D;
-    private final static double GAUGE_WIDTH = 50D;
-    private final static double GAUGE_HEIGHT = 5D;
+    private final static double OUTSIDE_WIDTH = 60d;
+    private final static double OUTSIDE_HEIGHT = 90d;
+    private final static double INSIDE_WIDTH = 40d;
+    private final static double INSIDE_HEIGHT = 70d;
+    private final static double GAUGE_WIDTH = 50d;
+    private final static double GAUGE_HEIGHT = 5d;
 
     private DecksViewCreator() {
     }
 
-    public static DecksViewCreator createHandView(ObservableGameState gameState) {
+    public static void createHandView(ObservableGameState gameState) {
         HBox rootHBox = MapViewUtils.hBoxWithoutId("decks.css", "colors.css");
-        ListView tickets = MapViewUtils.listView(TICKETS_ID);
+        ListView<Rectangle> tickets = MapViewUtils.listView(TICKETS_ID);
         HBox handPaneHBox = MapViewUtils.hBox(HAND_PANE_ID);
 
         for (Card card : ALL) {
@@ -57,27 +58,25 @@ class DecksViewCreator {
             ReadOnlyIntegerProperty count = gameState.card(card.ordinal());
             cardPane.visibleProperty().bind(Bindings.greaterThan(count, 0));
 
-            Rectangle outside = MapViewUtils.rectangle(OUTSIDE_WIDTH, OUTSIDE_HEIGHT, OUTSIDE_SC);
-            MapViewUtils.addChildrenPane(cardPane, outside);
+            Rectangle outside = new Rectangle(OUTSIDE_WIDTH, OUTSIDE_HEIGHT);
+            outside.getStyleClass().add(OUTSIDE_SC);
 
-            Rectangle inside = MapViewUtils.rectangle(INSIDE_WIDTH, INSIDE_HEIGHT, INSIDE_SC, FILLED_SC);
-            MapViewUtils.addChildrenPane(cardPane, inside);
+            Rectangle inside = new Rectangle(INSIDE_WIDTH, INSIDE_HEIGHT);
+            inside.getStyleClass().addAll(INSIDE_SC, FILLED_SC);
 
-            Rectangle trainImage = MapViewUtils.rectangle(INSIDE_WIDTH, INSIDE_HEIGHT, TRAIN_IMAGE_SC);
-            MapViewUtils.addChildrenPane(cardPane, trainImage);
+            Rectangle trainImage = new Rectangle(INSIDE_WIDTH, INSIDE_HEIGHT);
+            trainImage.getStyleClass().add(TRAIN_IMAGE_SC);
 
             Text text = MapViewUtils.text(COUNT_SC);
             text.textProperty().bind(Bindings.convert(count)); // pas sur du tout
             text.visibleProperty().bind(Bindings.greaterThan(count, 1));
-            MapViewUtils.addChildrenPane(cardPane, text);
 
-
-
+            cardPane.getChildren().addAll(outside, inside, trainImage, text);
 
             handPaneHBox.getChildren().add(cardPane);
         }
 
-        rootHBox.getChildren().add(tickets);
+        rootHBox.getChildren().addAll(tickets, handPaneHBox);
     }
 
     public static void createCardsView(ObservableGameState gameState,
@@ -110,6 +109,10 @@ class DecksViewCreator {
             Rectangle trainImage = MapViewUtils.rectangle(INSIDE_WIDTH, INSIDE_HEIGHT, TRAIN_IMAGE_SC);
             MapViewUtils.addChildrenPane(pane, trainImage);
         }
+    }
+
+    private static StackPane cardPaneOf(List<Card> cards){
+        
     }
 }
 

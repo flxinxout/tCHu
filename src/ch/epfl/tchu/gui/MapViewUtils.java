@@ -1,7 +1,6 @@
 package ch.epfl.tchu.gui;
 
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
@@ -9,18 +8,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
 class MapViewUtils {
 
     private MapViewUtils() {
-    }
-
-    public static Rectangle rectangle(double width, double height, String... elements) {
-        Rectangle rectangle = new Rectangle(width, height);
-        rectangle.getStyleClass().addAll(elements);
-        return rectangle;
     }
 
     public static Circle circle(double x, double y, double radius, String... elements) {
@@ -85,8 +77,8 @@ class MapViewUtils {
         return vBox;
     }
 
-    public static ListView listView(String id) {
-        ListView list = new ListView();
+    public static <T> ListView<T> listView(String id) {
+        ListView<T> list = new ListView();
         list.setId(id);
         return list;
     }
@@ -95,13 +87,5 @@ class MapViewUtils {
         StackPane stackPane = new StackPane();
         stackPane.getStyleClass().addAll(elements);
         return stackPane;
-    }
-
-    public static void addChildrenPane(Pane parent, Node... children) {
-        parent.getChildren().addAll(children);
-    }
-
-    public static void addChildrenGroup(Group parent, Node... children) {
-        parent.getChildren().addAll(children);
     }
 }

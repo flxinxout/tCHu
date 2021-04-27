@@ -21,7 +21,7 @@ import static ch.epfl.tchu.gui.ActionHandlers.ClaimRouteHandler;
 class MapViewCreator {
 
     //TODO: demander si c'est bien de créer constantes pours les styles class
-    private final static String ROUTE_CS = "route";
+    private final static String ROUTE_SC = "route";
     private final static String NEUTRAL_SC = "NEUTRAL";
     private final static String TRACK_SC = "track";
     private final static String FILLED_SC = "filled";
@@ -48,15 +48,15 @@ class MapViewCreator {
                                      ObjectProperty<ClaimRouteHandler> claimRouteHP,
                                      CardChooser cardChooser) {
         //3.4.1
-        Pane pane = new Pane();
-        pane.getStylesheets().add("tCHu/resources/map.css");
-        pane.getStylesheets().add("tCHu/resources/colors.css");
-        pane.getChildren().add(new ImageView());
+        Pane rootPane = new Pane();
+        rootPane.getStylesheets().add("tCHu/resources/map.css");
+        rootPane.getStylesheets().add("tCHu/resources/colors.css");
+        rootPane.getChildren().add(new ImageView());
 
         for (Route route : ChMap.routes()) {
             //3.4.1
             Group routeGroup = new Group();
-            routeGroup.getStyleClass().add(ROUTE_CS);
+            routeGroup.getStyleClass().add(ROUTE_SC);
             routeGroup.getStyleClass().add(route.level().name());
             routeGroup.getStyleClass().add(route.color() == null ? NEUTRAL_SC : route.color().name());
             routeGroup.setId(route.id());
@@ -114,10 +114,10 @@ class MapViewCreator {
                 routeGroup.getChildren().add(squareGroup);
             }
 
-            pane.getChildren().add(routeGroup);
+            rootPane.getChildren().add(routeGroup);
         }
 
-        Scene scene = new Scene(pane);
+        Scene scene = new Scene(rootPane);
         Stage stage = new Stage();
         stage.setScene(scene);
         stage.show();

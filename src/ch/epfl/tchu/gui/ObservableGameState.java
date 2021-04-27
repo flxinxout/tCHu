@@ -25,7 +25,7 @@ public final class ObservableGameState {
 
     private final PlayerId playerId;
     private PublicGameState gameState;
-    private PlayerState playerState;
+    private ObjectProperty<PlayerState> playerState;
 
     public ObservableGameState(PlayerId id){
         this.ticketsPercentage = new SimpleObjectProperty<>(0);
@@ -157,10 +157,14 @@ public final class ObservableGameState {
     }
 
     public List<SortedBag<Card>> possibleClaimCards(Route route){
-        return playerState.possibleClaimCards(route);
+        return playerState.get().possibleClaimCards(route);
     }
 
     public ReadOnlyBooleanProperty claimable(Route route){
-        return ReadOnlyBooleanProperty.readOnlyBooleanProperty(new SimpleBooleanProperty(playerState.canClaimRoute(route)));
+        return ReadOnlyBooleanProperty.readOnlyBooleanProperty(new SimpleBooleanProperty(playerState.get().canClaimRoute(route)));
+    }
+
+    public ReadOnlyObjectProperty<PlayerState> playerStateProperty(){
+        return playerState;
     }
 }

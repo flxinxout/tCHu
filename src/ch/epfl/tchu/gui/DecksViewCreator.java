@@ -14,12 +14,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
-import java.util.List;
-
 import static ch.epfl.tchu.game.Card.ALL;
 import static ch.epfl.tchu.game.Card.LOCOMOTIVE;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawCardHandler;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawTicketHandler;
+import static ch.epfl.tchu.gui.MapViewUtils.*;
 
 class DecksViewCreator {
     private final static String TICKETS_ID = "tickets";
@@ -37,82 +36,96 @@ class DecksViewCreator {
     private final static String BACKGROUND_SC = "background";
     private final static String FOREGROUND_SC = "foreground";
 
-    private final static double OUTSIDE_WIDTH = 60d;
-    private final static double OUTSIDE_HEIGHT = 90d;
-    private final static double INSIDE_WIDTH = 40d;
-    private final static double INSIDE_HEIGHT = 70d;
-    private final static double GAUGE_WIDTH = 50d;
-    private final static double GAUGE_HEIGHT = 5d;
+    private final static double OUTSIDE_WIDTH = 60D;
+    private final static double OUTSIDE_HEIGHT = 90D;
+    private final static double INSIDE_WIDTH = 40D;
+    private final static double INSIDE_HEIGHT = 70D;
+    private final static double GAUGE_INITIAL_WIDTH = 50D;
+    private final static double GAUGE_HEIGHT = 5D;
 
-    private DecksViewCreator() {
-    }
+    private DecksViewCreator() { }
 
     public static void createHandView(ObservableGameState gameState) {
-        HBox rootHBox = MapViewUtils.hBoxWithoutId("decks.css", "colors.css");
-        ListView<Rectangle> tickets = MapViewUtils.listView(TICKETS_ID);
-        HBox handPaneHBox = MapViewUtils.hBox(HAND_PANE_ID);
+        HBox root = hBoxWithoutId("decks.css", "colors.css");
+        ListView<Rectangle> tickets = listView(TICKETS_ID);
+        HBox handPaneHBox = hBox(HAND_PANE_ID);
 
-        for (Card card : ALL) {
-            StackPane cardPane = MapViewUtils.stackPane(card != LOCOMOTIVE ? card.name() : NEUTRAL_SC, CARD_SC);
+        for (Card cardType : ALL) {
+            StackPane card = stackPaneOf(cardType);
 
-            ReadOnlyIntegerProperty count = gameState.card(card.ordinal());
-            cardPane.visibleProperty().bind(Bindings.greaterThan(count, 0));
+            Text text = text(COUNT_SC);
+            card.getChildren().add(text);
 
-            Rectangle outside = new Rectangle(OUTSIDE_WIDTH, OUTSIDE_HEIGHT);
-            outside.getStyleClass().add(OUTSIDE_SC);
+            ReadOnlyIntegerProperty count = gameState.cardOccurrencesProperty(cardType);
+            card.visibleProperty().bind(Bindings.greaterThan(count, 0));
 
-            Rectangle inside = new Rectangle(INSIDE_WIDTH, INSIDE_HEIGHT);
-            inside.getStyleClass().addAll(INSIDE_SC, FILLED_SC);
-
-            Rectangle trainImage = new Rectangle(INSIDE_WIDTH, INSIDE_HEIGHT);
-            trainImage.getStyleClass().add(TRAIN_IMAGE_SC);
-
-            Text text = MapViewUtils.text(COUNT_SC);
-            text.textProperty().bind(Bindings.convert(count)); // pas sur du tout
+            text.textProperty().bind(Bindings.convert(count));
             text.visibleProperty().bind(Bindings.greaterThan(count, 1));
 
-            cardPane.getChildren().addAll(outside, inside, trainImage, text);
-
-            handPaneHBox.getChildren().add(cardPane);
+            handPaneHBox.getChildren().add(card);
         }
+        root.getChildren().addAll(tickets, handPaneHBox);
 
-        rootHBox.getChildren().addAll(tickets, handPaneHBox);
+        showStageOf(root);
     }
 
     public static void createCardsView(ObservableGameState gameState,
                                 ObjectProperty<DrawTicketHandler> drawTicketHP,
                                 ObjectProperty<DrawCardHandler> drawCardHP){
+        VBox root = vBox(CARD_PANE_ID, "decks.css", "colors.css");
 
-        VBox rootVBox = MapViewUtils.vBox(CARD_PANE_ID, "decks.css", "colors.css");
+        //TODO: VERIFIER QUE CA JOUE MEME SI LE BIND EST PASSE EN ARGUMENT
+        Button ticketsB = createButton(gameState.ticketsPercentageProperty());
+        ticketsB.disableProperty().bind(drawTicketHP.isNull());
+        ticketsB.setOnMouseClicked(e -> drawTicketHP.get().onDrawTickets());
 
-        for(int i = 1; i <= 2; i++) {
-            Button button = MapViewUtils.button(GAUGED_SC);
-            MapViewUtils.addChildrenPane(rootVBox, button);
+        //TODO: VERIFIER QUE CA JOUE MEME SI LE BIND EST PASSE EN ARGUMENT
+        Button cardsB = createButton(gameState.cardsPercentageProperty());
+        cardsB.disableProperty().bind(drawCardHP.isNull());
+        cardsB.setOnMouseClicked(e -> drawCardHP.get().onDrawCard(-1));
 
-            Group buttonGroup = new Group();
-            Rectangle background = MapViewUtils.rectangle(GAUGE_WIDTH, GAUGE_HEIGHT, BACKGROUND_SC);
-            Rectangle foreground = MapViewUtils.rectangle(GAUGE_WIDTH, GAUGE_HEIGHT, FOREGROUND_SC);
-            MapViewUtils.addChildrenGroup(buttonGroup, background, foreground);
+        root.getChildren().addAll(ticketsB, cardsB);
 
+        for (int slot : Constants.FACE_UP_CARD_SLOTS) {
+            Card card = gameState.faceUpCardPropertyAt(slot).get();
+            StackPane cardPane = stackPaneOf(card);
+            gameState.faceUpCardPropertyAt(slot).addListener((o, oV, nV) -> cardPane.getStyleClass().set(
+                    cardPane.getStyleClass().indexOf(oV),
+                    nV != LOCOMOTIVE ? nV.name() : NEUTRAL_SC));
+            root.getChildren().add(cardPane);
         }
 
-        for (int i = 0; i < Constants.FACE_UP_CARDS_COUNT; i++) {
-            Card card = gameState.faceUpCard(i).getValue();
-            StackPane pane = MapViewUtils.stackPane(card != LOCOMOTIVE ? card.color().name() : NEUTRAL_SC, CARD_SC);
-
-            Rectangle outside = MapViewUtils.rectangle(OUTSIDE_WIDTH, OUTSIDE_HEIGHT, OUTSIDE_SC);
-            MapViewUtils.addChildrenPane(pane, outside);
-
-            Rectangle inside = MapViewUtils.rectangle(INSIDE_WIDTH, INSIDE_HEIGHT, INSIDE_SC, FILLED_SC);
-            MapViewUtils.addChildrenPane(pane, inside);
-
-            Rectangle trainImage = MapViewUtils.rectangle(INSIDE_WIDTH, INSIDE_HEIGHT, TRAIN_IMAGE_SC);
-            MapViewUtils.addChildrenPane(pane, trainImage);
-        }
+        showStageOf(root);
     }
 
-    private static StackPane cardPaneOf(List<Card> cards){
-        
+    private static StackPane stackPaneOf(Card card){
+        StackPane cardPane = stackPane(card != LOCOMOTIVE ? card.name() : NEUTRAL_SC, CARD_SC);
+
+        Rectangle outside = new Rectangle(OUTSIDE_WIDTH, OUTSIDE_HEIGHT);
+        outside.getStyleClass().add(OUTSIDE_SC);
+
+        Rectangle inside = new Rectangle(INSIDE_WIDTH, INSIDE_HEIGHT);
+        inside.getStyleClass().addAll(INSIDE_SC, FILLED_SC);
+
+        Rectangle trainImage = new Rectangle(INSIDE_WIDTH, INSIDE_HEIGHT);
+        trainImage.getStyleClass().add(TRAIN_IMAGE_SC);
+
+        cardPane.getChildren().addAll(outside, inside, trainImage);
+
+        return cardPane;
+    }
+
+    private static Button createButton(ReadOnlyIntegerProperty gaugePercentage){
+        Button button = button(GAUGED_SC);
+
+        Rectangle gaugeBackground = rectangle(GAUGE_INITIAL_WIDTH, GAUGE_HEIGHT, BACKGROUND_SC);
+        Rectangle gaugeForeground = rectangle(GAUGE_INITIAL_WIDTH, GAUGE_HEIGHT, FOREGROUND_SC);
+        gaugeForeground.widthProperty().bind(gaugePercentage.multiply(50).divide(100));
+
+        Group buttonGroup = new Group(gaugeBackground, gaugeForeground);
+        button.setGraphic(buttonGroup);
+
+        return button;
     }
 }
 

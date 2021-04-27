@@ -3,21 +3,18 @@ package ch.epfl.tchu.gui;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.Card;
 import ch.epfl.tchu.game.ChMap;
-import ch.epfl.tchu.game.Route;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
-import org.w3c.dom.css.Rect;
 
 import java.util.List;
 
 import static ch.epfl.tchu.gui.ActionHandlers.ChooseCardsHandler;
 import static ch.epfl.tchu.gui.ActionHandlers.ClaimRouteHandler;
+import static ch.epfl.tchu.gui.MapViewUtils.showStageOf;
 
 class MapViewCreator {
 
@@ -48,24 +45,20 @@ class MapViewCreator {
     public static void createMapView(ObservableGameState gameState,
                                      ObjectProperty<ClaimRouteHandler> claimRouteHP,
                                      CardChooser cardChooser) {
-        //3.4.1
-        Pane rootPane = MapViewUtils.pane("map.css", "colors.css");
-        MapViewUtils.addChildrenPane(rootPane, new ImageView());
+        Pane root = MapViewUtils.pane("map.css", "colors.css");
+        MapViewUtils.addChildrenPane(root, new ImageView());
 
         ChMap.routes().forEach(route -> {
 
-            //3.4.1
             Group routeGroup = MapViewUtils.group(route.id(), ROUTE_SC, route.level().name(),
                     route.color() == null ? NEUTRAL_SC : route.color().name());
 
-            //3.4.2
             routeGroup.disableProperty().bind(claimRouteHP.isNull().or(gameState.claimable(route).not()));
-            gameState.route(ChMap.routes().indexOf(route)).addListener((o, oV, nV) -> {
+            gameState.routesOwnerProperty(route.id()).addListener((o, oV, nV) -> {
                 if (nV != null)
                     routeGroup.getStyleClass().add(nV.name());
             });
 
-            //3.4.3
             routeGroup.setOnMouseClicked(e -> {
                 List<SortedBag<Card>> possibleClaimCards = gameState.possibleClaimCards(route);
                 ClaimRouteHandler claimRouteH = claimRouteHP.get();
@@ -78,7 +71,6 @@ class MapViewCreator {
                 }
             });
 
-            //3.4.1
             for (int i = 1; i <= route.length(); i++) {
                 Group squareGroup = MapViewUtils.group(String.format("%s_%d", route.id(), i));
                 Rectangle wayRect = MapViewUtils.rectangle(RECT_WIDTH, RECT_HEIGHT, TRACK_SC, FILLED_SC);
@@ -97,13 +89,10 @@ class MapViewCreator {
                 MapViewUtils.addChildrenGroup(routeGroup, squareGroup);
             }
 
-            MapViewUtils.addChildrenPane(rootPane, routeGroup);
+            MapViewUtils.addChildrenPane(root, routeGroup);
         });
 
-        Scene scene = new Scene(rootPane);
-        Stage stage = new Stage();
-        stage.setScene(scene);
-        stage.show();
+        showStageOf(root);
     }
 
     /**

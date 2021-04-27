@@ -13,159 +13,156 @@ import static ch.epfl.tchu.game.Constants.*;
 
 public final class ObservableGameState {
 
-    private final ObjectProperty<Integer> ticketsPercentage, cardsPercentage;
-    private final List<ObjectProperty<Card>> faceUpCards;
-    private final List<ObjectProperty<PlayerId>> routes;
+    //TODO: mettre en property?
+    private final PlayerId id;
 
-    private final Map<PlayerId, ObjectProperty<Integer>> ticketsCount, cardsCount, carsCount, claimPoints;
+    //TODO: faut-il créer des accesseurs pour ces 2?
+    private final ObjectProperty<PublicGameState> gameState;
+    private final ObjectProperty<PlayerState> playerState;
+
+    private final IntegerProperty ticketsPercentage, cardsPercentage;
+    private final List<ObjectProperty<Card>> faceUpCards;
+    //TODO: bien Map?
+    private final Map<String, ObjectProperty<PlayerId>> routeOwner;
+
+    private final Map<PlayerId, IntegerProperty> ticketCount, cardCount, carCount, claimPoints;
 
     private final ObjectProperty<SortedBag<Ticket>> tickets;
-    private final List<ObjectProperty<Integer>> cards;
-    private final List<ObjectProperty<Boolean>> routesClaimed;
+    //TODO: bien Map?
+    private final Map<Card, IntegerProperty> cardOccurences;
+    private final Map<String, BooleanProperty> routesClaimed;
 
-    private final PlayerId playerId;
-    private PublicGameState gameState;
-    private ObjectProperty<PlayerState> playerState;
+    /**
+     * Construit un état de jeu observable correspondant à l'identité du joueur donnée. À la création, la totalité des
+     * propriétés de l'état ont leur valeur par défaut.
+     *
+     * @param id l'identité du joueur attaché à cet état de jeu
+     */
+    public ObservableGameState(PlayerId id) {
+        this.id = id;
 
-    public ObservableGameState(PlayerId id){
-        this.ticketsPercentage = new SimpleObjectProperty<>(0);
-        this.cardsPercentage = new SimpleObjectProperty<>(0);
+        this.gameState = new SimpleObjectProperty<>(null);
+        this.playerState = new SimpleObjectProperty<>(null);
+
+        this.ticketsPercentage = new SimpleIntegerProperty(0);
+        this.cardsPercentage = new SimpleIntegerProperty(0);
         this.faceUpCards = new ArrayList<>(FACE_UP_CARDS_COUNT);
-        this.routes = new ArrayList<>(ChMap.routes().size());
+        this.routeOwner = new HashMap<>(ChMap.routes().size());
 
-        this.ticketsCount = new HashMap<>(PlayerId.COUNT);
-        this.cardsCount = new HashMap<>(PlayerId.COUNT);
-        this.carsCount = new HashMap<>(PlayerId.COUNT);
+        this.ticketCount = new HashMap<>(PlayerId.COUNT);
+        this.cardCount = new HashMap<>(PlayerId.COUNT);
+        this.carCount = new HashMap<>(PlayerId.COUNT);
         this.claimPoints = new HashMap<>(PlayerId.COUNT);
 
         this.tickets = new SimpleObjectProperty<>(null);
-        this.cards = new ArrayList<>(Card.COUNT);
-        this.routesClaimed = new ArrayList<>(ChMap.routes().size());
-
-        this.playerId = id;
+        this.cardOccurences = new HashMap<>(Card.COUNT);
+        this.routesClaimed = new HashMap<>(ChMap.routes().size());
     }
 
-    public void setState(PublicGameState newGameState, PlayerState playerState){
-        //TODO: casts
-        ticketsPercentage.setValue((int) ((double) newGameState.ticketsCount() / (double) ChMap.tickets().size() * 100));
-        cardsPercentage.setValue((int) ((double) newGameState.cardState().deckSize() / (double) TOTAL_CARDS_COUNT * 100));
-        for (int slot : FACE_UP_CARD_SLOTS) {
-            Card newCard = newGameState.cardState().faceUpCard(slot);
-            faceUpCards.get(slot).set(newCard);
-        }
-        //TODO: remettre null après coup??
-        //TODO: claimedRoute de gamestate ??
-        for (int i = 0; i < ChMap.routes().size(); i++) {
+    /**
+     * Met à jour la totalité des propriétés de l'état en fonction des deux états donnés.
+     *
+     * @param newGameState le nouvel état de jeu
+     * @param playerState  le nouvel état du joueur associé à cet état de jeu
+     */
+    public void setState(PublicGameState newGameState, PlayerState playerState) {
+        gameState.setValue(newGameState);
+
+        ticketsPercentage.setValue(100 * newGameState.ticketsCount() / ChMap.tickets().size());
+        cardsPercentage.setValue(100 * newGameState.cardState().deckSize() / TOTAL_CARDS_COUNT);
+        for (int slot : FACE_UP_CARD_SLOTS)
+            faceUpCards.get(slot).setValue(newGameState.cardState().faceUpCard(slot));
+        for (Route claimedRoute : newGameState.claimedRoutes()) {
             for (PlayerId pId : PlayerId.ALL) {
-                if (newGameState.playerState(pId).routes().contains(ChMap.routes().get(i)))
-                    routes.get(i).set(pId);
+                if (newGameState.playerState(pId).routes().contains(claimedRoute))
+                    routeOwner.get(claimedRoute.id()).setValue(pId);
             }
         }
 
         for (PlayerId pId : PlayerId.ALL) {
-            ticketsCount.get(pId).setValue(newGameState.playerState(pId).ticketCount());
-            cardsCount.get(pId).setValue(newGameState.playerState(pId).cardCount());
-            carsCount.get(pId).setValue(newGameState.playerState(pId).carCount());
+            ticketCount.get(pId).setValue(newGameState.playerState(pId).ticketCount());
+            cardCount.get(pId).setValue(newGameState.playerState(pId).cardCount());
+            carCount.get(pId).setValue(newGameState.playerState(pId).carCount());
             claimPoints.get(pId).setValue(newGameState.playerState(pId).claimPoints());
         }
 
         tickets.setValue(playerState.tickets());
-        //todo: pas beau mais vasy j'ai pas d'idée
-        for(int i = 0; i < Card.COUNT; i++) {
-            int j = 0;
-            for(Card card : playerState.cards()) {
-                if(card.ordinal() == i) {
-                    j++;
-                }
-            }
-            cards.get(i).setValue(j);
-        }
-
-        for (int i = 0; i < ChMap.routes().size(); i++) {
-            Route route = ChMap.routes().get(i);
-            if(newGameState.currentPlayerId() == playerId) {
-
-                // Vu qu'on sait que c'est le joueur courant, alors pas besoin de for each tout les joueurs.
-                if(!newGameState.currentPlayerState().routes().contains(route)) {
-                    //TODO: savoir si c'est une route double ??
-
-                    // si il ne l'a pas, logiquement on peut continue sur la prochaine carte non ?
-                    routesClaimed.get(i).set(false);
-                    continue;
-                }
-
-                //TODO: est-ce qu'il faut différentier les tunnels des routes ? car la donnée est pas claire...
-                if(!playerState.canClaimRoute(route)) {
-                    // si il ne peut pas, logiquement on peut continue sur la prochaine carte non ?
-                    routesClaimed.get(i).set(false);
-                    continue;
-                }
-            }
-            routesClaimed.get(i).setValue(true);
-        }
+        for (Card card : Card.ALL)
+            cardOccurences.get(card).setValue(playerState.cards().countOf(card));
+        for (Route route : ChMap.routes())
+            //TODO: check les routes doubles
+            routesClaimed.get(route.id()).setValue(newGameState.currentPlayerId() == id &&
+                    !newGameState.claimedRoutes().contains(route) &&
+                    playerState.canClaimRoute(route));
     }
 
-    public ReadOnlyIntegerProperty ticketsPercentage() {
+    public ReadOnlyIntegerProperty ticketsPercentageProperty() {
         return ReadOnlyIntegerProperty.readOnlyIntegerProperty(ticketsPercentage);
     }
 
-    public ReadOnlyIntegerProperty cardsPercentage() {
+    //TODO faut-il faire les getters du contenu des propriétés comme précisé §4.3 du cours sur JAVAFX?
+    public int getTicketsPercentage(){
+        return ticketsPercentage.getValue();
+    }
+
+    public ReadOnlyIntegerProperty cardsPercentageProperty() {
         return ReadOnlyIntegerProperty.readOnlyIntegerProperty(cardsPercentage);
     }
 
-    public ReadOnlyObjectProperty<Card> faceUpCard(int slot) {
+    public ReadOnlyObjectProperty<Card> faceUpCardPropertyAt(int slot) {
         return faceUpCards.get(slot);
     }
 
-    public ReadOnlyObjectProperty<PlayerId> route(int id) {
-        return routes.get(id);
+
+    public ReadOnlyObjectProperty<PlayerId> routesOwnerProperty(String routeId) {
+        return routeOwner.get(routeId);
     }
 
-    public ReadOnlyIntegerProperty ticketsCount(PlayerId id) {
-        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(ticketsCount.get(id));
+    public ReadOnlyIntegerProperty ticketsCountProperty(PlayerId id) {
+        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(ticketCount.get(id));
     }
 
-    public ReadOnlyIntegerProperty cardsCount(PlayerId id) {
-        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(cardsCount.get(id));
+    public ReadOnlyIntegerProperty cardsCountProperty(PlayerId id) {
+        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(cardCount.get(id));
     }
 
-    public ReadOnlyIntegerProperty carsCount(PlayerId id) {
-        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(carsCount.get(id));
+    public ReadOnlyIntegerProperty carsCountProperty(PlayerId id) {
+        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(carCount.get(id));
     }
 
-    public ReadOnlyIntegerProperty points(PlayerId id) {
+    public ReadOnlyIntegerProperty claimPointsProperty(PlayerId id) {
         return ReadOnlyIntegerProperty.readOnlyIntegerProperty(claimPoints.get(id));
     }
 
-    public ReadOnlyObjectProperty<SortedBag<Ticket>> tickets() {
+    public ReadOnlyObjectProperty<SortedBag<Ticket>> ticketsProperty() {
         return tickets;
     }
 
-    public ReadOnlyIntegerProperty card(int id) {
-        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(cards.get(id));
+    public ReadOnlyIntegerProperty cardOccurrencesProperty(Card card) {
+        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(cardOccurences.get(card));
     }
 
-    public ReadOnlyBooleanProperty routesClaimed(int id) {
-        return ReadOnlyBooleanProperty.readOnlyBooleanProperty(routesClaimed.get(id));
+    public ReadOnlyBooleanProperty routesClaimedProperty(String routeId) {
+        return ReadOnlyBooleanProperty.readOnlyBooleanProperty(routesClaimed.get(routeId));
     }
 
-    public boolean canDrawTickets(){
-        return gameState.canDrawTickets();
+    public boolean canDrawTickets() {
+        return (gameState.getValue() != null && gameState.getValue().canDrawTickets());
     }
 
-    public boolean canDrawCards(){
-        return gameState.canDrawCards();
+    public boolean canDrawCards() {
+        return (gameState.getValue() != null && gameState.getValue().canDrawCards());
     }
 
-    public List<SortedBag<Card>> possibleClaimCards(Route route){
-        return playerState.get().possibleClaimCards(route);
+    public List<SortedBag<Card>> possibleClaimCards(Route route) {
+        if (playerState.getValue() != null)
+            return playerState.getValue().possibleClaimCards(route);
+        else
+            return List.of();
     }
 
-    public ReadOnlyBooleanProperty claimable(Route route){
-        return ReadOnlyBooleanProperty.readOnlyBooleanProperty(new SimpleBooleanProperty(playerState.get().canClaimRoute(route)));
-    }
-
-    public ReadOnlyObjectProperty<PlayerState> playerStateProperty(){
-        return playerState;
+    public ReadOnlyBooleanProperty claimable(Route route) {
+        return ReadOnlyBooleanProperty.readOnlyBooleanProperty(new SimpleBooleanProperty(
+                playerState.getValue() != null && playerState.getValue().canClaimRoute(route)));
     }
 }

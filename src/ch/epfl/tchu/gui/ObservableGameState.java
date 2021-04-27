@@ -54,6 +54,7 @@ public final class ObservableGameState {
             faceUpCards.get(slot).set(newCard);
         }
         //TODO: remettre null après coup??
+        //TODO: claimedRoute de gamestate ??
         for (int i = 0; i < ChMap.routes().size(); i++) {
             for (PlayerId pId : PlayerId.ALL) {
                 if (newGameState.playerState(pId).routes().contains(ChMap.routes().get(i)))

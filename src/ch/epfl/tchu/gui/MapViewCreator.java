@@ -12,6 +12,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import org.w3c.dom.css.Rect;
 
 import java.util.List;
 
@@ -27,10 +28,10 @@ class MapViewCreator {
     private final static String FILLED_SC = "filled";
     private final static String CAR_CS = "car";
 
-    private final static double RECT_HEIGHT = 12d;
-    private final static double RECT_WIDTH = 36d;
-    private final static double CIRCLE_RADIUS = 3d;
-    private final static double CIRCLE_MARGIN = 6d;
+    private final static double RECT_HEIGHT = 12D;
+    private final static double RECT_WIDTH = 36D;
+    private final static double CIRCLE_RADIUS = 3D;
+    private final static double CIRCLE_MARGIN = 6D;
 
     private MapViewCreator() {
     }
@@ -48,18 +49,14 @@ class MapViewCreator {
                                      ObjectProperty<ClaimRouteHandler> claimRouteHP,
                                      CardChooser cardChooser) {
         //3.4.1
-        Pane rootPane = new Pane();
-        rootPane.getStylesheets().add("tCHu/resources/map.css");
-        rootPane.getStylesheets().add("tCHu/resources/colors.css");
-        rootPane.getChildren().add(new ImageView());
+        Pane rootPane = MapViewUtils.pane("map.css", "colors.css");
+        MapViewUtils.addChildrenPane(rootPane, new ImageView());
 
-        for (Route route : ChMap.routes()) {
+        ChMap.routes().forEach(route -> {
+
             //3.4.1
-            Group routeGroup = new Group();
-            routeGroup.getStyleClass().add(ROUTE_SC);
-            routeGroup.getStyleClass().add(route.level().name());
-            routeGroup.getStyleClass().add(route.color() == null ? NEUTRAL_SC : route.color().name());
-            routeGroup.setId(route.id());
+            Group routeGroup = MapViewUtils.group(route.id(), ROUTE_SC, route.level().name(),
+                    route.color() == null ? NEUTRAL_SC : route.color().name());
 
             //3.4.2
             routeGroup.disableProperty().bind(claimRouteHP.isNull().or(gameState.claimable(route).not()));
@@ -83,39 +80,25 @@ class MapViewCreator {
 
             //3.4.1
             for (int i = 1; i <= route.length(); i++) {
-                Group squareGroup = new Group();
-                squareGroup.setId(String.format("%s_%d", route.id(), i));
+                Group squareGroup = MapViewUtils.group(String.format("%s_%d", route.id(), i));
+                Rectangle wayRect = MapViewUtils.rectangle(RECT_WIDTH, RECT_HEIGHT, TRACK_SC, FILLED_SC);
+                Group carGroup = MapViewUtils.groupWithoutId(CAR_CS);
 
-                Rectangle wayRect = new Rectangle();
-                wayRect.getStyleClass().add(TRACK_SC);
-                wayRect.getStyleClass().add(FILLED_SC);
-                wayRect.setHeight(RECT_HEIGHT);
-                wayRect.setWidth(RECT_WIDTH);
+                Rectangle carRect = MapViewUtils.rectangle(RECT_WIDTH, RECT_HEIGHT, FILLED_SC);
+                MapViewUtils.addChildrenGroup(carGroup, carRect);
 
-                Group carGroup = new Group();
-                carGroup.getStyleClass().add(CAR_CS);
-                Rectangle carRect = new Rectangle();
-                carRect.getStyleClass().add(FILLED_SC);
-                carRect.setHeight(RECT_HEIGHT);
-                carRect.setWidth(RECT_WIDTH);
-                carGroup.getChildren().add(carRect);
                 for (int j = 1; j <= 2; j++) {
-                    Circle carCircle = new Circle();
-                    carCircle.getStyleClass().add(FILLED_SC);
-                    carCircle.setRadius(CIRCLE_RADIUS);
-                    carCircle.setCenterX((carRect.getWidth() / 2 - CIRCLE_MARGIN) * j);
-                    carCircle.setCenterY(carRect.getHeight() / 2);
-                    carGroup.getChildren().add(carCircle);
+                    Circle carCircle = MapViewUtils.circle((carRect.getWidth() / 2 - CIRCLE_MARGIN) * j,
+                            carRect.getHeight() / 2, CIRCLE_RADIUS, FILLED_SC);
+                    MapViewUtils.addChildrenGroup(carGroup, carCircle);
                 }
 
-                squareGroup.getChildren().add(wayRect);
-                squareGroup.getChildren().add(carGroup);
-
-                routeGroup.getChildren().add(squareGroup);
+                MapViewUtils.addChildrenGroup(squareGroup, wayRect, carGroup);
+                MapViewUtils.addChildrenGroup(routeGroup, squareGroup);
             }
 
-            rootPane.getChildren().add(routeGroup);
-        }
+            MapViewUtils.addChildrenPane(rootPane, routeGroup);
+        });
 
         Scene scene = new Scene(rootPane);
         Stage stage = new Stage();

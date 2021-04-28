@@ -4,10 +4,7 @@ import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
 import javafx.beans.property.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ch.epfl.tchu.game.Constants.*;
 
@@ -89,11 +86,16 @@ public final class ObservableGameState {
         tickets.setValue(playerState.tickets());
         for (Card card : Card.ALL)
             cardOccurences.get(card).setValue(playerState.cards().countOf(card));
-        for (Route route : ChMap.routes())
-            //TODO: check les routes doubles
+
+        //TODO: à voir les routes doubles si c'est correct
+        Set<Set<Station>> stations = new HashSet<>();
+        for (Route route : ChMap.routes()){
             routesClaimed.get(route.id()).setValue(newGameState.currentPlayerId() == id &&
                     !newGameState.claimedRoutes().contains(route) &&
+                    !stations.contains(new HashSet<>(route.stations())) &&
                     playerState.canClaimRoute(route));
+            stations.add(new HashSet<>(route.stations()));
+        }
     }
 
     public ReadOnlyIntegerProperty ticketsPercentageProperty() {

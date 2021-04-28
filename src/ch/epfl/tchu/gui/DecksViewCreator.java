@@ -2,10 +2,12 @@ package ch.epfl.tchu.gui;
 
 import ch.epfl.tchu.game.Card;
 import ch.epfl.tchu.game.Constants;
+import ch.epfl.tchu.game.Ticket;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
@@ -17,13 +19,15 @@ import javafx.scene.text.Text;
 import static ch.epfl.tchu.game.Card.ALL;
 import static ch.epfl.tchu.game.Card.LOCOMOTIVE;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawCardHandler;
-import static ch.epfl.tchu.gui.ActionHandlers.DrawTicketHandler;
-import static ch.epfl.tchu.gui.MapViewUtils.*;
+import static ch.epfl.tchu.gui.ActionHandlers.DrawTicketsHandler;
 
 class DecksViewCreator {
     private final static String TICKETS_ID = "tickets";
     private final static String HAND_PANE_ID = "hand-pane";
     private final static String CARD_PANE_ID = "card-pane";
+
+    private final static String TICKETS_BUTTON_TEXT = "Billets";
+    private final static String CARDS_BUTTON_TEXT = "Cartes";
 
     private final static String NEUTRAL_SC = "NEUTRAL";
     private final static String CARD_SC = "card";
@@ -43,63 +47,81 @@ class DecksViewCreator {
     private final static double GAUGE_INITIAL_WIDTH = 50D;
     private final static double GAUGE_HEIGHT = 5D;
 
-    private DecksViewCreator() { }
+    private DecksViewCreator() {
+    }
 
-    public static void createHandView(ObservableGameState gameState) {
-        HBox root = hBoxWithoutId("decks.css", "colors.css");
-        ListView<Rectangle> tickets = listView(TICKETS_ID);
-        HBox handPaneHBox = hBox(HAND_PANE_ID);
+    public static Node createHandView(ObservableGameState gameState) {
+        HBox root = new HBox();
+        root.getStylesheets().addAll("decks.css", "colors.css");
 
-        for (Card cardType : ALL) {
-            StackPane card = stackPaneOf(cardType);
+        ListView<Ticket> tickets = new ListView<>(gameState.tickets());
+        tickets.setId(TICKETS_ID);
 
-            Text text = text(COUNT_SC);
-            card.getChildren().add(text);
+        HBox handPaneHBox = new HBox();
+        handPaneHBox.setId(HAND_PANE_ID);
 
-            ReadOnlyIntegerProperty count = gameState.cardOccurrencesProperty(cardType);
-            card.visibleProperty().bind(Bindings.greaterThan(count, 0));
+        for (Card card : ALL) {
+            StackPane cardPane = stackPaneOf(card);
+
+            Text text = new Text();
+            text.getStyleClass().add(COUNT_SC);
+            cardPane.getChildren().add(text);
+
+            ReadOnlyIntegerProperty count = gameState.occurrencesOf(card);
+            cardPane.visibleProperty().bind(Bindings.greaterThan(count, 0));
 
             text.textProperty().bind(Bindings.convert(count));
             text.visibleProperty().bind(Bindings.greaterThan(count, 1));
 
-            handPaneHBox.getChildren().add(card);
+            handPaneHBox.getChildren().add(cardPane);
         }
-        root.getChildren().addAll(tickets, handPaneHBox);
 
-        showStageOf(root);
+        root.getChildren().addAll(tickets, handPaneHBox);
+        return root;
     }
 
-    public static void createCardsView(ObservableGameState gameState,
-                                ObjectProperty<DrawTicketHandler> drawTicketHP,
-                                ObjectProperty<DrawCardHandler> drawCardHP){
-        VBox root = vBox(CARD_PANE_ID, "decks.css", "colors.css");
+    public static Node createCardsView(ObservableGameState gameState,
+                                       ObjectProperty<DrawTicketsHandler> drawTicketHP,
+                                       ObjectProperty<DrawCardHandler> drawCardHP) {
+        VBox root = new VBox();
+        root.setId(CARD_PANE_ID);
+        root.getStylesheets().addAll("decks.css", "colors.css");
 
-        //TODO: VERIFIER QUE CA JOUE MEME SI LE BIND EST PASSE EN ARGUMENT
-        Button ticketsB = createButton(gameState.ticketsPercentageProperty());
+        Button ticketsB = buttonOf(gameState.ticketsPercentage());
+        ticketsB.setText(TICKETS_BUTTON_TEXT);
         ticketsB.disableProperty().bind(drawTicketHP.isNull());
         ticketsB.setOnMouseClicked(e -> drawTicketHP.get().onDrawTickets());
 
-        //TODO: VERIFIER QUE CA JOUE MEME SI LE BIND EST PASSE EN ARGUMENT
-        Button cardsB = createButton(gameState.cardsPercentageProperty());
-        cardsB.disableProperty().bind(drawCardHP.isNull());
-        cardsB.setOnMouseClicked(e -> drawCardHP.get().onDrawCard(-1));
-
-        root.getChildren().addAll(ticketsB, cardsB);
+        root.getChildren().add(ticketsB);
 
         for (int slot : Constants.FACE_UP_CARD_SLOTS) {
-            Card card = gameState.faceUpCardPropertyAt(slot).get();
+            Card card = gameState.faceUpCardAt(slot).get();
             StackPane cardPane = stackPaneOf(card);
-            gameState.faceUpCardPropertyAt(slot).addListener((o, oV, nV) -> cardPane.getStyleClass().set(
-                    cardPane.getStyleClass().indexOf(oV),
-                    nV != LOCOMOTIVE ? nV.name() : NEUTRAL_SC));
+            gameState.faceUpCardAt(slot).addListener((o, oV, nV) -> {
+                int index;
+                if (oV != null) {
+                    index = cardPane.getStyleClass().indexOf(oV != LOCOMOTIVE ? oV.name() : NEUTRAL_SC);
+                    cardPane.getStyleClass().set(index, nV != LOCOMOTIVE ? nV.name() : NEUTRAL_SC);
+                } else
+                    cardPane.getStyleClass().add(nV != LOCOMOTIVE ? nV.name() : NEUTRAL_SC);
+            });
             root.getChildren().add(cardPane);
         }
 
-        showStageOf(root);
+        Button cardsB = buttonOf(gameState.cardsPercentage());
+        cardsB.setText(CARDS_BUTTON_TEXT);
+        cardsB.disableProperty().bind(drawCardHP.isNull());
+        cardsB.setOnMouseClicked(e -> drawCardHP.get().onDrawCard(-1));
+
+        root.getChildren().add(cardsB);
+        return root;
     }
 
-    private static StackPane stackPaneOf(Card card){
-        StackPane cardPane = stackPane(card != LOCOMOTIVE ? card.name() : NEUTRAL_SC, CARD_SC);
+    private static StackPane stackPaneOf(Card card) {
+        StackPane cardPane = new StackPane();
+        if (card != null)
+            cardPane.getStyleClass().add(card != LOCOMOTIVE ? card.name() : NEUTRAL_SC);
+        cardPane.getStyleClass().add(CARD_SC);
 
         Rectangle outside = new Rectangle(OUTSIDE_WIDTH, OUTSIDE_HEIGHT);
         outside.getStyleClass().add(OUTSIDE_SC);
@@ -115,34 +137,18 @@ class DecksViewCreator {
         return cardPane;
     }
 
-    private static Button createButton(ReadOnlyIntegerProperty gaugePercentage){
-        Button button = button(GAUGED_SC);
+    private static Button buttonOf(ReadOnlyIntegerProperty gaugePercentage) {
+        Button button = new Button();
+        button.getStyleClass().add(GAUGED_SC);
 
-        Rectangle gaugeBackground = rectangle(GAUGE_INITIAL_WIDTH, GAUGE_HEIGHT, BACKGROUND_SC);
-        Rectangle gaugeForeground = rectangle(GAUGE_INITIAL_WIDTH, GAUGE_HEIGHT, FOREGROUND_SC);
+        Rectangle gaugeBackground = new Rectangle(GAUGE_INITIAL_WIDTH, GAUGE_HEIGHT);
+        gaugeBackground.getStyleClass().add(BACKGROUND_SC);
+        Rectangle gaugeForeground = new Rectangle(GAUGE_INITIAL_WIDTH, GAUGE_HEIGHT);
+        gaugeForeground.getStyleClass().add(FOREGROUND_SC);
         gaugeForeground.widthProperty().bind(gaugePercentage.multiply(50).divide(100));
 
-        Group buttonGroup = new Group(gaugeBackground, gaugeForeground);
-        button.setGraphic(buttonGroup);
-
+        Group gaugeGroup = new Group(gaugeBackground, gaugeForeground);
+        button.setGraphic(gaugeGroup);
         return button;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

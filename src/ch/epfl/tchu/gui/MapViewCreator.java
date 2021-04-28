@@ -3,8 +3,10 @@ package ch.epfl.tchu.gui;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.Card;
 import ch.epfl.tchu.game.ChMap;
+import ch.epfl.tchu.game.Route;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
@@ -14,11 +16,9 @@ import java.util.List;
 
 import static ch.epfl.tchu.gui.ActionHandlers.ChooseCardsHandler;
 import static ch.epfl.tchu.gui.ActionHandlers.ClaimRouteHandler;
-import static ch.epfl.tchu.gui.MapViewUtils.showStageOf;
 
 class MapViewCreator {
 
-    //TODO: demander si c'est bien de créer constantes pours les styles class
     private final static String ROUTE_SC = "route";
     private final static String NEUTRAL_SC = "NEUTRAL";
     private final static String TRACK_SC = "track";
@@ -42,22 +42,25 @@ class MapViewCreator {
      *                     lorsque le joueur désire s'emparer d'une route
      * @param cardChooser  le sélectionneur de cartes à utiliser
      */
-    public static void createMapView(ObservableGameState gameState,
+    public static Node createMapView(ObservableGameState gameState,
                                      ObjectProperty<ClaimRouteHandler> claimRouteHP,
                                      CardChooser cardChooser) {
-        Pane root = MapViewUtils.pane("map.css", "colors.css");
-        MapViewUtils.addChildrenPane(root, new ImageView());
+        Pane root = new Pane();
+        root.getStylesheets().addAll("map.css", "colors.css");
+        root.getChildren().add(new ImageView());
 
-        ChMap.routes().forEach(route -> {
+        for (Route route : ChMap.routes()) {
+            Group routeGroup = new Group();
+            routeGroup.setId(route.id());
+            routeGroup.getStyleClass().addAll(ROUTE_SC, route.level().name(),
+                    route.color() != null ? route.color().name() : NEUTRAL_SC);
 
-            Group routeGroup = MapViewUtils.group(route.id(), ROUTE_SC, route.level().name(),
-                    route.color() == null ? NEUTRAL_SC : route.color().name());
-
-            routeGroup.disableProperty().bind(claimRouteHP.isNull().or(gameState.claimable(route).not()));
-            gameState.routesOwnerProperty(route.id()).addListener((o, oV, nV) -> {
+            gameState.ownerOf(route).addListener((o, oV, nV) -> {
                 if (nV != null)
                     routeGroup.getStyleClass().add(nV.name());
             });
+
+            routeGroup.disableProperty().bind(claimRouteHP.isNull().or(gameState.claimable(route).not()));
 
             routeGroup.setOnMouseClicked(e -> {
                 List<SortedBag<Card>> possibleClaimCards = gameState.possibleClaimCards(route);
@@ -72,27 +75,33 @@ class MapViewCreator {
             });
 
             for (int i = 1; i <= route.length(); i++) {
-                Group squareGroup = MapViewUtils.group(String.format("%s_%d", route.id(), i));
-                Rectangle wayRect = MapViewUtils.rectangle(RECT_WIDTH, RECT_HEIGHT, TRACK_SC, FILLED_SC);
-                Group carGroup = MapViewUtils.groupWithoutId(CAR_CS);
+                Group squareGroup = new Group();
+                squareGroup.setId(String.format("%s_%d", route.id(), i));
 
-                Rectangle carRect = MapViewUtils.rectangle(RECT_WIDTH, RECT_HEIGHT, FILLED_SC);
-                MapViewUtils.addChildrenGroup(carGroup, carRect);
+                Rectangle railwayRect = new Rectangle(RECT_WIDTH, RECT_HEIGHT);
+                railwayRect.getStyleClass().addAll(TRACK_SC, FILLED_SC);
+
+                Group carGroup = new Group();
+                carGroup.getStyleClass().add(CAR_CS);
+
+                Rectangle carRect = new Rectangle(RECT_WIDTH, RECT_HEIGHT);
+                carRect.getStyleClass().add(FILLED_SC);
+                carGroup.getChildren().add(carRect);
 
                 for (int j = 1; j <= 2; j++) {
-                    Circle carCircle = MapViewUtils.circle((carRect.getWidth() / 2 - CIRCLE_MARGIN) * j,
-                            carRect.getHeight() / 2, CIRCLE_RADIUS, FILLED_SC);
-                    MapViewUtils.addChildrenGroup(carGroup, carCircle);
+                    Circle carCircle = new Circle((carRect.getWidth() / 2 - CIRCLE_MARGIN) * j,
+                            carRect.getHeight() / 2, CIRCLE_RADIUS);
+                    carCircle.getStyleClass().add(FILLED_SC);
+                    carGroup.getChildren().add(carCircle);
                 }
 
-                MapViewUtils.addChildrenGroup(squareGroup, wayRect, carGroup);
-                MapViewUtils.addChildrenGroup(routeGroup, squareGroup);
+                squareGroup.getChildren().addAll(railwayRect, carGroup);
+
+                routeGroup.getChildren().add(squareGroup);
             }
-
-            MapViewUtils.addChildrenPane(root, routeGroup);
-        });
-
-        showStageOf(root);
+            root.getChildren().add(routeGroup);
+        }
+        return root;
     }
 
     /**

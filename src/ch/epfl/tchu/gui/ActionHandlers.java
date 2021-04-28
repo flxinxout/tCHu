@@ -14,7 +14,7 @@ public interface ActionHandlers {
      * Gestionnaire de l'action de tirer des billets.
      */
     @FunctionalInterface
-    interface DrawTicketHandler {
+    interface DrawTicketsHandler {
         /**
          * Est appelée lorsque le joueur désire tirer des billets.
          */

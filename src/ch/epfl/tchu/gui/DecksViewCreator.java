@@ -26,9 +26,6 @@ class DecksViewCreator {
     private final static String HAND_PANE_ID = "hand-pane";
     private final static String CARD_PANE_ID = "card-pane";
 
-    private final static String TICKETS_BUTTON_TEXT = "Billets";
-    private final static String CARDS_BUTTON_TEXT = "Cartes";
-
     private final static String NEUTRAL_SC = "NEUTRAL";
     private final static String CARD_SC = "card";
     private final static String OUTSIDE_SC = "outside";
@@ -87,8 +84,7 @@ class DecksViewCreator {
         root.setId(CARD_PANE_ID);
         root.getStylesheets().addAll("decks.css", "colors.css");
 
-        Button ticketsB = buttonOf(gameState.ticketsPercentage());
-        ticketsB.setText(TICKETS_BUTTON_TEXT);
+        Button ticketsB = buttonOf(StringsFr.TICKETS, gameState.ticketsPercentage());
         ticketsB.disableProperty().bind(drawTicketHP.isNull());
         ticketsB.setOnMouseClicked(e -> drawTicketHP.get().onDrawTickets());
 
@@ -108,8 +104,7 @@ class DecksViewCreator {
             root.getChildren().add(cardPane);
         }
 
-        Button cardsB = buttonOf(gameState.cardsPercentage());
-        cardsB.setText(CARDS_BUTTON_TEXT);
+        Button cardsB = buttonOf(StringsFr.CARDS, gameState.cardsPercentage());
         cardsB.disableProperty().bind(drawCardHP.isNull());
         cardsB.setOnMouseClicked(e -> drawCardHP.get().onDrawCard(-1));
 
@@ -137,8 +132,8 @@ class DecksViewCreator {
         return cardPane;
     }
 
-    private static Button buttonOf(ReadOnlyIntegerProperty gaugePercentage) {
-        Button button = new Button();
+    private static Button buttonOf(String text, ReadOnlyIntegerProperty gaugePercentage) {
+        Button button = new Button(text);
         button.getStyleClass().add(GAUGED_SC);
 
         Rectangle gaugeBackground = new Rectangle(GAUGE_INITIAL_WIDTH, GAUGE_HEIGHT);

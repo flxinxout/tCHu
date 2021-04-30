@@ -7,6 +7,14 @@ import ch.epfl.tchu.game.Ticket;
 
 /**
  * Contient cinq interfaces fonctionnelles imbriquées représentant différents gestionnaires d'actions.
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ *
+ * @implNote Chaque inteface est un morceau de code à exécuter lorsque le joueur effectue une action.
+ * Par exemple, quand c'est à lui de jouer, un joueur peut effectuer trois actions différentes: tirer des billets,
+ * tirer des cartes, ou (tenter de) s'emparer d'une route. À chacune de ces trois actions correspond donc
+ * un gestionnaire d'action décrit ci-dessous.
  */
 public interface ActionHandlers {
 

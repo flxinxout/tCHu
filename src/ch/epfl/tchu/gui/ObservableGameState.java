@@ -11,6 +11,12 @@ import java.util.*;
 import static ch.epfl.tchu.game.ChMap.*;
 import static ch.epfl.tchu.game.Constants.*;
 
+/**
+ * Représente l'état observable d'une partie de tCHu.
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ */
 public final class ObservableGameState {
 
     private final PlayerId id;
@@ -53,10 +59,11 @@ public final class ObservableGameState {
         this.routesOwner = new HashMap<>(routes().size());
 
         //2.
-        this.ticketCount = new HashMap<>(PlayerId.COUNT);
-        this.cardCount = new HashMap<>(PlayerId.COUNT);
-        this.carCount = new HashMap<>(PlayerId.COUNT);
-        this.claimPoints = new HashMap<>(PlayerId.COUNT);
+        this.ticketCount = new EnumMap<>(PlayerId.class);
+        this.cardCount = new EnumMap<>(PlayerId.class);
+        this.carCount = new EnumMap<>(PlayerId.class);
+        this.claimPoints = new EnumMap<>(PlayerId.class);
+
         for(PlayerId pId : PlayerId.ALL) {
             ticketCount.put(pId, new SimpleIntegerProperty());
             cardCount.put(pId, new SimpleIntegerProperty());

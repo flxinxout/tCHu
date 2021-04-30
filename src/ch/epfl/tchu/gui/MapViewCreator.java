@@ -17,6 +17,12 @@ import java.util.List;
 import static ch.epfl.tchu.gui.ActionHandlers.ChooseCardsHandler;
 import static ch.epfl.tchu.gui.ActionHandlers.ClaimRouteHandler;
 
+/**
+ * Classe permettant de créer la vue de la carte d'une partie de tCHu.
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ */
 class MapViewCreator {
 
     private final static String ROUTE_SC = "route";

@@ -21,6 +21,12 @@ import static ch.epfl.tchu.game.Card.LOCOMOTIVE;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawCardHandler;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawTicketsHandler;
 
+/**
+ * Classe permettant de retourner la vue de la main et celle des cartes d'une partie de tCHu.
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ */
 class DecksViewCreator {
     private final static String TICKETS_ID = "tickets";
     private final static String HAND_PANE_ID = "hand-pane";

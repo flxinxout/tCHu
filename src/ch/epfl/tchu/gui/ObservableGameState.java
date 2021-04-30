@@ -19,6 +19,41 @@ import static ch.epfl.tchu.game.Constants.*;
  */
 public final class ObservableGameState {
 
+    private static List<ObjectProperty<Card>> createFaceUpCards() {
+        List<ObjectProperty<Card>> faceUpCards = new ArrayList<>(FACE_UP_CARDS_COUNT);
+        for (int i = 0; i < FACE_UP_CARDS_COUNT; i++)
+            faceUpCards.add(new SimpleObjectProperty<>());
+        return faceUpCards;
+    }
+
+    private static Map<Route, ObjectProperty<PlayerId>> createRoutesOwner() {
+        Map<Route, ObjectProperty<PlayerId>> routesMap = new HashMap<>();
+        for (Route route : routes())
+            routesMap.put(route, new SimpleObjectProperty<>());
+        return routesMap;
+    }
+
+    private static Map<Route, BooleanProperty> createRoutesClaimable() {
+        Map<Route, BooleanProperty> routesMap = new HashMap<>();
+        for (Route route : routes())
+            routesMap.put(route, new SimpleBooleanProperty());
+        return routesMap;
+    }
+
+    private static Map<PlayerId, IntegerProperty> createPlayerIdMap() {
+        Map<PlayerId, IntegerProperty> map = new EnumMap<>(PlayerId.class);
+        for (PlayerId id : PlayerId.ALL)
+            map.put(id, new SimpleIntegerProperty());
+        return map;
+    }
+
+    private static Map<Card, IntegerProperty> createCardOccurences() {
+        Map<Card, IntegerProperty> cardOccurrences = new EnumMap<>(Card.class);
+        for (Card card: Card.ALL)
+            cardOccurrences.put(card, new SimpleIntegerProperty());
+        return cardOccurrences;
+    }
+
     private final PlayerId id;
     private PublicGameState gameState;
     private PlayerState playerState;
@@ -51,38 +86,19 @@ public final class ObservableGameState {
         //1.
         this.ticketsPercentage = new SimpleIntegerProperty(0);
         this.cardsPercentage = new SimpleIntegerProperty(0);
-        this.faceUpCards = new ArrayList<>(FACE_UP_CARDS_COUNT);
-
-        for (int i = 0; i < FACE_UP_CARDS_COUNT; i++)
-            faceUpCards.add(new SimpleObjectProperty<>());
-
-        this.routesOwner = new HashMap<>(routes().size());
+        this.faceUpCards = createFaceUpCards();
+        this.routesOwner = createRoutesOwner();
 
         //2.
-        this.ticketCount = new EnumMap<>(PlayerId.class);
-        this.cardCount = new EnumMap<>(PlayerId.class);
-        this.carCount = new EnumMap<>(PlayerId.class);
-        this.claimPoints = new EnumMap<>(PlayerId.class);
-
-        for(PlayerId pId : PlayerId.ALL) {
-            ticketCount.put(pId, new SimpleIntegerProperty());
-            cardCount.put(pId, new SimpleIntegerProperty());
-            carCount.put(pId, new SimpleIntegerProperty());
-            claimPoints.put(pId, new SimpleIntegerProperty());
-        }
+        this.ticketCount = createPlayerIdMap();
+        this.cardCount = createPlayerIdMap();
+        this.carCount = createPlayerIdMap();
+        this.claimPoints = createPlayerIdMap();
 
         //3.
         this.tickets = FXCollections.observableArrayList();
-
-        this.cardOccurrences = new HashMap<>(Card.COUNT);
-        for (Card card : Card.ALL)
-            cardOccurrences.put(card, new SimpleIntegerProperty());
-
-        this.routesClaimable = new HashMap<>(routes().size());
-        for (Route route : routes()) {
-            routesOwner.put(route, new SimpleObjectProperty<>());
-            routesClaimable.put(route, new SimpleBooleanProperty());
-        }
+        this.cardOccurrences = createCardOccurences();
+        this.routesClaimable = createRoutesClaimable();
     }
 
     /**
@@ -134,11 +150,11 @@ public final class ObservableGameState {
     }
 
     public ReadOnlyIntegerProperty ticketsPercentage() {
-        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(ticketsPercentage);
+        return ticketsPercentage;
     }
 
     public ReadOnlyIntegerProperty cardsPercentage() {
-        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(cardsPercentage);
+        return cardsPercentage;
     }
 
     public ReadOnlyObjectProperty<Card> faceUpCardAt(int slot) {
@@ -151,19 +167,19 @@ public final class ObservableGameState {
     }
 
     public ReadOnlyIntegerProperty ticketsCountOf(PlayerId id) {
-        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(ticketCount.get(id));
+        return ticketCount.get(id);
     }
 
     public ReadOnlyIntegerProperty cardsCountOf(PlayerId id) {
-        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(cardCount.get(id));
+        return cardCount.get(id);
     }
 
     public ReadOnlyIntegerProperty carsCountOf(PlayerId id) {
-        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(carCount.get(id));
+        return carCount.get(id);
     }
 
     public ReadOnlyIntegerProperty claimPointsOf(PlayerId id) {
-        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(claimPoints.get(id));
+        return claimPoints.get(id);
     }
 
     public ObservableList<Ticket> tickets() {
@@ -171,11 +187,11 @@ public final class ObservableGameState {
     }
 
     public ReadOnlyIntegerProperty occurrencesOf(Card card) {
-        return ReadOnlyIntegerProperty.readOnlyIntegerProperty(cardOccurrences.get(card));
+        return cardOccurrences.get(card);
     }
 
     public ReadOnlyBooleanProperty claimable(Route route) {
-        return ReadOnlyBooleanProperty.readOnlyBooleanProperty(routesClaimable.get(route));
+        return routesClaimable.get(route);
     }
 
     public boolean canDrawTickets() {

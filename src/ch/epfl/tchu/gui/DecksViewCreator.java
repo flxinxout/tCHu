@@ -20,24 +20,23 @@ import static ch.epfl.tchu.game.Card.ALL;
 import static ch.epfl.tchu.game.Card.LOCOMOTIVE;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawCardHandler;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawTicketsHandler;
+import static ch.epfl.tchu.gui.MapViewCreator.FILLED_SC;
+import static ch.epfl.tchu.gui.MapViewCreator.NEUTRAL_SC;
 
 /**
- * Classe permettant de retourner la vue de la main et celle des cartes d'une partie de tCHu.
+ * Permet de créer la vue de la main et celle des cartes d'une partie de tCHu.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
  */
 class DecksViewCreator {
-    //TODO: demander si mieux ici les constantes ou dans Constants ou Stringsfr
     private final static String TICKETS_ID = "tickets";
     private final static String HAND_PANE_ID = "hand-pane";
     private final static String CARD_PANE_ID = "card-pane";
 
-    private final static String NEUTRAL_SC = "NEUTRAL";
     private final static String CARD_SC = "card";
     private final static String OUTSIDE_SC = "outside";
     private final static String INSIDE_SC = "inside";
-    private final static String FILLED_SC = "filled";
     private final static String TRAIN_IMAGE_SC = "train-image";
     private final static String COUNT_SC = "count";
     private final static String GAUGED_SC = "gauged";
@@ -54,6 +53,12 @@ class DecksViewCreator {
     private DecksViewCreator() {
     }
 
+    /**
+     * Permet de créer la vue de la main du joueur à l'aide de l'état du jeu observable donné.
+     *
+     * @param gameState l'état de jeu observable
+     * @return la vue de la main du joueur
+     */
     public static Node createHandView(ObservableGameState gameState) {
         HBox root = new HBox();
         root.getStylesheets().addAll("decks.css", "colors.css");
@@ -84,6 +89,15 @@ class DecksViewCreator {
         return root;
     }
 
+    /**
+     * Permet de créer la vue de la main du joueur à l'aide de l'état du jeu observable, les gestionnaires d'action
+     * à utiliser lorsque le joueur désire tirer une carte ou un billet.
+     *
+     * @param gameState l'état de jeu observable
+     * @param drawCardHP la propriété contenant le gestionnaire d'action à utiliser lorsque le joueur désire tirer une carte
+     * @param drawTicketHP la propriété contenant le gestionnaire d'action à utiliser lorsque le joueur désire tirer un billet
+     * @return la vue de la main du joueur
+     */
     public static Node createCardsView(ObservableGameState gameState,
                                        ObjectProperty<DrawTicketsHandler> drawTicketHP,
                                        ObjectProperty<DrawCardHandler> drawCardHP) {
@@ -135,7 +149,6 @@ class DecksViewCreator {
         trainImage.getStyleClass().add(TRAIN_IMAGE_SC);
 
         cardPane.getChildren().addAll(outside, inside, trainImage);
-
         return cardPane;
     }
 

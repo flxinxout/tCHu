@@ -7,6 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ch.epfl.tchu.game.ChMap.*;
 import static ch.epfl.tchu.game.Constants.*;
@@ -19,6 +20,11 @@ import static ch.epfl.tchu.game.Constants.*;
  */
 public final class ObservableGameState {
 
+    /**
+     * Crée la liste des 5 propriétés des cartes face visible. Ces cartes sont initialisées à {@code null}.
+     *
+     * @return la liste des 5 propriétés des cartes face visible
+     */
     private static List<ObjectProperty<Card>> createFaceUpCards() {
         List<ObjectProperty<Card>> faceUpCards = new ArrayList<>(FACE_UP_CARDS_COUNT);
         for (int i = 0; i < FACE_UP_CARDS_COUNT; i++)
@@ -26,6 +32,11 @@ public final class ObservableGameState {
         return faceUpCards;
     }
 
+    /**
+     * Crée la table associative entre les routes du jeu et leur propriétaire, initialisé à {@code null}.
+     *
+     * @return la table associative entre les routes du jeu et leur propriétaire
+     */
     private static Map<Route, ObjectProperty<PlayerId>> createRoutesOwner() {
         Map<Route, ObjectProperty<PlayerId>> routesMap = new HashMap<>();
         for (Route route : routes())
@@ -33,6 +44,11 @@ public final class ObservableGameState {
         return routesMap;
     }
 
+    /**
+     * Crée la table associative entre les routes du jeu et leur disponibilité, initialisée à {@code false}.
+     *
+     * @return la table associative entre les routes du jeu et leur disponibilité
+     */
     private static Map<Route, BooleanProperty> createRoutesClaimable() {
         Map<Route, BooleanProperty> routesMap = new HashMap<>();
         for (Route route : routes())
@@ -40,6 +56,12 @@ public final class ObservableGameState {
         return routesMap;
     }
 
+    /**
+     * Crée la table associative entre les joueurs du jeu et leur différents comptes publics
+     * (compte des cartes, billets, wagons et points de construction).
+     *
+     * @return la table associative entre les joueurs du jeu et leur différents comptes publics
+     */
     private static Map<PlayerId, IntegerProperty> createPlayerIdMap() {
         Map<PlayerId, IntegerProperty> map = new EnumMap<>(PlayerId.class);
         for (PlayerId id : PlayerId.ALL)
@@ -47,9 +69,14 @@ public final class ObservableGameState {
         return map;
     }
 
-    private static Map<Card, IntegerProperty> createCardOccurences() {
+    /**
+     * Crée la table associative entre les cartes du jeu et leur nombre d'occurrences dans la main du joueur de cet état.
+     *
+     * @return la table associative entre les cartes du jeu et leur nombre d'occurrences dans la main de ce joueur
+     */
+    private static Map<Card, IntegerProperty> createCardOccurrences() {
         Map<Card, IntegerProperty> cardOccurrences = new EnumMap<>(Card.class);
-        for (Card card: Card.ALL)
+        for (Card card : Card.ALL)
             cardOccurrences.put(card, new SimpleIntegerProperty());
         return cardOccurrences;
     }
@@ -58,34 +85,31 @@ public final class ObservableGameState {
     private PublicGameState gameState;
     private PlayerState playerState;
 
-    //Groupe 1: propriétés publiques
+    //Groupe 1: propriétés de l'état public de la partie
     private final IntegerProperty ticketsPercentage, cardsPercentage;
     private final List<ObjectProperty<Card>> faceUpCards;
     private final Map<Route, ObjectProperty<PlayerId>> routesOwner;
 
-    //Groupe 2: propriétés propres à chacun des joueurs
+    //Groupe 2: propriétés de l'état public de chacun des joueurs
     private final Map<PlayerId, IntegerProperty> ticketCount, cardCount, carCount, claimPoints;
 
-    //Groupe 3: propriétés propre au joueur associé à cet état de jeu
+    //Groupe 3: propriétés de l'état privé du joueur auquel cette instance correspond
     private final ObservableList<Ticket> tickets;
     private final Map<Card, IntegerProperty> cardOccurrences;
     private final Map<Route, BooleanProperty> routesClaimable;
 
     /**
      * Construit un état de jeu observable correspondant à l'identité du joueur donnée. À la création, la totalité des
-     * propriétés de l'état ont leur valeur par défaut.
+     * propriétés de cet état ont leur valeur par défaut.
      *
      * @param id l'identité du joueur attaché à cet état de jeu observable
      */
     public ObservableGameState(PlayerId id) {
         this.id = id;
 
-        this.gameState = null;
-        this.playerState = null;
-
         //1.
-        this.ticketsPercentage = new SimpleIntegerProperty(0);
-        this.cardsPercentage = new SimpleIntegerProperty(0);
+        this.ticketsPercentage = new SimpleIntegerProperty();
+        this.cardsPercentage = new SimpleIntegerProperty();
         this.faceUpCards = createFaceUpCards();
         this.routesOwner = createRoutesOwner();
 
@@ -97,18 +121,18 @@ public final class ObservableGameState {
 
         //3.
         this.tickets = FXCollections.observableArrayList();
-        this.cardOccurrences = createCardOccurences();
+        this.cardOccurrences = createCardOccurrences();
         this.routesClaimable = createRoutesClaimable();
     }
 
     /**
-     * Met à jour la totalité des propriétés de l'état en fonction des deux états donnés.
+     * Met à jour la totalité des propriétés de cet état en fonction des deux états donnés.
      *
      * @param newGameState le nouvel état de jeu
      * @param playerState  le nouvel état du joueur associé à cet état de jeu
      */
     public void setState(PublicGameState newGameState, PlayerState playerState) {
-        gameState = newGameState;
+        this.gameState = newGameState;
         this.playerState = playerState;
 
         //1.
@@ -119,13 +143,20 @@ public final class ObservableGameState {
             faceUpCards.get(slot).setValue(newGameState.cardState().faceUpCard(slot));
 
         for (Route claimedRoute : newGameState.claimedRoutes()) {
-            for (PlayerId pId : PlayerId.ALL) {
-                if (newGameState.playerState(pId).routes().contains(claimedRoute))
-                    routesOwner.get(claimedRoute).setValue(pId);
+            ObjectProperty<PlayerId> ownerP = routesOwner.get(claimedRoute);
+            //TODO: only not current player? like juste below
+            /*if (ownerP.getValue() == null && newGameState.currentPlayerState().routes().contains(claimedRoute))
+                ownerP.setValue(newGameState.currentPlayerId());*/
+            if (ownerP.getValue() == null) {
+                for (PlayerId pId : PlayerId.ALL) {
+                    if (newGameState.playerState(pId).routes().contains(claimedRoute))
+                        ownerP.setValue(pId);
+                }
             }
         }
 
         //2.
+        //TODO: only not current player too?
         for (PlayerId pId : PlayerId.ALL) {
             ticketCount.get(pId).setValue(newGameState.playerState(pId).ticketCount());
             cardCount.get(pId).setValue(newGameState.playerState(pId).cardCount());
@@ -139,9 +170,9 @@ public final class ObservableGameState {
         for (Card card : Card.ALL)
             cardOccurrences.get(card).setValue(playerState.cards().countOf(card));
 
-        Set<List<Station>> stations = new HashSet<>();
-        for (Route claimedRoute : newGameState.claimedRoutes())
-            stations.add(claimedRoute.stations());
+        Set<List<Station>> stations = newGameState.claimedRoutes().stream()
+                .map(Route::stations)
+                .collect(Collectors.toSet());
         for (Route route : routes())
             routesClaimable.get(route).setValue(newGameState.currentPlayerId() == id &&
                     !newGameState.claimedRoutes().contains(route) &&
@@ -149,59 +180,138 @@ public final class ObservableGameState {
                     playerState.canClaimRoute(route));
     }
 
+    /**
+     * Retourne la propriété du pourcentage de tickets restants dans la pioche.
+     *
+     * @return la propriété du pourcentage de tickets restants dans la pioche
+     */
     public ReadOnlyIntegerProperty ticketsPercentage() {
         return ticketsPercentage;
     }
 
+    /**
+     * Retourne la propriété du pourcentage de cartes restants dans la pioche.
+     *
+     * @return la propriété du pourcentage de cartes restants dans la pioche
+     */
     public ReadOnlyIntegerProperty cardsPercentage() {
         return cardsPercentage;
     }
 
+    /**
+     * Retourne la propriété de la carte face visible à l'emplacement donné.
+     *
+     * @param slot l'emplacement de la carte face visible
+     * @return la propriété de la carte face visible à l'emplacement donné
+     */
     public ReadOnlyObjectProperty<Card> faceUpCardAt(int slot) {
         return faceUpCards.get(slot);
     }
 
-
+    /**
+     * Retourne la propriété du propriétaire de la route donnée.
+     *
+     * @param route la route
+     * @return la propriété du propriétaire de la route donnée
+     */
     public ReadOnlyObjectProperty<PlayerId> ownerOf(Route route) {
         return routesOwner.get(route);
     }
 
+    /**
+     * Retourne la propriété du nombre de billets du joueur donné.
+     *
+     * @param id le joueur
+     * @return la propriété du  nombre de billets du joueur donné
+     */
     public ReadOnlyIntegerProperty ticketsCountOf(PlayerId id) {
         return ticketCount.get(id);
     }
 
+    /**
+     * Retourne la propriété du nombre de cartes du joueur donné.
+     *
+     * @param id le joueur
+     * @return la propriété du  nombre de cartes du joueur donné
+     */
     public ReadOnlyIntegerProperty cardsCountOf(PlayerId id) {
         return cardCount.get(id);
     }
 
+    /**
+     * Retourne la propriété du nombre de wagons du joueur donné.
+     *
+     * @param id le joueur
+     * @return la propriété du  nombre de wagons du joueur donné
+     */
     public ReadOnlyIntegerProperty carsCountOf(PlayerId id) {
         return carCount.get(id);
     }
 
+    /**
+     * Retourne la propriété du nombre de points de construction du joueur donné.
+     *
+     * @param id le joueur
+     * @return la propriété du  nombre de points de construction du joueur donné
+     */
     public ReadOnlyIntegerProperty claimPointsOf(PlayerId id) {
         return claimPoints.get(id);
     }
 
+    /**
+     * Retourne les billets du joueur de cet état de jeu, sous forme de liste observable.
+     *
+     * @return les billets du joueur de cet état de jeu
+     */
     public ObservableList<Ticket> tickets() {
         return FXCollections.unmodifiableObservableList(tickets);
     }
 
+    /**
+     * Retourne la propriété du nombre d'occurrences de la carte donnée dans la main du joueur de cet état de jeu.
+     *
+     * @param card la carte
+     * @return la propriété du nombre d'occurrences de la carte donnée dans la main du joueur de cet état de jeu
+     */
     public ReadOnlyIntegerProperty occurrencesOf(Card card) {
         return cardOccurrences.get(card);
     }
 
+    /**
+     * Retourne la propriété de la possibilité du joueur de cet état de jeu de s'emparer de la route donnée.
+     *
+     * @param route la route
+     * @return la propriété de la possibilité du joueur de cet état de jeu de s'emparer de la route donnée
+     */
     public ReadOnlyBooleanProperty claimable(Route route) {
         return routesClaimable.get(route);
     }
 
+    /**
+     * Retourne si et seulement s'il est possible de tirer des billets de la pioche.
+     *
+     * @return si et seulement s'il est possible de tirer des billets de la pioche
+     */
     public boolean canDrawTickets() {
-        return (gameState != null && gameState.canDrawTickets());
+        return gameState != null && gameState.canDrawTickets();
     }
 
+    /**
+     * Retourne si et seulement s'il est possible de tirer une carte de la pioche.
+     *
+     * @return si et seulement s'il est possible de tirer une carte de la pioche
+     */
     public boolean canDrawCards() {
-        return (gameState != null && gameState.canDrawCards());
+        return gameState != null && gameState.canDrawCards();
     }
 
+    /**
+     * Retourne la liste de tous les ensembles de cartes que le joueur de cet état de jeu pourrait utiliser pour prendre
+     * possession de la route donnée.
+     *
+     * @return la liste de tous les ensembles de cartes que le joueur de cet état de jeu pourrait utiliser pour prendre
+     * possession de la route donnée
+     */
     public List<SortedBag<Card>> possibleClaimCards(Route route) {
         if (playerState != null)
             return playerState.possibleClaimCards(route);

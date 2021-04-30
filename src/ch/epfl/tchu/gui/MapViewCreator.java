@@ -18,17 +18,17 @@ import static ch.epfl.tchu.gui.ActionHandlers.ChooseCardsHandler;
 import static ch.epfl.tchu.gui.ActionHandlers.ClaimRouteHandler;
 
 /**
- * Classe permettant de créer la vue de la carte d'une partie de tCHu.
+ * Permet de créer la vue de la carte d'une partie de tCHu.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
  */
 class MapViewCreator {
+    public final static String NEUTRAL_SC = "NEUTRAL";
+    public final static String FILLED_SC = "filled";
 
     private final static String ROUTE_SC = "route";
-    private final static String NEUTRAL_SC = "NEUTRAL";
     private final static String TRACK_SC = "track";
-    private final static String FILLED_SC = "filled";
     private final static String CAR_CS = "car";
 
     private final static double RECT_HEIGHT = 12D;
@@ -40,13 +40,14 @@ class MapViewCreator {
     }
 
     /**
-     * Permet de créer la vue de la carte à l'aide de l'état du jeu observable, d'une propriété contenant le
-     * gestionnaire d'action à utiliser lorsque le joueur désire s'emparer d'une route et d'un sélectionneur de cartes.
+     * Permet de créer la vue de la carte à l'aide de l'état du jeu observable, de la propriété contenant le gestionnaire
+     * d'action à utiliser lorsque le joueur désire s'emparer d'une route et du sélectionneur de cartes donnés.
      *
-     * @param gameState    l'état de jeu observable actuel
-     * @param claimRouteHP une propriété contenant le gestionnaire d'action à utiliser
+     * @param gameState    l'état de jeu observable
+     * @param claimRouteHP la propriété contenant le gestionnaire d'action à utiliser
      *                     lorsque le joueur désire s'emparer d'une route
      * @param cardChooser  le sélectionneur de cartes à utiliser
+     * @return la vue de la carte de l'état de jeu observable
      */
     public static Node createMapView(ObservableGameState gameState,
                                      ObjectProperty<ClaimRouteHandler> claimRouteHP,
@@ -61,10 +62,7 @@ class MapViewCreator {
             routeGroup.getStyleClass().addAll(ROUTE_SC, route.level().name(),
                     route.color() != null ? route.color().name() : NEUTRAL_SC);
 
-            gameState.ownerOf(route).addListener((o, oV, nV) -> {
-                if (nV != null)
-                    routeGroup.getStyleClass().add(nV.name());
-            });
+            gameState.ownerOf(route).addListener((o, oV, nV) -> routeGroup.getStyleClass().add(nV.name()));
 
             routeGroup.disableProperty().bind(claimRouteHP.isNull().or(gameState.claimable(route).not()));
 
@@ -72,9 +70,9 @@ class MapViewCreator {
                 List<SortedBag<Card>> possibleClaimCards = gameState.possibleClaimCards(route);
                 ClaimRouteHandler claimRouteH = claimRouteHP.get();
 
-                if (possibleClaimCards.size() == 1)
+                if (possibleClaimCards.size() == 1) {
                     claimRouteH.onClaimRoute(route, possibleClaimCards.get(0));
-                else {
+                } else {
                     ChooseCardsHandler chooseCardsH = chosenCards -> claimRouteH.onClaimRoute(route, chosenCards);
                     cardChooser.chooseCards(possibleClaimCards, chooseCardsH);
                 }
@@ -97,12 +95,11 @@ class MapViewCreator {
                 for (int j = 1; j <= 2; j++) {
                     Circle carCircle = new Circle((carRect.getWidth() / 2 - CIRCLE_MARGIN) * j,
                             carRect.getHeight() / 2, CIRCLE_RADIUS);
-                    carCircle.getStyleClass().add(FILLED_SC);
+                    carCircle.getStyleClass().addAll(FILLED_SC);
                     carGroup.getChildren().add(carCircle);
                 }
 
                 squareGroup.getChildren().addAll(railwayRect, carGroup);
-
                 routeGroup.getChildren().add(squareGroup);
             }
             root.getChildren().add(routeGroup);
@@ -112,6 +109,9 @@ class MapViewCreator {
 
     /**
      * Sélectionneur de cartes.
+     *
+     * @author Dylan Vairoli (326603)
+     * @author Giovanni Ranieri (326870)
      */
     @FunctionalInterface
     interface CardChooser {

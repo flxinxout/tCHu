@@ -28,6 +28,7 @@ import static ch.epfl.tchu.gui.ActionHandlers.DrawTicketsHandler;
  * @author Giovanni Ranieri (326870)
  */
 class DecksViewCreator {
+    //TODO: demander si mieux ici les constantes ou dans Constants ou Stringsfr
     private final static String TICKETS_ID = "tickets";
     private final static String HAND_PANE_ID = "hand-pane";
     private final static String CARD_PANE_ID = "card-pane";

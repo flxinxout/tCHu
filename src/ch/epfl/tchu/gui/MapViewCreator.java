@@ -95,7 +95,6 @@ class MapViewCreator {
                 for (int j = 1; j <= 2; j++) {
                     Circle carCircle = new Circle((carRect.getWidth() / 2 - CIRCLE_MARGIN) * j,
                             carRect.getHeight() / 2, CIRCLE_RADIUS);
-                    carCircle.getStyleClass().addAll(FILLED_SC);
                     carGroup.getChildren().add(carCircle);
                 }
 

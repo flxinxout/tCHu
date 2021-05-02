@@ -83,7 +83,7 @@ public interface Serde<E> {
             @Override
             public String serialize(List<T> list) {
                 return list.stream()
-                        .map(t -> serde.serialize(t))
+                        .map(serde::serialize)
                         .collect(Collectors.joining(String.valueOf(delimiter)));
             }
 
@@ -93,7 +93,7 @@ public interface Serde<E> {
                 return str.isEmpty() ?
                         List.of() :
                         Arrays.stream(splits)
-                                .map(s -> serde.deserialize(s))
+                                .map(serde::deserialize)
                                 .collect(Collectors.toList());
             }
         };

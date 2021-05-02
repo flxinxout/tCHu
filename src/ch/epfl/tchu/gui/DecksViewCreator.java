@@ -54,7 +54,7 @@ class DecksViewCreator {
     }
 
     /**
-     * Permet de créer la vue de la main du joueur à l'aide de l'état du jeu observable donné.
+     * Crée la vue de la main du joueur à l'aide de l'état du jeu observable donné.
      *
      * @param gameState l'état de jeu observable
      * @return la vue de la main du joueur
@@ -90,7 +90,7 @@ class DecksViewCreator {
     }
 
     /**
-     * Permet de créer la vue de la main du joueur à l'aide de l'état du jeu observable, les gestionnaires d'action
+     * Crée la vue de la main du joueur à l'aide de l'état du jeu observable, les gestionnaires d'action
      * à utiliser lorsque le joueur désire tirer une carte ou un billet.
      *
      * @param gameState l'état de jeu observable
@@ -134,6 +134,12 @@ class DecksViewCreator {
         return root;
     }
 
+    /**
+     * Crée la vue de la carte donnée.
+     *
+     * @param card la carte
+     * @return la vue de la carte donnée
+     */
     private static StackPane stackPaneOf(Card card) {
         StackPane cardPane = new StackPane();
         if (card != null)
@@ -153,6 +159,13 @@ class DecksViewCreator {
         return cardPane;
     }
 
+    /**
+     * Crée un bouton possédant le texte donné et la propriété donnée, liée au pourcentage de la jauge.
+     *
+     * @param text le texte
+     * @param gaugePercentage la propriété liée au pourcentage de la jauge
+     * @return un bouton
+     */
     private static Button buttonOf(String text, ReadOnlyIntegerProperty gaugePercentage) {
         Button button = new Button(text);
         button.getStyleClass().add(GAUGED_SC);

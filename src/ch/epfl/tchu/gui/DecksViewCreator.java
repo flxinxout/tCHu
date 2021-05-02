@@ -122,6 +122,7 @@ class DecksViewCreator {
                 } else
                     cardPane.getStyleClass().add(nV != LOCOMOTIVE ? nV.name() : NEUTRAL_SC);
             });
+            cardPane.setOnMouseClicked(e -> drawCardHP.get().onDrawCard(slot));
             root.getChildren().add(cardPane);
         }
 

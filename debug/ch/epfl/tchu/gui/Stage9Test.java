@@ -1,6 +1,5 @@
 package ch.epfl.tchu.gui;
 
-
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
 import javafx.application.Application;
@@ -43,14 +42,14 @@ public final class Stage9Test extends Application {
     }
 
     private void setState(ObservableGameState gameState) {
-        PlayerState p1State = new PlayerState(SortedBag.of(tickets().subList(0, 3)),
-                        SortedBag.of(1, Card.WHITE, 3, Card.RED),
-                        routes().subList(0, 3));
+        PlayerState p1State = new PlayerState(SortedBag.of(tickets().subList(0, 4)),
+                SortedBag.of(List.of(Card.WHITE, Card.RED, Card.RED, Card.LOCOMOTIVE, Card.BLUE, Card.BLACK)),
+                routes().subList(0, 3));
 
         PublicPlayerState p2State = new PublicPlayerState(0, 0, routes().subList(3, 6));
 
         Map<PlayerId, PublicPlayerState> pubPlayerStates = Map.of(PLAYER_1, p1State, PLAYER_2, p2State);
-        PublicCardState cardState = new PublicCardState(Card.ALL.subList(0, 5), 110 - 2 * 4 - 5, 0);
+        PublicCardState cardState = new PublicCardState(Card.ALL.subList(4, 10), 110 - 2 * 4 - 5, 0);
         PublicGameState publicGameState = new PublicGameState(36, cardState, PLAYER_1, pubPlayerStates, null);
         gameState.setState(publicGameState, p1State);
     }
@@ -73,5 +72,6 @@ public final class Stage9Test extends Application {
         System.out.printf("Tirage de cartes (emplacement %s)!\n", slot);
     }
 }
+
 
 

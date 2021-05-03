@@ -23,6 +23,7 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.Window;
 
 import java.util.List;
 import java.util.Map;
@@ -46,10 +47,14 @@ public class GraphicalPlayer {
     private final ObservableList<Text> texts;
     private final Stage primaryStage;
 
-    private final ObjectProperty<ClaimRouteHandler> claimRoute;
-    private final ObjectProperty<DrawTicketsHandler> drawTickets;
-    private final ObjectProperty<DrawCardHandler> drawCard;
+    private final ObjectProperty<ClaimRouteHandler> claimRouteHP;
+    private final ObjectProperty<DrawTicketsHandler> drawTicketsHP;
+    private final ObjectProperty<DrawCardHandler> drawCardHP;
 
+    /**
+     * @param playerId    l'identité du joueur lié à cette interface graphique
+     * @param playerNames la table associative entre les joueurs et leur nom
+     */
     public GraphicalPlayer(PlayerId playerId, Map<PlayerId, String> playerNames) {
         this.playerId = playerId;
         this.playerNames = playerNames;
@@ -59,12 +64,12 @@ public class GraphicalPlayer {
         this.primaryStage = new Stage();
         primaryStage.setTitle("tCHu \u2014 " + playerNames.get(playerId));
 
-        this.claimRoute = new SimpleObjectProperty<>();
-        this.drawTickets = new SimpleObjectProperty<>();
-        this.drawCard = new SimpleObjectProperty<>();
+        this.claimRouteHP = new SimpleObjectProperty<>();
+        this.drawTicketsHP = new SimpleObjectProperty<>();
+        this.drawCardHP = new SimpleObjectProperty<>();
 
-        Node mapView = MapViewCreator.createMapView(gameState, claimRoute, this::chooseClaimCards);
-        Node cardsView = DecksViewCreator.createCardsView(gameState, drawTickets, drawCard);
+        Node mapView = MapViewCreator.createMapView(gameState, claimRouteHP, this::chooseClaimCards);
+        Node cardsView = DecksViewCreator.createCardsView(gameState, drawTicketsHP, drawCardHP);
         Node handView = DecksViewCreator.createHandView(gameState);
         Node infoView = InfoViewCreator.createInfoView(playerId, playerNames, gameState, texts);
 
@@ -85,64 +90,52 @@ public class GraphicalPlayer {
         gameState.setState(newGameState, playerState);
     }
 
+    /**
+     * Ajoute l'information donnée aux messages informatifs de cette interface graphique. S'il y a déjà 5 messages
+     * affichés, le plus ancien est remplacé par celui donné.
+     *
+     * @param message la nouvelle information à afficher
+     */
     public void receiveInfo(String message) {
         assert isFxApplicationThread();
-
         if (texts.size() == 5)
             texts.remove(0);
-
         texts.add(new Text(message));
     }
 
     /**
-     * Permet au joueur d'effectuer une action parmis les 3 gestionnaires d'actions passés en paramètre de la méthode.
+     * Permet au joueur d'effectuer une action parmi les 3 gestionnaires d'actions passés en paramètre de la méthode.
      *
      * @param drawTicketsH le gestionnaire d'action pour tirer des billets
-     * @param drawCardH le gestionnaire d'action pour tirer des cartes
-     * @param claimRouteH le gestionnaire d'action pour tenter de s'emparer d'une route
+     * @param drawCardH    le gestionnaire d'action pour tirer des cartes
+     * @param claimRouteH  le gestionnaire d'action pour tenter de s'emparer d'une route
      */
     public void startTurn(DrawTicketsHandler drawTicketsH, DrawCardHandler drawCardH, ClaimRouteHandler claimRouteH) {
         assert isFxApplicationThread();
 
-        //TODO: J'ai pas réussi à faire une fonction si tu y arrives c'est nice car c'est des functional interface
-        //TODO: donc essaye d'en faire une méthode simple efficace car là bordel ma tete elle a pas réussi mdrrrr
-        drawTickets.setValue(() -> {
-            drawTickets.setValue(null);
-            drawCard.setValue(null);
-            claimRoute.setValue(null);
-            drawTicketsH.onDrawTickets();
-        });
+        drawTicketsHP.setValue(!gameState.canDrawTickets() ? null :
+                () -> {
+                    drawTicketsH.onDrawTickets();
+                    clearHandlerProperties();
+                });
 
-        drawCard.setValue(slot -> {
-            drawTickets.setValue(null);
-            drawCard.setValue(null);
-            claimRoute.setValue(null);
-            drawCardH.onDrawCard(slot);
-        });
+        drawCardHP.setValue(!gameState.canDrawCards() ? null :
+                slot -> {
+                    drawCardH.onDrawCard(slot);
+                    clearHandlerProperties();
+                });
 
-        claimRoute.setValue((Route r, SortedBag<Card> c) -> {
-            drawTickets.setValue(null);
-            drawCard.setValue(null);
-            claimRoute.setValue(null);
+        claimRouteHP.setValue((Route r, SortedBag<Card> c) -> {
             claimRouteH.onClaimRoute(r, c);
+            clearHandlerProperties();
         });
-
-        // 3.2.1 partie avec les 3 points à la suite.
-        if(gameState.canDrawTickets())
-            drawTickets.setValue(drawTicketsH);
-
-        if(gameState.canDrawCards())
-            drawCard.setValue(drawCardH);
-
-        claimRoute.setValue(claimRouteH);
-
     }
 
     /**
-     * Ouvre une fenêtre permettant au joueur de faire son choix sur les billets à choisir; une fois celui-ci confirmé,
-     * le gestionnaire de choix est appelé avec ce choix en argument.
+     * Ouvre une fenêtre permettant au joueur de faire son choix entre les billets à choisir;
+     * une fois celui-ci confirmé, le gestionnaire de choix donné est appelé avec ce choix en argument.
      *
-     * @param options les choix des billets que le joueur peut choisir
+     * @param options        les options de billets parmi lesquelles le joueur peut choisir
      * @param chooseTicketsH le gestionnaire d'action pour tirer des billets
      */
     public void chooseTickets(SortedBag<Ticket> options, ChooseTicketsHandler chooseTicketsH) {
@@ -150,7 +143,7 @@ public class GraphicalPlayer {
         Preconditions.checkArgument(options.size() == INITIAL_TICKETS_COUNT ||
                 options.size() == IN_GAME_TICKETS_COUNT);
 
-        Stage selectionStage = createTicketsSelectionStage(options, chooseTicketsH); // jla sens static aussi donc le stage il va sauté...
+        Stage selectionStage = createTicketsSelectionStage(primaryStage, options, chooseTicketsH);
         selectionStage.show();
     }
 
@@ -164,7 +157,10 @@ public class GraphicalPlayer {
      */
     public void drawCard(DrawCardHandler drawCardH) {
         assert isFxApplicationThread();
-        //TODO: va falloir la comprendre celle là mdr
+        drawCardHP.setValue(slot -> {
+            drawCardH.onDrawCard(slot);
+            clearHandlerProperties();
+        });
     }
 
     /**
@@ -178,17 +174,17 @@ public class GraphicalPlayer {
      */
     public void chooseClaimCards(List<SortedBag<Card>> initialCards, ChooseCardsHandler chooseCardsH) {
         assert isFxApplicationThread();
-        Stage selectionStage = createInitialCardsSelectionStage(initialCards, chooseCardsH);
+        Stage selectionStage = createClaimCardsSelectionStage(primaryStage, initialCards, chooseCardsH);
         selectionStage.show();
     }
 
     /**
-     * Ouvre une fenêtre  permettant au joueur de faire son choix sur les cartes additionelles qu'il peut utiliser pour
+     * Ouvre une fenêtre  permettant au joueur de faire son choix sur les cartes additionnelles qu'il peut utiliser pour
      * s'emparer d'un tunnel; une fois que celui-ci a été fait et confirmé, le gestionnaire de choix est appelé avec
      * le choix du joueur en argument.
      *
      * @param additionalCards les options des cartes qu'il peut choisir
-     * @param chooseCardsH le gestionnaire d'action pour choisir des cartes
+     * @param chooseCardsH    le gestionnaire d'action pour choisir des cartes
      */
     public void chooseAdditionalCards(List<SortedBag<Card>> additionalCards, ChooseCardsHandler chooseCardsH) {
         assert isFxApplicationThread();
@@ -196,7 +192,7 @@ public class GraphicalPlayer {
         chooseAdditionalCardsStage.show();
     }
 
-    private Stage createTicketsSelectionStage(SortedBag<Ticket> options, ChooseTicketsHandler chooseTicketsH) {
+    private static Stage createTicketsSelectionStage(Window owner, SortedBag<Ticket> options, ChooseTicketsHandler chooseTicketsH) {
         int minCount = options.size() - 2;
 
         VBox root = new VBox();
@@ -213,7 +209,7 @@ public class GraphicalPlayer {
                 .lessThan(minCount));
 
         root.getChildren().addAll(introTextFlow, optionsLV, confirmB);
-        Stage stage = createChooserStageOf(StringsFr.TICKETS_CHOICE, root);
+        Stage stage = createChooserStageOf(owner, StringsFr.TICKETS_CHOICE, root);
 
         confirmB.setOnAction(e -> {
             stage.hide();
@@ -223,7 +219,7 @@ public class GraphicalPlayer {
         return stage;
     }
 
-    private Stage createInitialCardsSelectionStage(List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
+    private static Stage createClaimCardsSelectionStage(Window owner, List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
         VBox root = new VBox();
 
         TextFlow introTextFlow = new TextFlow();
@@ -237,7 +233,7 @@ public class GraphicalPlayer {
         confirmB.disableProperty().bind(Bindings.size(optionsLV.getSelectionModel().getSelectedItems()).lessThan(1)); // maybe constant ? // juste ?
 
         root.getChildren().addAll(introTextFlow, optionsLV, confirmB);
-        Stage stage = createChooserStageOf(StringsFr.CARDS_CHOICE, root);
+        Stage stage = createChooserStageOf(owner, StringsFr.CARDS_CHOICE, root);
 
         confirmB.setOnAction(e -> {
             stage.hide();
@@ -247,7 +243,7 @@ public class GraphicalPlayer {
         return stage;
     }
 
-    private Stage createAdditionalCardsSelectionStage(Stage owner, List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
+    private  static Stage createAdditionalCardsSelectionStage(Window owner, List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
         VBox root = new VBox();
 
         TextFlow introTextFlow = new TextFlow();
@@ -258,11 +254,9 @@ public class GraphicalPlayer {
         optionsLV.setCellFactory(v -> new TextFieldListCell<>(new CardBagStringConverter()));
 
         Button confirmB = new Button();
-        //TODO: je crois tu t'es trompé de méthode, si je lis bien pour les additional card y'a rien mais au dessus oui !
-        //confirmB.disableProperty().bind(new SimpleBooleanProperty(optionsLV.getSelectionModel().getSelectedItem() != null));
 
         root.getChildren().addAll(introTextFlow, optionsLV, confirmB);
-        Stage stage = createChooserStageOf(StringsFr.CARDS_CHOICE, root);
+        Stage stage = createChooserStageOf(owner, StringsFr.CARDS_CHOICE, root);
 
         confirmB.setOnAction(e -> {
             stage.hide();
@@ -272,9 +266,9 @@ public class GraphicalPlayer {
         return stage;
     }
 
-    private Stage createChooserStageOf(String title, Parent root) {
+    private static Stage createChooserStageOf(Window owner, String title, Parent root) {
         Stage stage = new Stage(StageStyle.UTILITY);
-        stage.initOwner(primaryStage);
+        stage.initOwner(owner);
         stage.setTitle(title);
         stage.initModality(Modality.WINDOW_MODAL);
         stage.setOnCloseRequest(Event::consume);
@@ -283,5 +277,11 @@ public class GraphicalPlayer {
         scene.getStylesheets().add("chooser.css");
         stage.setScene(scene);
         return stage;
+    }
+
+    private void clearHandlerProperties() {
+        drawTicketsHP.setValue(null);
+        drawCardHP.setValue(null);
+        claimRouteHP.setValue(null);
     }
 }

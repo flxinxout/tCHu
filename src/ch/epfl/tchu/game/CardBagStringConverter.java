@@ -9,8 +9,15 @@ import java.util.List;
 import static ch.epfl.tchu.gui.Info.cardName;
 import static ch.epfl.tchu.gui.StringsFr.AND_SEPARATOR;
 
+/**
+ * Classe permettant de convertir certaines chaînes de caractères en d'autres.
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ */
 //TODO: c'est bien de la définir à l'extérieur de GraphicalPlayer? On pourrait l'utiliser dans Info aussi
 public class CardBagStringConverter extends StringConverter<SortedBag<Card>> {
+
     /**
      * Retourne la représentation textuelle de l'ensemble de cartes donné.
      *

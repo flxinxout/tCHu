@@ -24,17 +24,16 @@ import static ch.epfl.tchu.gui.ActionHandlers.ClaimRouteHandler;
  * @author Giovanni Ranieri (326870)
  */
 class MapViewCreator {
-    public final static String NEUTRAL_SC = "NEUTRAL";
-    public final static String FILLED_SC = "filled";
-
+    private final static String CAR_CS = "car";
+    private final static String FILLED_SC = "filled";
+    private final static String NEUTRAL_SC = "NEUTRAL";
     private final static String ROUTE_SC = "route";
     private final static String TRACK_SC = "track";
-    private final static String CAR_CS = "car";
 
+    private final static double CIRCLE_MARGIN = 6D;
+    private final static double CIRCLE_RADIUS = 3D;
     private final static double RECT_HEIGHT = 12D;
     private final static double RECT_WIDTH = 36D;
-    private final static double CIRCLE_RADIUS = 3D;
-    private final static double CIRCLE_MARGIN = 6D;
 
     private MapViewCreator() {
     }

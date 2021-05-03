@@ -49,7 +49,7 @@ public final class Stage9Test extends Application {
         PublicPlayerState p2State = new PublicPlayerState(0, 0, routes().subList(3, 6));
 
         Map<PlayerId, PublicPlayerState> pubPlayerStates = Map.of(PLAYER_1, p1State, PLAYER_2, p2State);
-        PublicCardState cardState = new PublicCardState(Card.ALL.subList(4, 10), 110 - 2 * 4 - 5, 0);
+        PublicCardState cardState = new PublicCardState(Card.ALL.subList(4, 9), 110 - 2 * 4 - 5, 0);
         PublicGameState publicGameState = new PublicGameState(36, cardState, PLAYER_1, pubPlayerStates, null);
         gameState.setState(publicGameState, p1State);
     }

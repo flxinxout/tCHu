@@ -11,12 +11,19 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
+import java.util.List;
 import java.util.Map;
 
+/**
+ * Permet de créer la vue des informations d'une partie de tCHu.
+ *
+ * @author Dylan Vairoli (326603)
+ * @author Giovanni Ranieri (326870)
+ */
 class InfoViewCreator {
 
-    private final static String PLAYER_STATS_ID = "player-stats";
     private final static String GAME_INFO_ID = "game-info";
+    private final static String PLAYER_STATS_ID = "player-stats";
 
     private final static String FILLED_SC = "filled";
 
@@ -25,23 +32,24 @@ class InfoViewCreator {
     private InfoViewCreator() {
     }
 
-    public static Node createInfoView(PlayerId playerId, Map<PlayerId, String> playerNames, ObservableGameState gameState, ObservableList<Text> texts) {
-
+    /**
+     * Permet de créer la vue des informations correspondant au joueur donné, à l'aide de l'état du jeu observable, les
+     * noms des joueurs ainsi que la liste observable des messages à afficher donnés.
+     *
+     * @param playerId    identité du joueur auquel cette vue est attachée
+     * @param playerNames carte associative entre les joueurs et leur nom
+     * @param gameState   l'état de jeu observable
+     * @param messages    la liste observable des différents messages à observer
+     * @return la vue des informations de l'état de jeu
+     */
+    public static Node createInfoView(PlayerId playerId, Map<PlayerId, String> playerNames,
+                                      ObservableGameState gameState, ObservableList<Text> messages) {
         VBox root = new VBox();
         root.getStylesheets().addAll("info.css", "colors.css");
 
         VBox playerStats = new VBox();
         playerStats.setId(PLAYER_STATS_ID);
-
-        Separator separator = new Separator(Orientation.HORIZONTAL);
-
-        TextFlow messages = new TextFlow();
-        messages.setId(GAME_INFO_ID);
-
-        for(Map.Entry<PlayerId, String> entries : playerNames.entrySet()) {
-
-            PlayerId id = entries.getKey();
-
+        for (PlayerId id : List.of(playerId, playerId.next())) {
             TextFlow playerTextFlow = new TextFlow();
             playerTextFlow.getStyleClass().add(id.name());
 
@@ -49,17 +57,24 @@ class InfoViewCreator {
             circle.getStyleClass().add(FILLED_SC);
 
             Text text = new Text();
-
             text.textProperty().bind(Bindings.format(StringsFr.PLAYER_STATS,
-                    id, gameState.ticketsCountOf(id).getValue(), gameState.cardsCountOf(id).getValue(), gameState.carsCountOf(id).getValue(),
+                    playerNames.get(id),
+                    gameState.ticketsCountOf(id).getValue(),
+                    gameState.cardsCountOf(id).getValue(),
+                    gameState.carsCountOf(id).getValue(),
                     gameState.claimPointsOf(id).getValue()));
 
             playerTextFlow.getChildren().addAll(circle, text);
             playerStats.getChildren().add(playerTextFlow);
         }
 
-        Bindings.bindContent(messages.getChildren(), texts);
-        root.getChildren().addAll(playerStats, separator, messages);
+        Separator separator = new Separator(Orientation.HORIZONTAL);
+
+        TextFlow messagesFlow = new TextFlow();
+        messagesFlow.setId(GAME_INFO_ID);
+        Bindings.bindContent(messagesFlow.getChildren(), messages);
+
+        root.getChildren().addAll(playerStats, separator, messagesFlow);
         return root;
     }
 }

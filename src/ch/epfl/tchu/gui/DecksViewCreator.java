@@ -20,8 +20,6 @@ import static ch.epfl.tchu.game.Card.ALL;
 import static ch.epfl.tchu.game.Card.LOCOMOTIVE;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawCardHandler;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawTicketsHandler;
-import static ch.epfl.tchu.gui.MapViewCreator.FILLED_SC;
-import static ch.epfl.tchu.gui.MapViewCreator.NEUTRAL_SC;
 
 /**
  * Permet de créer la vue de la main et celle des cartes d'une partie de tCHu.
@@ -30,25 +28,27 @@ import static ch.epfl.tchu.gui.MapViewCreator.NEUTRAL_SC;
  * @author Giovanni Ranieri (326870)
  */
 class DecksViewCreator {
-    private final static String TICKETS_ID = "tickets";
-    private final static String HAND_PANE_ID = "hand-pane";
     private final static String CARD_PANE_ID = "card-pane";
+    private final static String HAND_PANE_ID = "hand-pane";
+    private final static String TICKETS_ID = "tickets";
 
-    private final static String CARD_SC = "card";
-    private final static String OUTSIDE_SC = "outside";
-    private final static String INSIDE_SC = "inside";
-    private final static String TRAIN_IMAGE_SC = "train-image";
-    private final static String COUNT_SC = "count";
-    private final static String GAUGED_SC = "gauged";
     private final static String BACKGROUND_SC = "background";
+    private final static String CARD_SC = "card";
+    private final static String COUNT_SC = "count";
+    private final static String FILLED_SC = "filled";
     private final static String FOREGROUND_SC = "foreground";
+    private final static String GAUGED_SC = "gauged";
+    private final static String INSIDE_SC = "inside";
+    private final static String NEUTRAL_SC = "NEUTRAL";
+    private final static String OUTSIDE_SC = "outside";
+    private final static String TRAIN_IMAGE_SC = "train-image";
 
-    private final static double OUTSIDE_WIDTH = 60D;
-    private final static double OUTSIDE_HEIGHT = 90D;
-    private final static double INSIDE_WIDTH = 40D;
-    private final static double INSIDE_HEIGHT = 70D;
-    private final static double GAUGE_INITIAL_WIDTH = 50D;
     private final static double GAUGE_HEIGHT = 5D;
+    private final static double GAUGE_INITIAL_WIDTH = 50D;
+    private final static double INSIDE_HEIGHT = 70D;
+    private final static double INSIDE_WIDTH = 40D;
+    private final static double OUTSIDE_HEIGHT = 90D;
+    private final static double OUTSIDE_WIDTH = 60D;
 
     private DecksViewCreator() {
     }
@@ -93,8 +93,8 @@ class DecksViewCreator {
      * Crée la vue de la main du joueur à l'aide de l'état du jeu observable, les gestionnaires d'action
      * à utiliser lorsque le joueur désire tirer une carte ou un billet.
      *
-     * @param gameState l'état de jeu observable
-     * @param drawCardHP la propriété contenant le gestionnaire d'action à utiliser lorsque le joueur désire tirer une carte
+     * @param gameState    l'état de jeu observable
+     * @param drawCardHP   la propriété contenant le gestionnaire d'action à utiliser lorsque le joueur désire tirer une carte
      * @param drawTicketHP la propriété contenant le gestionnaire d'action à utiliser lorsque le joueur désire tirer un billet
      * @return la vue de la main du joueur
      */
@@ -162,7 +162,7 @@ class DecksViewCreator {
     /**
      * Crée un bouton possédant le texte donné et la propriété donnée, liée au pourcentage de la jauge.
      *
-     * @param text le texte
+     * @param text            le texte
      * @param gaugePercentage la propriété liée au pourcentage de la jauge
      * @return un bouton
      */

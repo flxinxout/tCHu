@@ -23,7 +23,6 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.Window;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import java.util.Map;
 import static ch.epfl.tchu.game.Constants.INITIAL_TICKETS_COUNT;
 import static ch.epfl.tchu.game.Constants.IN_GAME_TICKETS_COUNT;
 import static ch.epfl.tchu.gui.ActionHandlers.*;
+import static ch.epfl.tchu.gui.StringsFr.*;
 import static javafx.application.Platform.isFxApplicationThread;
 
 /**
@@ -41,12 +41,9 @@ import static javafx.application.Platform.isFxApplicationThread;
  */
 public class GraphicalPlayer {
 
-    private final PlayerId playerId;
-    private final Map<PlayerId, String> playerNames;
     private final ObservableGameState gameState;
     private final ObservableList<Text> texts;
-    private final Stage primaryStage;
-
+    private final Stage mainStage;
     private final ObjectProperty<ClaimRouteHandler> claimRouteHP;
     private final ObjectProperty<DrawTicketsHandler> drawTicketsHP;
     private final ObjectProperty<DrawCardHandler> drawCardHP;
@@ -56,13 +53,11 @@ public class GraphicalPlayer {
      * @param playerNames la table associative entre les joueurs et leur nom
      */
     public GraphicalPlayer(PlayerId playerId, Map<PlayerId, String> playerNames) {
-        this.playerId = playerId;
-        this.playerNames = playerNames;
         this.gameState = new ObservableGameState(playerId);
         this.texts = FXCollections.emptyObservableList();
 
-        this.primaryStage = new Stage();
-        primaryStage.setTitle("tCHu \u2014 " + playerNames.get(playerId));
+        this.mainStage = new Stage();
+        mainStage.setTitle("tCHu \u2014 " + playerNames.get(playerId));
 
         this.claimRouteHP = new SimpleObjectProperty<>();
         this.drawTicketsHP = new SimpleObjectProperty<>();
@@ -74,8 +69,8 @@ public class GraphicalPlayer {
         Node infoView = InfoViewCreator.createInfoView(playerId, playerNames, gameState, texts);
 
         BorderPane mainPane = new BorderPane(mapView, null, cardsView, handView, infoView);
-        primaryStage.setScene(new Scene(mainPane));
-        primaryStage.show();
+        mainStage.setScene(new Scene(mainPane));
+        mainStage.show();
     }
 
     /**
@@ -174,7 +169,7 @@ public class GraphicalPlayer {
      */
     public void chooseClaimCards(List<SortedBag<Card>> initialCards, ChooseCardsHandler chooseCardsH) {
         assert isFxApplicationThread();
-        Stage selectionStage = createClaimCardsSelectionStage(initialCards, chooseCardsH);
+        Stage selectionStage = createSelectionStage(ChoiceType.INITIAL_CARDS, initialCards, chooseCardsH);
         selectionStage.show();
     }
 
@@ -188,8 +183,8 @@ public class GraphicalPlayer {
      */
     public void chooseAdditionalCards(List<SortedBag<Card>> additionalCards, ChooseCardsHandler chooseCardsH) {
         assert isFxApplicationThread();
-        Stage chooseAdditionalCardsStage = createAdditionalCardsSelectionStage(additionalCards, chooseCardsH);
-        chooseAdditionalCardsStage.show();
+        Stage selectionStage = createSelectionStage(ChoiceType.ADDITIONAL_CARDS, additionalCards, chooseCardsH);
+        selectionStage.show();
     }
 
     private Stage createTicketsSelectionStage(SortedBag<Ticket> options, ChooseTicketsHandler chooseTicketsH) {
@@ -198,18 +193,18 @@ public class GraphicalPlayer {
         VBox root = new VBox();
 
         TextFlow introTextFlow = new TextFlow();
-        Text introText = new Text(String.format(StringsFr.CHOOSE_TICKETS, minCount, StringsFr.plural(minCount)));
+        Text introText = new Text(String.format(CHOOSE_TICKETS, minCount, plural(minCount)));
         introTextFlow.getChildren().add(introText);
 
         ListView<Ticket> optionsLV = new ListView<>(FXCollections.observableArrayList(options.toList()));
         optionsLV.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        Button confirmB = new Button("Choisir");
+        Button confirmB = new Button(CHOOSE);
         confirmB.disableProperty().bind(Bindings.size(optionsLV.getSelectionModel().getSelectedItems())
                 .lessThan(minCount));
 
         root.getChildren().addAll(introTextFlow, optionsLV, confirmB);
-        Stage stage = createChooserStageOf(StringsFr.TICKETS_CHOICE, root);
+        Stage stage = createChooserStageOf(TICKETS_CHOICE, root);
 
         confirmB.setOnAction(e -> {
             stage.hide();
@@ -219,44 +214,39 @@ public class GraphicalPlayer {
         return stage;
     }
 
-    private Stage createClaimCardsSelectionStage(List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
+    private Stage createSelectionStage(ChoiceType choiceType,
+                                       List<SortedBag<Card>> options,
+                                       ChooseCardsHandler chooseCardsH) {
         VBox root = new VBox();
 
         TextFlow introTextFlow = new TextFlow();
-        Text introText = new Text(StringsFr.CHOOSE_CARDS);
+        //TODO: bonne idée l'enum interne? Ca permettrait de faire 1 seule fonction puisque bcp de code est partagé entre elles
+        // on pourrait l'adapter aussi pour les tickets
+        /*String introString;
+        switch (choiceType){
+            case INITIAL_CARDS:
+                introString = CHOOSE_CARDS;
+                break;
+            case ADDITIONAL_CARDS:
+                introString = CHOOSE_ADDITIONAL_CARDS;
+                break;
+            case TICKETS:
+                introString = String.format(CHOOSE_TICKETS, ticketsMinCount, plural(ticketsMinCount));
+                break;
+            default:
+        }*/
+        Text introText = new Text(choiceType == ChoiceType.INITIAL_CARDS ? CHOOSE_CARDS : CHOOSE_ADDITIONAL_CARDS);
         introTextFlow.getChildren().add(introText);
 
         ListView<SortedBag<Card>> optionsLV = new ListView<>(FXCollections.observableArrayList(options));
         optionsLV.setCellFactory(v -> new TextFieldListCell<>(new CardBagStringConverter()));
 
-        Button confirmB = new Button("Choisir");
-        confirmB.disableProperty().bind(Bindings.size(optionsLV.getSelectionModel().getSelectedItems()).lessThan(1)); // maybe constant ? // juste ?
+        Button confirmB = new Button(CHOOSE);
+        if (choiceType == ChoiceType.INITIAL_CARDS)
+            confirmB.disableProperty().bind(Bindings.size(optionsLV.getSelectionModel().getSelectedItems()).isEqualTo(0));
 
         root.getChildren().addAll(introTextFlow, optionsLV, confirmB);
-        Stage stage = createChooserStageOf(StringsFr.CARDS_CHOICE, root);
-
-        confirmB.setOnAction(e -> {
-            stage.hide();
-            chooseCardsH.onChooseCards(optionsLV.getSelectionModel().getSelectedItem());
-        });
-
-        return stage;
-    }
-
-    private Stage createAdditionalCardsSelectionStage(List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
-        VBox root = new VBox();
-
-        TextFlow introTextFlow = new TextFlow();
-        Text introText = new Text(StringsFr.CHOOSE_ADDITIONAL_CARDS);
-        introTextFlow.getChildren().add(introText);
-
-        ListView<SortedBag<Card>> optionsLV = new ListView<>(FXCollections.observableArrayList(options));
-        optionsLV.setCellFactory(v -> new TextFieldListCell<>(new CardBagStringConverter()));
-
-        Button confirmB = new Button("Choisir");
-
-        root.getChildren().addAll(introTextFlow, optionsLV, confirmB);
-        Stage stage = createChooserStageOf(StringsFr.CARDS_CHOICE, root);
+        Stage stage = createChooserStageOf(CARDS_CHOICE, root);
 
         confirmB.setOnAction(e -> {
             stage.hide();
@@ -268,7 +258,7 @@ public class GraphicalPlayer {
 
     private Stage createChooserStageOf(String title, Parent root) {
         Stage stage = new Stage(StageStyle.UTILITY);
-        stage.initOwner(primaryStage);
+        stage.initOwner(mainStage);
         stage.setTitle(title);
         stage.initModality(Modality.WINDOW_MODAL);
         stage.setOnCloseRequest(Event::consume);
@@ -283,5 +273,11 @@ public class GraphicalPlayer {
         drawTicketsHP.setValue(null);
         drawCardHP.setValue(null);
         claimRouteHP.setValue(null);
+    }
+
+    private enum ChoiceType {
+        INITIAL_CARDS,
+        ADDITIONAL_CARDS,
+        TICKETS
     }
 }

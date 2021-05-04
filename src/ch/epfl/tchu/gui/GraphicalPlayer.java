@@ -10,7 +10,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
@@ -135,11 +134,31 @@ public class GraphicalPlayer {
      */
     public void chooseTickets(SortedBag<Ticket> options, ChooseTicketsHandler chooseTicketsH) {
         assert isFxApplicationThread();
-        Preconditions.checkArgument(options.size() == INITIAL_TICKETS_COUNT ||
-                options.size() == IN_GAME_TICKETS_COUNT);
+        int optionsSize = options.size();
+        Preconditions.checkArgument(optionsSize == INITIAL_TICKETS_COUNT ||
+                optionsSize == IN_GAME_TICKETS_COUNT);
 
-        Stage selectionStage = createTicketsSelectionStage(options, chooseTicketsH);
-        selectionStage.show();
+        int minCount = optionsSize - 2;
+        String introText = String.format(CHOOSE_TICKETS, minCount, plural(minCount));
+
+        ListView<Ticket> optionsLV = new ListView<>(FXCollections.observableArrayList(options.toList()));
+
+        Button confirmB = new Button(CHOOSE);
+        confirmB.disableProperty().bind(Bindings.size(optionsLV.getSelectionModel().getSelectedItems())
+                .lessThan(minCount));
+
+        optionsLV.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        Stage stage = createSelectionStage(TICKETS_CHOICE,
+                introText,
+                optionsLV,
+                confirmB);
+
+        confirmB.setOnAction(e -> {
+            chooseTicketsH.onChooseTickets(SortedBag.of(optionsLV.getSelectionModel().getSelectedItems()));
+            stage.hide();
+        });
+
+        stage.show();
     }
 
     /**
@@ -169,8 +188,24 @@ public class GraphicalPlayer {
      */
     public void chooseClaimCards(List<SortedBag<Card>> initialCards, ChooseCardsHandler chooseCardsH) {
         assert isFxApplicationThread();
-        Stage selectionStage = createSelectionStage(ChoiceType.INITIAL_CARDS, initialCards, chooseCardsH);
-        selectionStage.show();
+
+        ListView<SortedBag<Card>> optionsLV = new ListView<>(FXCollections.observableArrayList(initialCards));
+        optionsLV.setCellFactory(v -> new TextFieldListCell<>(new CardBagStringConverter()));
+
+        Button confirmB = new Button(CHOOSE);
+        confirmB.disableProperty().bind(Bindings.size(optionsLV.getSelectionModel().getSelectedItems()).isEqualTo(0));
+
+        Stage stage = createSelectionStage(CARDS_CHOICE,
+                CHOOSE_CARDS,
+                optionsLV,
+                confirmB);
+
+        confirmB.setOnAction(e -> {
+            chooseCardsH.onChooseCards(optionsLV.getSelectionModel().getSelectedItem());
+            stage.hide();
+        });
+
+        stage.show();
     }
 
     /**
@@ -183,80 +218,37 @@ public class GraphicalPlayer {
      */
     public void chooseAdditionalCards(List<SortedBag<Card>> additionalCards, ChooseCardsHandler chooseCardsH) {
         assert isFxApplicationThread();
-        Stage selectionStage = createSelectionStage(ChoiceType.ADDITIONAL_CARDS, additionalCards, chooseCardsH);
-        selectionStage.show();
-    }
 
-    private Stage createTicketsSelectionStage(SortedBag<Ticket> options, ChooseTicketsHandler chooseTicketsH) {
-        int minCount = options.size() - 2;
-
-        VBox root = new VBox();
-
-        TextFlow introTextFlow = new TextFlow();
-        Text introText = new Text(String.format(CHOOSE_TICKETS, minCount, plural(minCount)));
-        introTextFlow.getChildren().add(introText);
-
-        ListView<Ticket> optionsLV = new ListView<>(FXCollections.observableArrayList(options.toList()));
-        optionsLV.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
-        Button confirmB = new Button(CHOOSE);
-        confirmB.disableProperty().bind(Bindings.size(optionsLV.getSelectionModel().getSelectedItems())
-                .lessThan(minCount));
-
-        root.getChildren().addAll(introTextFlow, optionsLV, confirmB);
-        Stage stage = createChooserStageOf(TICKETS_CHOICE, root);
-
-        confirmB.setOnAction(e -> {
-            stage.hide();
-            chooseTicketsH.onChooseTickets(SortedBag.of(optionsLV.getSelectionModel().getSelectedItems()));
-        });
-
-        return stage;
-    }
-
-    private Stage createSelectionStage(ChoiceType choiceType,
-                                       List<SortedBag<Card>> options,
-                                       ChooseCardsHandler chooseCardsH) {
-        VBox root = new VBox();
-
-        TextFlow introTextFlow = new TextFlow();
-        //TODO: bonne idée l'enum interne? Ca permettrait de faire 1 seule fonction puisque bcp de code est partagé entre elles
-        // on pourrait l'adapter aussi pour les tickets
-        /*String introString;
-        switch (choiceType){
-            case INITIAL_CARDS:
-                introString = CHOOSE_CARDS;
-                break;
-            case ADDITIONAL_CARDS:
-                introString = CHOOSE_ADDITIONAL_CARDS;
-                break;
-            case TICKETS:
-                introString = String.format(CHOOSE_TICKETS, ticketsMinCount, plural(ticketsMinCount));
-                break;
-            default:
-        }*/
-        Text introText = new Text(choiceType == ChoiceType.INITIAL_CARDS ? CHOOSE_CARDS : CHOOSE_ADDITIONAL_CARDS);
-        introTextFlow.getChildren().add(introText);
-
-        ListView<SortedBag<Card>> optionsLV = new ListView<>(FXCollections.observableArrayList(options));
+        ListView<SortedBag<Card>> optionsLV = new ListView<>(FXCollections.observableArrayList(additionalCards));
         optionsLV.setCellFactory(v -> new TextFieldListCell<>(new CardBagStringConverter()));
 
         Button confirmB = new Button(CHOOSE);
-        if (choiceType == ChoiceType.INITIAL_CARDS)
-            confirmB.disableProperty().bind(Bindings.size(optionsLV.getSelectionModel().getSelectedItems()).isEqualTo(0));
 
-        root.getChildren().addAll(introTextFlow, optionsLV, confirmB);
-        Stage stage = createChooserStageOf(CARDS_CHOICE, root);
+        Stage stage = createSelectionStage(CARDS_CHOICE,
+                CHOOSE_ADDITIONAL_CARDS,
+                optionsLV,
+                confirmB);
 
         confirmB.setOnAction(e -> {
-            stage.hide();
             chooseCardsH.onChooseCards(optionsLV.getSelectionModel().getSelectedItem());
+            stage.hide();
         });
 
-        return stage;
+        stage.show();
     }
 
-    private Stage createChooserStageOf(String title, Parent root) {
+    private <T> Stage createSelectionStage(String title,
+                                           String introString,
+                                           ListView<T> optionsLV,
+                                           Button confirmB) {
+        VBox root = new VBox();
+
+        TextFlow introTextFlow = new TextFlow();
+        Text introText = new Text(introString);
+        introTextFlow.getChildren().add(introText);
+
+        root.getChildren().addAll(introTextFlow, optionsLV, confirmB);
+
         Stage stage = new Stage(StageStyle.UTILITY);
         stage.initOwner(mainStage);
         stage.setTitle(title);
@@ -273,11 +265,5 @@ public class GraphicalPlayer {
         drawTicketsHP.setValue(null);
         drawCardHP.setValue(null);
         claimRouteHP.setValue(null);
-    }
-
-    private enum ChoiceType {
-        INITIAL_CARDS,
-        ADDITIONAL_CARDS,
-        TICKETS
     }
 }

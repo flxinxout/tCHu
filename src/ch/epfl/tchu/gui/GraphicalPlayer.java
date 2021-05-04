@@ -143,7 +143,7 @@ public class GraphicalPlayer {
         Preconditions.checkArgument(options.size() == INITIAL_TICKETS_COUNT ||
                 options.size() == IN_GAME_TICKETS_COUNT);
 
-        Stage selectionStage = createTicketsSelectionStage(primaryStage, options, chooseTicketsH);
+        Stage selectionStage = createTicketsSelectionStage(options, chooseTicketsH);
         selectionStage.show();
     }
 
@@ -174,7 +174,7 @@ public class GraphicalPlayer {
      */
     public void chooseClaimCards(List<SortedBag<Card>> initialCards, ChooseCardsHandler chooseCardsH) {
         assert isFxApplicationThread();
-        Stage selectionStage = createClaimCardsSelectionStage(primaryStage, initialCards, chooseCardsH);
+        Stage selectionStage = createClaimCardsSelectionStage(initialCards, chooseCardsH);
         selectionStage.show();
     }
 
@@ -188,11 +188,11 @@ public class GraphicalPlayer {
      */
     public void chooseAdditionalCards(List<SortedBag<Card>> additionalCards, ChooseCardsHandler chooseCardsH) {
         assert isFxApplicationThread();
-        Stage chooseAdditionalCardsStage = createAdditionalCardsSelectionStage(primaryStage, additionalCards, chooseCardsH);
+        Stage chooseAdditionalCardsStage = createAdditionalCardsSelectionStage(additionalCards, chooseCardsH);
         chooseAdditionalCardsStage.show();
     }
 
-    private Stage createTicketsSelectionStage(Window owner, SortedBag<Ticket> options, ChooseTicketsHandler chooseTicketsH) {
+    private Stage createTicketsSelectionStage(SortedBag<Ticket> options, ChooseTicketsHandler chooseTicketsH) {
         int minCount = options.size() - 2;
 
         VBox root = new VBox();
@@ -204,12 +204,12 @@ public class GraphicalPlayer {
         ListView<Ticket> optionsLV = new ListView<>(FXCollections.observableArrayList(options.toList()));
         optionsLV.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        Button confirmB = new Button();
+        Button confirmB = new Button("Choisir");
         confirmB.disableProperty().bind(Bindings.size(optionsLV.getSelectionModel().getSelectedItems())
                 .lessThan(minCount));
 
         root.getChildren().addAll(introTextFlow, optionsLV, confirmB);
-        Stage stage = createChooserStageOf(owner, StringsFr.TICKETS_CHOICE, root);
+        Stage stage = createChooserStageOf(StringsFr.TICKETS_CHOICE, root);
 
         confirmB.setOnAction(e -> {
             stage.hide();
@@ -219,7 +219,7 @@ public class GraphicalPlayer {
         return stage;
     }
 
-    private Stage createClaimCardsSelectionStage(Window owner, List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
+    private Stage createClaimCardsSelectionStage(List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
         VBox root = new VBox();
 
         TextFlow introTextFlow = new TextFlow();
@@ -229,11 +229,11 @@ public class GraphicalPlayer {
         ListView<SortedBag<Card>> optionsLV = new ListView<>(FXCollections.observableArrayList(options));
         optionsLV.setCellFactory(v -> new TextFieldListCell<>(new CardBagStringConverter()));
 
-        Button confirmB = new Button();
+        Button confirmB = new Button("Choisir");
         confirmB.disableProperty().bind(Bindings.size(optionsLV.getSelectionModel().getSelectedItems()).lessThan(1)); // maybe constant ? // juste ?
 
         root.getChildren().addAll(introTextFlow, optionsLV, confirmB);
-        Stage stage = createChooserStageOf(owner, StringsFr.CARDS_CHOICE, root);
+        Stage stage = createChooserStageOf(StringsFr.CARDS_CHOICE, root);
 
         confirmB.setOnAction(e -> {
             stage.hide();
@@ -243,7 +243,7 @@ public class GraphicalPlayer {
         return stage;
     }
 
-    private Stage createAdditionalCardsSelectionStage(Window owner, List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
+    private Stage createAdditionalCardsSelectionStage(List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
         VBox root = new VBox();
 
         TextFlow introTextFlow = new TextFlow();
@@ -253,10 +253,10 @@ public class GraphicalPlayer {
         ListView<SortedBag<Card>> optionsLV = new ListView<>(FXCollections.observableArrayList(options));
         optionsLV.setCellFactory(v -> new TextFieldListCell<>(new CardBagStringConverter()));
 
-        Button confirmB = new Button();
+        Button confirmB = new Button("Choisir");
 
         root.getChildren().addAll(introTextFlow, optionsLV, confirmB);
-        Stage stage = createChooserStageOf(owner, StringsFr.CARDS_CHOICE, root);
+        Stage stage = createChooserStageOf(StringsFr.CARDS_CHOICE, root);
 
         confirmB.setOnAction(e -> {
             stage.hide();
@@ -266,9 +266,9 @@ public class GraphicalPlayer {
         return stage;
     }
 
-    private Stage createChooserStageOf(Window owner, String title, Parent root) {
+    private Stage createChooserStageOf(String title, Parent root) {
         Stage stage = new Stage(StageStyle.UTILITY);
-        stage.initOwner(owner);
+        stage.initOwner(primaryStage);
         stage.setTitle(title);
         stage.initModality(Modality.WINDOW_MODAL);
         stage.setOnCloseRequest(Event::consume);

@@ -115,19 +115,19 @@ public class GraphicalPlayer {
 
         drawTicketsHP.setValue(!gameState.canDrawTickets() ? null :
                 () -> {
-                    drawTicketsH.onDrawTickets();
                     clearHandlerProperties();
+                    drawTicketsH.onDrawTickets();
                 });
 
         drawCardHP.setValue(!gameState.canDrawCards() ? null :
                 slot -> {
-                    drawCardH.onDrawCard(slot);
                     clearHandlerProperties();
+                    drawCardH.onDrawCard(slot);
                 });
 
         claimRouteHP.setValue((Route r, SortedBag<Card> c) -> {
-            claimRouteH.onClaimRoute(r, c);
             clearHandlerProperties();
+            claimRouteH.onClaimRoute(r, c);
         });
     }
 
@@ -158,8 +158,8 @@ public class GraphicalPlayer {
     public void drawCard(DrawCardHandler drawCardH) {
         assert isFxApplicationThread();
         drawCardHP.setValue(slot -> {
-            drawCardH.onDrawCard(slot);
             clearHandlerProperties();
+            drawCardH.onDrawCard(slot);
         });
     }
 
@@ -179,7 +179,7 @@ public class GraphicalPlayer {
     }
 
     /**
-     * Ouvre une fenêtre  permettant au joueur de faire son choix sur les cartes additionnelles qu'il peut utiliser pour
+     * Ouvre une fenêtre permettant au joueur de faire son choix sur les cartes additionnelles qu'il peut utiliser pour
      * s'emparer d'un tunnel; une fois que celui-ci a été fait et confirmé, le gestionnaire de choix est appelé avec
      * le choix du joueur en argument.
      *
@@ -192,7 +192,7 @@ public class GraphicalPlayer {
         chooseAdditionalCardsStage.show();
     }
 
-    private static Stage createTicketsSelectionStage(Window owner, SortedBag<Ticket> options, ChooseTicketsHandler chooseTicketsH) {
+    private Stage createTicketsSelectionStage(Window owner, SortedBag<Ticket> options, ChooseTicketsHandler chooseTicketsH) {
         int minCount = options.size() - 2;
 
         VBox root = new VBox();
@@ -219,7 +219,7 @@ public class GraphicalPlayer {
         return stage;
     }
 
-    private static Stage createClaimCardsSelectionStage(Window owner, List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
+    private Stage createClaimCardsSelectionStage(Window owner, List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
         VBox root = new VBox();
 
         TextFlow introTextFlow = new TextFlow();
@@ -243,7 +243,7 @@ public class GraphicalPlayer {
         return stage;
     }
 
-    private  static Stage createAdditionalCardsSelectionStage(Window owner, List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
+    private Stage createAdditionalCardsSelectionStage(Window owner, List<SortedBag<Card>> options, ChooseCardsHandler chooseCardsH) {
         VBox root = new VBox();
 
         TextFlow introTextFlow = new TextFlow();
@@ -266,7 +266,7 @@ public class GraphicalPlayer {
         return stage;
     }
 
-    private static Stage createChooserStageOf(Window owner, String title, Parent root) {
+    private Stage createChooserStageOf(Window owner, String title, Parent root) {
         Stage stage = new Stage(StageStyle.UTILITY);
         stage.initOwner(owner);
         stage.setTitle(title);

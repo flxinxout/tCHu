@@ -6,6 +6,8 @@ import ch.epfl.tchu.gui.Info;
 
 import java.util.*;
 
+import static java.lang.Math.*;
+
 /**
  * Une partie de tCHu.
  *
@@ -91,12 +93,12 @@ public final class Game {
                         final int slot = currentPlayer.drawSlot();
 
                         if (slot != Constants.DECK_SLOT) {
-                            gameState = gameState.withDrawnFaceUpCard(slot);
                             sendInformation(currentPlayerInfo
                                     .drewVisibleCard(gameState.cardState().faceUpCard(slot)), playersValues);
+                            gameState = gameState.withDrawnFaceUpCard(slot);
                         } else {
-                            gameState = gameState.withBlindlyDrawnCard();
                             sendInformation(currentPlayerInfo.drewBlindCard(), playersValues);
+                            gameState = gameState.withBlindlyDrawnCard();
                         }
                     }
                     break;
@@ -161,32 +163,29 @@ public final class Game {
         }
 
         //3. Fin de la partie
-        GameState finalGameState = gameState;
-        sendStateUpdate(finalGameState, players);
+        sendStateUpdate(gameState, players);
 
-        final Map<PlayerId, Integer> points = new EnumMap<>(PlayerId.class);
-        final Map<PlayerId, Trail> longestTrails = new EnumMap<>(PlayerId.class);
+        Map<PlayerId, Integer> points = new EnumMap<>(PlayerId.class);
+        Map<PlayerId, Trail> longestTrails = new EnumMap<>(PlayerId.class);
 
         //Calcul du chemin le plus long de chacun des joueurs
-        for (PlayerId id : PlayerId.ALL)
-            longestTrails.put(id, Trail.longest(gameState.playerState(id).routes()));
+        int maxLength = 0;
+        for (PlayerId id : PlayerId.ALL) {
+            Trail longest = Trail.longest(gameState.playerState(id).routes());
+            maxLength = max(maxLength, longest.length());
+            longestTrails.put(id, longest);
+        }
 
-        //Nous avons choisi d'utiliser des streams afin que ça facilite l'ajout de joueurs au jeu (> 2),
-        //Bien que cela complique légèrement le code qui aurait été nécessaire dans le cas spécifique à deux joueurs.
-        final int maxLength = longestTrails.values().stream()
-                .mapToInt(Trail::length)
-                .max()
-                .orElse(0);
-
-        longestTrails.forEach((id, tr) -> {
+        for (PlayerId id : PlayerId.ALL) {
+            Trail tr = longestTrails.get(id);
             if (tr.length() == maxLength) {
                 sendInformation(infos.get(id).getsLongestTrailBonus(tr), playersValues);
-                points.put(id, finalGameState.playerState(id).finalPoints() + Constants.LONGEST_TRAIL_BONUS_POINTS);
+                points.put(id, gameState.playerState(id).finalPoints() + Constants.LONGEST_TRAIL_BONUS_POINTS);
             } else
-                points.put(id, finalGameState.playerState(id).finalPoints());
-        });
+                points.put(id, gameState.playerState(id).finalPoints());
+        }
 
-        final boolean playersAreEqual = points.values().stream()
+        boolean playersAreEqual = points.values().stream()
                 .distinct()
                 .count() == 1;
 

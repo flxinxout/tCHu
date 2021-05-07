@@ -15,6 +15,11 @@ import java.util.Objects;
  */
 public class PublicGameState {
 
+    /**
+     * Le nombre de cartes tirées à la fois en cours de partie.
+     */
+    private static final int IN_GAME_CARDS_COUNT = 2;
+
     private final int ticketsCount;
     private final PublicCardState cardState;
     private final PlayerId currentPlayerId;
@@ -37,7 +42,7 @@ public class PublicGameState {
      */
     public PublicGameState(int ticketsCount, PublicCardState cardState, PlayerId currentPlayerId,
                            Map<PlayerId, PublicPlayerState> playerState, PlayerId lastPlayer) {
-        Preconditions.checkArgument(ticketsCount >= 0 && playerState.size() == 2);
+        Preconditions.checkArgument(ticketsCount >= 0 && playerState.size() == PlayerId.COUNT);
 
         this.cardState = Objects.requireNonNull(cardState);
         this.currentPlayerId = Objects.requireNonNull(currentPlayerId);
@@ -53,7 +58,7 @@ public class PublicGameState {
      * @return ssi il est possible de tirer des cartes
      */
     public boolean canDrawCards() {
-        return this.cardState.deckSize() + this.cardState.discardsSize() >= PlayerId.COUNT + Constants.ADDITIONAL_TUNNEL_CARDS;
+        return this.cardState.deckSize() + this.cardState.discardsSize() >= IN_GAME_CARDS_COUNT + Constants.ADDITIONAL_TUNNEL_CARDS;
     }
 
     /**

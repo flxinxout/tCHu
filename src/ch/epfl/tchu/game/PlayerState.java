@@ -6,6 +6,8 @@ import ch.epfl.tchu.SortedBag;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.*;
+
 /**
  * Partie complète (publique et privée) de l'état d'un joueur. En plus de la partie publique, elle possède également
  * les tickets et les cartes du joueur, inconnus des autres joueurs.
@@ -179,24 +181,18 @@ public final class PlayerState extends PublicPlayerState {
      * @return le nombre de points obtenus par ce joueur grâce à ses billets
      */
     public int ticketPoints() {
-        final int maxIndex = Math.max(routes().stream()
-                        .mapToInt(r -> r.station1().id())
-                        .max()
-                        .orElse(0),
-                routes().stream()
-                        .mapToInt(r -> r.station2().id())
-                        .max()
-                        .orElse(0));
+        int maxIndex = routes().stream()
+                .mapToInt(r -> max(r.station1().id(), r.station2().id()))
+                .max()
+                .orElse(0);
 
-        final StationPartition.Builder connectivityBuilder = new StationPartition.Builder(maxIndex + 1);
+        StationPartition.Builder connectivityBuilder = new StationPartition.Builder(maxIndex + 1);
         routes().forEach(c -> connectivityBuilder.connect(c.station1(), c.station2()));
-        final StationPartition connectivity = connectivityBuilder.build();
+        StationPartition connectivity = connectivityBuilder.build();
 
-        final int points = tickets().stream()
+        return tickets().stream()
                 .mapToInt(t -> t.points(connectivity))
                 .sum();
-
-        return points;
     }
 
     /**

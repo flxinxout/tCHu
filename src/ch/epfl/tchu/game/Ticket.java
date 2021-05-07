@@ -4,7 +4,6 @@ import ch.epfl.tchu.Preconditions;
 
 import java.util.List;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 /**
  * Un billet.
@@ -49,19 +48,19 @@ public final class Ticket implements Comparable<Ticket> {
     /**
      * Crée la représentation textuelle de ce billet.
      *
-     * @param tripList les trajets du billet
+     * @param trips les trajets du billet
      * @return la représentation textuelle de ce billet.
      */
-    private static String computeText(List<Trip> tripList) {
-        Trip firstTrip = tripList.get(0);
+    private static String computeText(List<Trip> trips) {
+        Trip firstTrip = trips.get(0);
 
         //Billet d'un trajet
-        if (tripList.size() == 1)
+        if (trips.size() == 1)
             return String.format("%s - %s (%s)", firstTrip.from(), firstTrip.to(), firstTrip.points());
 
         //Billet de plus d'un trajet
-        final TreeSet<String> stationsToTexts = new TreeSet<>();
-        tripList.forEach(trip -> stationsToTexts.add(String.format("%s (%s)", trip.to().name(), trip.points())));
+        TreeSet<String> stationsToTexts = new TreeSet<>();
+        trips.forEach(trip -> stationsToTexts.add(String.format("%s (%s)", trip.to().name(), trip.points())));
 
         return String.format("%s - {%s}", firstTrip.from(), String.join(", ", stationsToTexts));
     }
@@ -74,24 +73,19 @@ public final class Ticket implements Comparable<Ticket> {
      * @return le nombre de points du billet pour la connectivité donnée
      */
     public int points(StationConnectivity connectivity) {
-        List<Trip> connectedTrips = trips.stream()
-                .filter(trip -> connectivity.connected(trip.from(), trip.to()))
-                .collect(Collectors.toList());
+        boolean isAnyConnection = trips.stream()
+                .anyMatch(trip -> connectivity.connected(trip.from(), trip.to()));
 
-        final int minPoints = trips.stream()
-                .mapToInt(Trip::points)
-                .min()
-                .getAsInt();
+        if (!isAnyConnection)
+            return trips.stream()
+                    .mapToInt(t -> t.points(connectivity))
+                    .max()
+                    .getAsInt();
 
-        if (connectedTrips.isEmpty())
-            return -minPoints;
-
-        final int maxPoints = connectedTrips.stream()
-                .mapToInt(Trip::points)
+        return trips.stream()
+                .mapToInt(t -> t.points(connectivity))
                 .max()
                 .getAsInt();
-
-        return maxPoints;
     }
 
     /**

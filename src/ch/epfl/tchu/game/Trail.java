@@ -17,11 +17,11 @@ public final class Trail {
     private final Station to;
     private final int length;
 
-    private Trail(List<Route> routes, Station from, Station to) {
+    private Trail(List<Route> routes, Station from, Station to, int length) {
         this.routes = routes;
         this.from = from;
         this.to = to;
-        this.length = computeLength(routes, from, to);
+        this.length = length;
     }
 
     /**
@@ -35,29 +35,25 @@ public final class Trail {
 
         Trail maxLengthTrail = allTrails.stream()
                 .max(Comparator.comparing(Trail::length))
-                .orElse(new Trail(List.of(), null, null));
+                .orElse(new Trail(List.of(), null, null, 0));
 
         while (!allTrails.isEmpty()) {
             List<Trail> tempTrails = new ArrayList<>();
 
             for (Trail trail : allTrails) {
-                final List<Route> routesNotInTrail = new ArrayList<>(routes);
+                List<Route> routesNotInTrail = new ArrayList<>(routes);
                 routesNotInTrail.removeAll(trail.routes);
 
                 for (Route route : routesNotInTrail) {
-                    final Trail newTrail = tryExtend(trail, route);
-                    if (!newTrail.equals(trail))
+                    Trail newTrail = tryExtend(trail, route);
+                    if (!newTrail.equals(trail)) {
+                        maxLengthTrail = maxLengthTrail.length() < newTrail.length() ?
+                                newTrail : maxLengthTrail;
                         tempTrails.add(newTrail);
+                    }
                 }
             }
             allTrails = tempTrails;
-
-            final Trail possibleMaxLengthTrail = allTrails.stream()
-                    .max(Comparator.comparing(Trail::length))
-                    .orElse(maxLengthTrail);
-
-            maxLengthTrail = maxLengthTrail.length() < possibleMaxLengthTrail.length() ?
-                    possibleMaxLengthTrail : maxLengthTrail;
         }
 
         return maxLengthTrail;
@@ -81,34 +77,20 @@ public final class Trail {
      * La gare d'arrivée du nouveau chemin est {@code endStation}.
      */
     private static Trail extend(Trail trailToExtend, Route route, Station endStation) {
-        final List<Route> newRoads = new ArrayList<>(trailToExtend.routes);
+        List<Route> newRoads = new ArrayList<>(trailToExtend.routes);
         newRoads.add(route);
-        return new Trail(newRoads, trailToExtend.station1(), endStation);
-    }
-
-    /**
-     * Calcule la longueur du chemin constitué de ces routes (somme de la longueur des routes).
-     */
-    private static int computeLength(List<Route> routes, Station station1, Station station2) {
-        if (station1 == null || station2 == null)
-            return 0;
-
-        final int length = routes.stream()
-                .mapToInt(Route::length)
-                .sum();
-
-        return length;
+        return new Trail(newRoads, trailToExtend.station1(), endStation, trailToExtend.length + route.length());
     }
 
     /**
      * Retourne tous les chemins constitués d'une seule route de la liste {@code routes}.
      */
     private static List<Trail> computeTrivialTrails(List<Route> routes) {
-        final List<Trail> trivialTrailsList = new ArrayList<>();
+        List<Trail> trivialTrailsList = new ArrayList<>();
 
         for (Route route : routes) {
-            trivialTrailsList.add(new Trail(List.of(route), route.station1(), route.station2()));
-            trivialTrailsList.add(new Trail(List.of(route), route.station2(), route.station1()));
+            trivialTrailsList.add(new Trail(List.of(route), route.station1(), route.station2(), route.length()));
+            trivialTrailsList.add(new Trail(List.of(route), route.station2(), route.station1(), route.length()));
         }
         return trivialTrailsList;
     }
@@ -120,7 +102,7 @@ public final class Trail {
      */
     @Override
     public String toString() {
-        final List<String> stationNames = new ArrayList<>();
+        List<String> stationNames = new ArrayList<>();
         String lastStationName;
 
         if (from != null) {
@@ -130,13 +112,13 @@ public final class Trail {
             return "Chemin inexistant";
 
         for (Route route : routes) {
-            final String name = lastStationName.equals(route.station1().name()) ?
+            String name = lastStationName.equals(route.station1().name()) ?
                     route.station2().name() : route.station1().name();
             stationNames.add(name);
             lastStationName = name;
         }
 
-        final String names = String.join(" - ", stationNames);
+        String names = String.join(" - ", stationNames);
         return String.format("%s (%s)", names, length());
     }
 

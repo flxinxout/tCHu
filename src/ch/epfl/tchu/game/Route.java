@@ -85,40 +85,22 @@ public final class Route {
      * @return la liste de tous les ensembles de cartes qui pourraient être joués pour s'emparer de cette route
      */
     public List<SortedBag<Card>> possibleClaimCards() {
-        final List<SortedBag<Card>> possibleClaimCardsList = new ArrayList<>();
+        List<SortedBag<Card>> possibleClaimCardsList = new ArrayList<>();
 
-        //Si la route n'est pas de couleur neutre
-        if (color != null) {
+        if (color != null)
             possibleClaimCardsList.add(SortedBag.of(length, Card.of(color)));
-
-            //Si la route est un tunnel
-            if (level == Level.UNDERGROUND) {
-                for (int i = 1; i <= length; i++) {
-                    SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
-
-                    cardsBuilder.add(length - i, Card.of(color));
-                    cardsBuilder.add(i, Card.LOCOMOTIVE);
-                    possibleClaimCardsList.add(cardsBuilder.build());
-                }
-            }
-        }
-        //Si la route est de couleur neutre
-        else {
+        else
             Card.CARS.forEach(car -> possibleClaimCardsList.add(SortedBag.of(length, car)));
 
-            //Si la route est un tunnel
-            if (level == Level.UNDERGROUND) {
-                for (int i = 1; i < length; i++) {
-                    for (Card car : Card.CARS) {
-                        SortedBag.Builder<Card> cardsBuilder = new SortedBag.Builder<>();
-                        cardsBuilder.add(length - i, car);
-                        cardsBuilder.add(i, Card.LOCOMOTIVE);
-                        possibleClaimCardsList.add(cardsBuilder.build());
-                    }
-                }
-
-                possibleClaimCardsList.add(SortedBag.of(length, Card.LOCOMOTIVE));
+        if (level == Level.UNDERGROUND) {
+            for (int i = 1; i < length; i++) {
+                if (color != null)
+                    possibleClaimCardsList.add(SortedBag.of(length - i, Card.of(color), i, Card.LOCOMOTIVE));
+                else
+                    for (Card car : Card.CARS)
+                        possibleClaimCardsList.add(SortedBag.of(length - i, car, i, Card.LOCOMOTIVE));
             }
+            possibleClaimCardsList.add(SortedBag.of(length, Card.LOCOMOTIVE));
         }
 
         return possibleClaimCardsList;

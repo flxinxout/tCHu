@@ -72,7 +72,7 @@ public final class Info {
      * @return le message déclarant que les joueurs ont terminé la partie ex æqo
      */
     public static String draw(List<String> playerNames, int points) {
-        final String playersNamesTogether = String.join(AND_SEPARATOR, playerNames);
+        String playersNamesTogether = String.join(AND_SEPARATOR, playerNames);
         return String.format(DRAW, playersNamesTogether, points);
     }
 
@@ -94,14 +94,14 @@ public final class Info {
      * Retourne la description de l'ensemble de cartes donné.
      */
     private static String descriptionOf(SortedBag<Card> cards) {
-        final List<String> singleCardNames = new ArrayList<>();
+        List<String> singleCardNames = new ArrayList<>();
 
         for (Card c : cards.toSet()) {
             int n = cards.countOf(c);
             singleCardNames.add(n + " " + cardName(c, n));
         }
 
-        final int lastCardIndex = singleCardNames.size() - 1;
+        int lastCardIndex = singleCardNames.size() - 1;
         String joined;
         if (singleCardNames.size() == 1) {
             joined = singleCardNames.get(0);
@@ -209,8 +209,8 @@ public final class Info {
      * et qu'elles impliquent un coût additionnel de {@code additionalCost} cartes.
      */
     public String drewAdditionalCards(SortedBag<Card> drawnCards, int additionalCost) {
-        final String additionalCardsAre = String.format(ADDITIONAL_CARDS_ARE, descriptionOf(drawnCards));
-        final String additionalCosts = additionalCost != 0 ?
+        String additionalCardsAre = String.format(ADDITIONAL_CARDS_ARE, descriptionOf(drawnCards));
+        String additionalCosts = additionalCost != 0 ?
                 String.format(SOME_ADDITIONAL_COST, additionalCost, plural(additionalCost)) :
                 String.format(NO_ADDITIONAL_COST);
 

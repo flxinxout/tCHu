@@ -32,7 +32,8 @@ public final class Game {
      */
     public static void play(Map<PlayerId, Player> players, Map<PlayerId, String> playerNames,
                             SortedBag<Ticket> tickets, Random rng) {
-        Preconditions.checkArgument(players.size() == PlayerId.COUNT && playerNames.size() == PlayerId.COUNT);
+        Preconditions.checkArgument(players.size() == PlayerId.COUNT);
+        Preconditions.checkArgument(playerNames.size() == PlayerId.COUNT);
 
         final Collection<Player> playersValues = players.values();
         final Map<PlayerId, Info> infos = new EnumMap<>(PlayerId.class);

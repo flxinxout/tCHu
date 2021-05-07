@@ -56,8 +56,10 @@ public final class Info {
                 return RED_CARD + plural;
             case WHITE:
                 return WHITE_CARD + plural;
-            default:
+            case LOCOMOTIVE:
                 return LOCOMOTIVE_CARD + plural;
+            default:
+                throw new IllegalArgumentException("Type de carte invalide");
         }
     }
 

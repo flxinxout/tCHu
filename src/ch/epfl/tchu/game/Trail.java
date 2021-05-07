@@ -18,7 +18,7 @@ public final class Trail {
     private final int length;
 
     private Trail(List<Route> routes, Station from, Station to) {
-        this.routes = List.copyOf(routes);
+        this.routes = routes;
         this.from = from;
         this.to = to;
         this.length = computeLength(routes, from, to);

@@ -57,9 +57,7 @@ public final class Deck<C extends Comparable<C>> {
      */
     public Deck<C> withoutTopCard() {
         Preconditions.checkArgument(!isEmpty());
-
-        final List<C> newListOfCards = this.cards.subList(1, size());
-        return new Deck<>(newListOfCards);
+        return withoutTopCards(1);
     }
 
     /**

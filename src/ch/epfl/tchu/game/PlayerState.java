@@ -63,7 +63,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return un état identique à celui-ci, si ce n'est que ce joueur possède en plus la carte {@code card}
      */
     public PlayerState withAddedCard(Card card) {
-        return new PlayerState(tickets(), this.cards.union(SortedBag.of(card)), routes());
+        return withAddedCards(SortedBag.of(card));
     }
 
     /**
@@ -86,8 +86,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return ssi le joueur peut s'emparer de la route {@code route}
      */
     public boolean canClaimRoute(Route route) {
-        return carCount() >= route.length() && route.possibleClaimCards().stream()
-                .anyMatch(this.cards::contains);
+        return carCount() >= route.length() && !possibleClaimCards(route).isEmpty();
     }
 
     /**
@@ -131,13 +130,13 @@ public final class PlayerState extends PublicPlayerState {
         Preconditions.checkArgument(drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
 
         //1. Create a set of all possible cards in our hands (minus the initial cards)
-        final Card initialCardType = initialCards.stream()
+        Card initialCardType = initialCards.stream()
                 .distinct()
                 .filter(c -> c != Card.LOCOMOTIVE)
                 .findAny()
                 .orElse(Card.LOCOMOTIVE);
 
-        final SortedBag<Card> possibleCardsInHand = SortedBag.of(cards.stream()
+        SortedBag<Card> possibleCardsInHand = SortedBag.of(cards.stream()
                 .filter(c -> c == Card.LOCOMOTIVE || c == initialCardType)
                 .collect(Collectors.toList()))
                 .difference(initialCards);
@@ -147,7 +146,7 @@ public final class PlayerState extends PublicPlayerState {
         if (possibleCardsInHand.size() >= additionalCardsCount)
             optionsSet = possibleCardsInHand.subsetsOfSize(additionalCardsCount);
 
-        final List<SortedBag<Card>> optionsList = new ArrayList<>(optionsSet);
+        List<SortedBag<Card>> optionsList = new ArrayList<>(optionsSet);
 
         //3. Sort the list
         optionsList.sort(Comparator.comparingInt(cs -> cs.countOf(Card.LOCOMOTIVE)));

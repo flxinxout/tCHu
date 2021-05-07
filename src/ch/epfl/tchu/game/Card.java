@@ -33,7 +33,7 @@ public enum Card {
     /**
      * La liste des cartes colorées (non-locomotive) distinctes disponibles
      */
-    public static final List<Card> CARS = List.copyOf(ALL.subList(0, COUNT - 1));
+    public static final List<Card> CARS = ALL.subList(0, COUNT - 1);
 
     private final Color color;
 

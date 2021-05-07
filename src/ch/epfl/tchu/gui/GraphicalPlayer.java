@@ -48,12 +48,14 @@ public class GraphicalPlayer {
     private final ObjectProperty<DrawCardHandler> drawCardHP;
 
     /**
+     * Construit l'interface graphique du joueur donné.
+     *
      * @param playerId    l'identité du joueur lié à cette interface graphique
      * @param playerNames la table associative entre les joueurs et leur nom
      */
     public GraphicalPlayer(PlayerId playerId, Map<PlayerId, String> playerNames) {
         this.gameState = new ObservableGameState(playerId);
-        this.texts = FXCollections.emptyObservableList();
+        this.texts = FXCollections.observableArrayList();
 
         this.mainStage = new Stage();
         mainStage.setTitle("tCHu \u2014 " + playerNames.get(playerId));
@@ -237,6 +239,17 @@ public class GraphicalPlayer {
         stage.show();
     }
 
+    /**
+     * Crée une fenêtre de sélection avec le titre, le texte d'introduction, la liste des choix possibles et le bouton
+     * de confirmation donnés. Elle est une sous-fenêtre de la fenêtre principale de cette interface graphique.
+     *
+     * @param title       le titre de la fenêtre
+     * @param introString le texte d'introduction
+     * @param optionsLV   la liste des choix possibles
+     * @param confirmB    le bouton de confirmation
+     * @param <T>         le type du contenu de la liste
+     * @return la fenêtre de sélection
+     */
     private <T> Stage createSelectionStage(String title,
                                            String introString,
                                            ListView<T> optionsLV,
@@ -261,6 +274,9 @@ public class GraphicalPlayer {
         return stage;
     }
 
+    /**
+     * Vide de leur contenu les propriétés contenant les gestionnaires d'action de cette interface graphique.
+     */
     private void clearHandlerProperties() {
         drawTicketsHP.setValue(null);
         drawCardHP.setValue(null);

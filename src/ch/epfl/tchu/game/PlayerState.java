@@ -65,19 +65,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return un état identique à celui-ci, si ce n'est que ce joueur possède en plus la carte {@code card}
      */
     public PlayerState withAddedCard(Card card) {
-        return withAddedCards(SortedBag.of(card));
-    }
-
-    /**
-     * Retourne un état identique à celui-ci,
-     * si ce n'est que ce joueur possède en plus les cartes {@code additionalCards}.
-     *
-     * @param additionalCards les cartes additionnelles
-     * @return un état identique à celui-ci,
-     * si ce n'est que ce joueur possède en plus les cartes {@code additionalCards}
-     */
-    public PlayerState withAddedCards(SortedBag<Card> additionalCards) {
-        return new PlayerState(tickets(), this.cards.union(additionalCards), routes());
+        return new PlayerState(tickets(), this.cards.union(SortedBag.of(card)), routes());
     }
 
     /**

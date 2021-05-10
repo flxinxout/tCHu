@@ -104,20 +104,6 @@ class PlayerStateTest {
     }
 
     @Test
-    void playerStateWithAddedCardsAddsCards() {
-        var cards = shuffledCards(TestRandomizer.newRandom());
-        for (int batchSize = 1; batchSize < 5; batchSize += 1) {
-            var playerState = new PlayerState(SortedBag.of(), SortedBag.of(), List.of());
-            for (int i = 0; i + batchSize < cards.size(); i += batchSize) {
-                var nextI = i + batchSize;
-                var cardsToAdd = cards.subList(i, nextI);
-                playerState = playerState.withAddedCards(SortedBag.of(cardsToAdd));
-                assertEquals(SortedBag.of(cards.subList(0, nextI)), playerState.cards());
-            }
-        }
-    }
-
-    @Test
     void playerStateCanClaimRouteWorksWhenNotEnoughCars() {
         var chMap = new ChMap();
         var cards = sixOfEachCard();
@@ -144,9 +130,7 @@ class PlayerStateTest {
                 var availableCars = TOTAL_CAR_COUNT - usedCars;
 
                 if (availableCars < route.length())
-                    assertThrows(IllegalArgumentException.class, () -> {
-                        playerState.possibleClaimCards(route);
-                    });
+                    assertThrows(IllegalArgumentException.class, () -> playerState.possibleClaimCards(route));
             }
         }
     }

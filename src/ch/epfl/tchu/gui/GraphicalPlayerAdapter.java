@@ -48,11 +48,7 @@ public final class GraphicalPlayerAdapter implements Player {
 
     @Override
     public SortedBag<Ticket> chooseInitialTickets() {
-        try {
-            return ticketsBQ.take();
-        } catch (InterruptedException e) {
-            throw new Error();
-        }
+        return takeFromQueue(ticketsBQ);
     }
 
     @Override
@@ -69,64 +65,45 @@ public final class GraphicalPlayerAdapter implements Player {
                     cardsBQ.add(cards);
                     turnKindBQ.add(TurnKind.CLAIM_ROUTE);
                 }));
-        try {
-            return turnKindBQ.take();
-        } catch (InterruptedException e) {
-            throw new Error();
-        }
+
+        return takeFromQueue(turnKindBQ);
     }
 
     @Override
     public SortedBag<Ticket> chooseTickets(SortedBag<Ticket> options) {
         runLater(() -> graphicalPlayer.chooseTickets(options, ticketsBQ::add));
-        try {
-            return ticketsBQ.take();
-        } catch (InterruptedException e) {
-            throw new Error();
-        }
+        return takeFromQueue(ticketsBQ);
     }
 
     @Override
     public int drawSlot() {
-        if(!cardSlotBQ.isEmpty()) {
-            try {
-                return cardSlotBQ.take();
-            } catch (InterruptedException e) {
-                throw new Error();
-            }
-        }
+        if(!cardSlotBQ.isEmpty())
+            return takeFromQueue(cardSlotBQ);
 
         runLater(() -> graphicalPlayer.drawCard(cardSlotBQ::add));
-        try {
-            return cardSlotBQ.take();
-        } catch (InterruptedException e) {
-            throw new Error();
-        }
+        return takeFromQueue(cardSlotBQ);
     }
 
     @Override
     public Route claimedRoute() {
-        try {
-            return routeBQ.take();
-        } catch (InterruptedException e) {
-            throw new Error();
-        }
+        return takeFromQueue(routeBQ);
+
     }
 
     @Override
     public SortedBag<Card> initialClaimCards() {
-        try {
-            return cardsBQ.take();
-        } catch (InterruptedException e) {
-            throw new Error();
-        }
+        return takeFromQueue(cardsBQ);
     }
 
     @Override
     public SortedBag<Card> chooseAdditionalCards(List<SortedBag<Card>> options) {
         runLater(() -> graphicalPlayer.chooseAdditionalCards(options, cardsBQ::add));
+        return takeFromQueue(cardsBQ);
+    }
+
+    private static <T> T takeFromQueue(BlockingQueue<T> queue){
         try {
-            return cardsBQ.take();
+            return queue.take();
         } catch (InterruptedException e) {
             throw new Error();
         }

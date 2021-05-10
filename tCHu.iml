@@ -7,10 +7,11 @@
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/sigcheck" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/debug" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.junit.jupiter:junit-jupiter:5.7.0" level="project" />
-    <orderEntry type="library" name="OpenJFX 11" level="application" />
+    <orderEntry type="library" name="OpenJFX" level="application" />
   </component>
 </module>

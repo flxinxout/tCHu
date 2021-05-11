@@ -9,8 +9,12 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import static ch.epfl.tchu.gui.StringsFr.DEFAULT_NAME_P1;
+import static ch.epfl.tchu.gui.StringsFr.DEFAULT_NAME_P2;
 
 /**
  * Programme principal du serveur tCHu.
@@ -27,29 +31,30 @@ public class ServerMain extends Application {
      * un mandataire du joueur distant qui se trouve sur le client et démarre le fil d'exécution gérant la partie.
      *
      * @param primaryStage le stage principal
-     * @throws IOException
      */
     @Override
     public void start(Stage primaryStage) throws IOException {
-        try (ServerSocket serverSocket = new ServerSocket(5108);
-             Socket socket = serverSocket.accept()) {
+        List<String> args = getParameters().getRaw();
 
-            Player playerProxy = new RemotePlayerProxy(socket);
-            SortedBag<Ticket> tickets = SortedBag.of(ChMap.tickets());
+        Map<PlayerId, String> playerNames = Map.of(
+                PlayerId.PLAYER_1,
+                args.isEmpty() ? DEFAULT_NAME_P1 : args.get(0),
+                PlayerId.PLAYER_2,
+                args.size() < 2 ? DEFAULT_NAME_P2 : args.get(1));
 
-            Map<PlayerId, Player> players = Map.of(
-                    PlayerId.PLAYER_1,
-                    new GraphicalPlayerAdapter(),
-                    PlayerId.PLAYER_2,
-                    playerProxy);
-
-            Map<PlayerId, String> playersName = Map.of(
-                    PlayerId.PLAYER_1,
-                    getParameters().getRaw().get(0).equals("Ada") ? getParameters().getRaw().get(0) : "Ada",
-                    PlayerId.PLAYER_2,
-                    getParameters().getRaw().get(0).equals("Charles") ? getParameters().getRaw().get(0) : "Charles");
-
-            new Thread(() -> Game.play(players, playersName, tickets, new Random())).start();
+        Socket socket;
+        try (ServerSocket s0 = new ServerSocket(5108)) {
+            socket = s0.accept();
         }
+        Player playerProxy = new RemotePlayerProxy(socket);
+        SortedBag<Ticket> tickets = SortedBag.of(ChMap.tickets());
+
+        Map<PlayerId, Player> players = Map.of(
+                PlayerId.PLAYER_1,
+                new GraphicalPlayerAdapter(),
+                PlayerId.PLAYER_2,
+                playerProxy);
+
+        new Thread(() -> Game.play(players, playerNames, tickets, new Random())).start();
     }
 }

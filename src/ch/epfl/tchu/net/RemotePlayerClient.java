@@ -23,7 +23,7 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
 public class RemotePlayerClient {
 
     private final Player player;
-    private final String name;
+    private final String hostName;
     private final int port;
 
     /**
@@ -31,13 +31,13 @@ public class RemotePlayerClient {
      * ainsi que le nom d'hôte et le port d'écoute à utiliser pour se connecter au mandataire.
      *
      * @param player le joueur auquel le client fourni un accès distant
-     * @param name   le nom d'hôte
+     * @param hostName   le nom d'hôte
      * @param port   le numéro du port d'écoute
      * @throws UncheckedIOException en cas d'erreur d'entrée/sortie
      */
-    public RemotePlayerClient(Player player, String name, int port) {
+    public RemotePlayerClient(Player player, String hostName, int port) {
         this.player = player;
-        this.name = name;
+        this.hostName = hostName;
         this.port = port;
     }
 
@@ -48,7 +48,7 @@ public class RemotePlayerClient {
      * Quand plus rien ne peut être lu sur le port en question, la connexion est fermée.
      */
     public void run() {
-        try (Socket socket = new Socket(name, port);
+        try (Socket socket = new Socket(hostName, port);
              final BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), US_ASCII));
              final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), US_ASCII))) {
 

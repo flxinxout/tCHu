@@ -232,7 +232,8 @@ public class GraphicalPlayer {
                 confirmB);
 
         confirmB.setOnAction(e -> {
-            chooseCardsH.onChooseCards(optionsLV.getSelectionModel().getSelectedItem());
+            SortedBag<Card> selectedCards = optionsLV.getSelectionModel().getSelectedItem();
+            chooseCardsH.onChooseCards(selectedCards == null ? SortedBag.of() : selectedCards);
             stage.hide();
         });
 

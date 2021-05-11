@@ -11,11 +11,10 @@ import java.util.concurrent.BlockingQueue;
 import static javafx.application.Platform.runLater;
 
 /**
- * Classe ayant pour but d'adapter (au sens du patron Adapter) une instance de GraphicalPlayer en une valeur de type Player.
+ * Adapte une instance de GraphicalPlayer en une valeur de type Player.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
- *
  * @implNote Toutes les méthodes de cette classe sont destinées à être exécutées sur le fil d'exécution de JavaFX.
  */
 public final class GraphicalPlayerAdapter implements Player {
@@ -28,13 +27,28 @@ public final class GraphicalPlayerAdapter implements Player {
     private GraphicalPlayer graphicalPlayer;
 
     /**
-     * Initialise les différentes files bloquantes utilisées pour bloquer le fil d'exécution de JavaFX
+     * Construit les différentes files bloquantes utilisées pour bloquer le fil d'exécution de JavaFX
      */
     public GraphicalPlayerAdapter() {
         this.ticketsBQ = new ArrayBlockingQueue<>(1);
         this.cardSlotBQ = new ArrayBlockingQueue<>(1);
         this.cardsBQ = new ArrayBlockingQueue<>(1);
         this.routeBQ = new ArrayBlockingQueue<>(1);
+    }
+
+    /**
+     * Retourne le premier élément de la file bloquante donnée, qui en est retiré.
+     *
+     * @param queue la file bloquante
+     * @param <T>   le type d'élément que contient la file bloquante
+     * @return le premier élément de la file bloquante donnée
+     */
+    private static <T> T takeFromQueue(BlockingQueue<T> queue) {
+        try {
+            return queue.take();
+        } catch (InterruptedException e) {
+            throw new Error();
+        }
     }
 
     /**
@@ -55,35 +69,48 @@ public final class GraphicalPlayerAdapter implements Player {
      */
     @Override
     public void receiveInfo(String info) {
-        runLater(() -> graphicalPlayer.receiveInfo(info));
+        runLater(() -> {
+            //TODO: null check obligatoire?
+            if (graphicalPlayer != null)
+                graphicalPlayer.receiveInfo(info);
+        });
     }
 
     /**
      * Appelle la méthode setState du joueur graphique.
-     * @see GraphicalPlayer#setState(PublicGameState, PlayerState)
      *
      * @param newState le nouvel état de la partie
      * @param ownState l'état du joueur
+     * @see GraphicalPlayer#setState(PublicGameState, PlayerState)
      */
     @Override
     public void updateState(PublicGameState newState, PlayerState ownState) {
-        runLater(() -> graphicalPlayer.setState(newState, ownState));
+        runLater(() -> {
+            //TODO: null check obligatoire?
+            if (graphicalPlayer != null)
+                graphicalPlayer.setState(newState, ownState);
+        });
     }
 
     /**
      * Appelle la méthode chooseTickets du joueur graphique, pour lui demander de choisir ses billets initiaux,
      * en lui passant un gestionnaire de choix qui stocke le choix du joueur dans une file bloquante.
-     * @see GraphicalPlayer#chooseTickets(SortedBag, ActionHandlers.ChooseTicketsHandler)
      *
      * @param tickets les billets distribués au joueur
+     * @see GraphicalPlayer#chooseTickets(SortedBag, ActionHandlers.ChooseTicketsHandler)
      */
     @Override
     public void setInitialTicketChoice(SortedBag<Ticket> tickets) {
-        runLater(() -> graphicalPlayer.chooseTickets(tickets, ticketsBQ::add));
+        runLater(() -> {
+            //TODO: null check obligatoire?
+            if (graphicalPlayer != null)
+                graphicalPlayer.chooseTickets(tickets, ticketsBQ::add);
+        });
     }
 
     /**
      * Bloque en attendant que la file des billets contienne une valeur, puis la retourne.
+     *
      * @return la valeur contenue dans la file des billets.
      */
     @Override
@@ -97,9 +124,8 @@ public final class GraphicalPlayerAdapter implements Player {
      * s'emparer — dans des files bloquantes, puis bloque en attendant qu'une valeur soit placée dans la file contenant
      * le type de tour, qu'elle retire et retourne.
      *
-     * @see GraphicalPlayer#startTurn(ActionHandlers.DrawTicketsHandler, ActionHandlers.DrawCardHandler, ActionHandlers.ClaimRouteHandler)
-     *
      * @return la valeur stockée dans la file de type d'action des joueurs
+     * @see GraphicalPlayer#startTurn(ActionHandlers.DrawTicketsHandler, ActionHandlers.DrawCardHandler, ActionHandlers.ClaimRouteHandler)
      */
     @Override
     public TurnKind nextTurn() {
@@ -144,7 +170,7 @@ public final class GraphicalPlayerAdapter implements Player {
      */
     @Override
     public int drawSlot() {
-        if(!cardSlotBQ.isEmpty())
+        if (!cardSlotBQ.isEmpty())
             return takeFromQueue(cardSlotBQ);
 
         runLater(() -> graphicalPlayer.drawCard(cardSlotBQ::add));
@@ -164,6 +190,7 @@ public final class GraphicalPlayerAdapter implements Player {
 
     /**
      * Similaire à claimedRoute mais utilise la file contenant les multiensembles de cartes.
+     *
      * @return
      */
     @Override
@@ -176,28 +203,12 @@ public final class GraphicalPlayerAdapter implements Player {
      * dans la file contenant les multiensembles de cartes, qu'elle retourne.
      *
      * @param options les possibilités de cartes pour s'emparer du tunnel
-     *
      * @return le sortedbag contenu dans la file des multiensembles de cartes
      */
     @Override
     public SortedBag<Card> chooseAdditionalCards(List<SortedBag<Card>> options) {
+        assert cardsBQ.isEmpty();
         runLater(() -> graphicalPlayer.chooseAdditionalCards(options, cardsBQ::add));
         return takeFromQueue(cardsBQ);
-    }
-
-    /**
-     * Retourne le premier élément d'une file bloquante.
-     *
-     * @param queue la file bloquante
-     * @param <T> le type d'élément que contient la file bloquante
-     *
-     * @return le premier élément de la file bloquante {@code queue}
-     */
-    private static <T> T takeFromQueue(BlockingQueue<T> queue){
-        try {
-            return queue.take();
-        } catch (InterruptedException e) {
-            throw new Error();
-        }
     }
 }

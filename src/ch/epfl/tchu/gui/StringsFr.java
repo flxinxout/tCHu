@@ -23,6 +23,10 @@ public final class StringsFr {
     public static final String TICKETS_CHOICE = "Choix de billets";
     public static final String CARDS_CHOICE = "Choix de cartes";
 
+    //Noms par défaut
+    public static final String DEFAULT_NAME_P1 = "Ada";
+    public static final String DEFAULT_NAME_P2 = "Charles";
+
     // Invites
     public static final String CHOOSE_TICKETS =
             "Choisissez au moins %s billet%s parmi ceux-ci :";

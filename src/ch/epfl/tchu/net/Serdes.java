@@ -22,6 +22,13 @@ import static ch.epfl.tchu.game.Player.*;
  */
 public final class Serdes {
 
+    /** Séparateur des éléments d'une collection */
+    private static final char COLL_DELIM = ',';
+    /** Séparateur des éléments d'une collection de collections */
+    private static final char COLL_DELIM_DEG2 = ';';
+    /** Séparateur des éléments d'une collection de collections de collections */
+    private static final char COLL_DELIM_DEG3 = ':';
+
     /**
      * {@code Serde} relatif aux entiers.
      */
@@ -62,33 +69,33 @@ public final class Serdes {
     /**
      * {@code Serde} relatif aux listes de chaînes de caractères.
      */
-    public static final Serde<List<String>> OF_LIST_OF_STRINGS = Serde.listOf(Serdes.OF_STRING, ',');
+    public static final Serde<List<String>> OF_LIST_OF_STRINGS = Serde.listOf(Serdes.OF_STRING, COLL_DELIM);
 
     /**
      * {@code Serde} relatif aux listes de cartes.
      */
-    public static final Serde<List<Card>> OF_LIST_OF_CARDS = Serde.listOf(Serdes.OF_CARD, ',');
+    public static final Serde<List<Card>> OF_LIST_OF_CARDS = Serde.listOf(Serdes.OF_CARD, COLL_DELIM);
 
     /**
      * {@code Serde} relatif aux listes de routes.
      */
-    public static final Serde<List<Route>> OF_LIST_OF_ROUTES = Serde.listOf(Serdes.OF_ROUTE, ',');
+    public static final Serde<List<Route>> OF_LIST_OF_ROUTES = Serde.listOf(Serdes.OF_ROUTE, COLL_DELIM);
 
     /**
      * {@code Serde} relatif aux multi-ensembles de cartes.
      */
-    public static final Serde<SortedBag<Card>> OF_SORTED_BAG_OF_CARD = Serde.bagOf(Serdes.OF_CARD, ',');
+    public static final Serde<SortedBag<Card>> OF_SORTED_BAG_OF_CARD = Serde.bagOf(Serdes.OF_CARD, COLL_DELIM);
 
     /**
      * {@code Serde} relatif aux multi-ensembles de billets.
      */
-    public static final Serde<SortedBag<Ticket>> OF_SORTED_BAG_OF_TICKETS = Serde.bagOf(Serdes.OF_TICKET, ',');
+    public static final Serde<SortedBag<Ticket>> OF_SORTED_BAG_OF_TICKETS = Serde.bagOf(Serdes.OF_TICKET, COLL_DELIM);
 
     /**
      * {@code Serde} relatif aux listes de multi-ensembles de cartes.
      */
     public static final Serde<List<SortedBag<Card>>> OF_LIST_OF_SORTED_BAGS_OF_CARDS =
-            Serde.listOf(OF_SORTED_BAG_OF_CARD, ';');
+            Serde.listOf(OF_SORTED_BAG_OF_CARD, COLL_DELIM_DEG2);
 
     /**
      * {@code Serde} relatif aux {@code PublicCardState}.
@@ -124,7 +131,7 @@ public final class Serdes {
      */
     private static Function<PublicCardState, String> serFuncPublicCardState() {
         return pcs -> {
-            StringJoiner joiner = new StringJoiner(";");
+            StringJoiner joiner = new StringJoiner(String.valueOf(COLL_DELIM_DEG2));
             joiner.add(Serdes.OF_LIST_OF_CARDS.serialize(pcs.faceUpCards()));
             joiner.add(Serdes.OF_INTEGER.serialize(pcs.deckSize()));
             joiner.add(Serdes.OF_INTEGER.serialize(pcs.discardsSize()));
@@ -139,7 +146,7 @@ public final class Serdes {
      */
     private static Function<String, PublicCardState> deserFuncPublicCardState() {
         return s -> {
-            String[] elements = s.split(Pattern.quote(";"), -1);
+            String[] elements = s.split(Pattern.quote(String.valueOf(COLL_DELIM_DEG2)), -1);
             return new PublicCardState(Serdes.OF_LIST_OF_CARDS.deserialize(elements[0]),
                     Serdes.OF_INTEGER.deserialize(elements[1]),
                     Serdes.OF_INTEGER.deserialize(elements[2]));
@@ -153,7 +160,7 @@ public final class Serdes {
      */
     private static Function<PublicPlayerState, String> serFuncPublicPlayerState() {
         return publicPlayerState -> {
-            StringJoiner joiner = new StringJoiner(";");
+            StringJoiner joiner = new StringJoiner(String.valueOf(COLL_DELIM_DEG2));
             joiner.add(Serdes.OF_INTEGER.serialize(publicPlayerState.ticketCount()));
             joiner.add(Serdes.OF_INTEGER.serialize(publicPlayerState.cardCount()));
             joiner.add(Serdes.OF_LIST_OF_ROUTES.serialize(publicPlayerState.routes()));
@@ -168,7 +175,7 @@ public final class Serdes {
      */
     private static Function<String, PublicPlayerState> deserFuncPublicPlayerState() {
         return s -> {
-            String[] elements = s.split(Pattern.quote(";"), -1);
+            String[] elements = s.split(Pattern.quote(String.valueOf(COLL_DELIM_DEG2)), -1);
             return new PublicPlayerState(Serdes.OF_INTEGER.deserialize(elements[0]),
                     Serdes.OF_INTEGER.deserialize(elements[1]),
                     Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]));
@@ -182,7 +189,7 @@ public final class Serdes {
      */
     private static Function<PlayerState, String> serFuncPlayerState() {
         return playerState -> {
-            StringJoiner joiner = new StringJoiner(";");
+            StringJoiner joiner = new StringJoiner(String.valueOf(COLL_DELIM_DEG2));
             joiner.add(Serdes.OF_SORTED_BAG_OF_TICKETS.serialize(playerState.tickets()));
             joiner.add(Serdes.OF_SORTED_BAG_OF_CARD.serialize(playerState.cards()));
             joiner.add(Serdes.OF_LIST_OF_ROUTES.serialize(playerState.routes()));
@@ -198,7 +205,7 @@ public final class Serdes {
      */
     private static Function<String, PlayerState> deserFuncPlayerState() {
         return s -> {
-            String[] elements = s.split(Pattern.quote(";"), -1);
+            String[] elements = s.split(Pattern.quote(String.valueOf(COLL_DELIM_DEG2)), -1);
             return new PlayerState(Serdes.OF_SORTED_BAG_OF_TICKETS.deserialize(elements[0]),
                     Serdes.OF_SORTED_BAG_OF_CARD.deserialize(elements[1]),
                     Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]));
@@ -212,7 +219,7 @@ public final class Serdes {
      */
     private static Function<PublicGameState, String> serFuncPublicGameState() {
         return publicGameState -> {
-            StringJoiner joiner = new StringJoiner(":");
+            StringJoiner joiner = new StringJoiner(String.valueOf(COLL_DELIM_DEG3));
             joiner.add(Serdes.OF_INTEGER.serialize(publicGameState.ticketsCount()));
             joiner.add(Serdes.OF_PUBLIC_CARD_STATE.serialize(publicGameState.cardState()));
             joiner.add(Serdes.OF_PLAYER_ID.serialize(publicGameState.currentPlayerId()));
@@ -231,7 +238,7 @@ public final class Serdes {
      */
     private static Function<String, PublicGameState> deserFuncPublicGameState() {
         return s -> {
-            String[] elements = s.split(Pattern.quote(":"), -1);
+            String[] elements = s.split(Pattern.quote(String.valueOf(COLL_DELIM_DEG3)), -1);
             Map<PlayerId, PublicPlayerState> playerState = Map.of(
                     PlayerId.PLAYER_1, Serdes.OF_PUBLIC_PLAYER_STATE.deserialize(elements[3]),
                     PlayerId.PLAYER_2, Serdes.OF_PUBLIC_PLAYER_STATE.deserialize(elements[4]));

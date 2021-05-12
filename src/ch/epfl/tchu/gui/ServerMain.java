@@ -43,7 +43,7 @@ public class ServerMain extends Application {
                 args.size() < 2 ? DEFAULT_NAME_P2 : args.get(1));
 
         Socket socket;
-        try (ServerSocket s0 = new ServerSocket(5108)) {
+        try (ServerSocket s0 = new ServerSocket(StringsFr.DEFAULT_PORT)) {
             socket = s0.accept();
         }
         Player playerProxy = new RemotePlayerProxy(socket);

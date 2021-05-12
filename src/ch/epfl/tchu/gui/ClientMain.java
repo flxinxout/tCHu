@@ -13,8 +13,6 @@ import java.util.List;
  * @author Giovanni Ranieri (326870)
  */
 public class ClientMain extends Application {
-    private static final int DEFAULT_PORT_NUMBER = 5108;
-    private static final String DEFAULT_HOST_NAME = "localhost";
 
     public static void main(String[] args) {
         launch(args);
@@ -29,8 +27,8 @@ public class ClientMain extends Application {
     @Override
     public void start(Stage primaryStage) {
         List<String> args = getParameters().getRaw();
-        String hostName = args.isEmpty() ? DEFAULT_HOST_NAME : args.get(0);
-        int port = args.size() < 2 ? DEFAULT_PORT_NUMBER : Integer.parseInt(args.get(1));
+        String hostName = args.isEmpty() ? StringsFr.DEFAULT_HOSTNAME : args.get(0);
+        int port = args.size() < 2 ? StringsFr.DEFAULT_PORT : Integer.parseInt(args.get(1));
 
         GraphicalPlayerAdapter playerAdapter = new GraphicalPlayerAdapter();
         RemotePlayerClient playerClient = new RemotePlayerClient(playerAdapter, hostName, port);

@@ -25,15 +25,15 @@ public final class ObservableGameState {
 
     private final PlayerId id;
 
-    //Groupe 1: propriétés de l'état public de la partie
+    // Groupe 1: propriétés de l'état public de la partie
     private final IntegerProperty ticketsPercentage, cardsPercentage;
     private final List<ObjectProperty<Card>> faceUpCards;
     private final Map<Route, ObjectProperty<PlayerId>> routesOwner;
 
-    //Groupe 2: propriétés de l'état public de chacun des joueurs
+    // Groupe 2: propriétés de l'état public de chacun des joueurs
     private final Map<PlayerId, IntegerProperty> ticketCount, cardCount, carCount, claimPoints;
 
-    //Groupe 3: propriétés de l'état privé du joueur auquel cette instance correspond
+    // Groupe 3: propriétés de l'état privé du joueur auquel cette instance correspond
     private final ObservableList<Ticket> tickets;
     private final Map<Card, IntegerProperty> cardOccurrences;
     private final Map<Route, BooleanProperty> routesClaimable;
@@ -50,19 +50,19 @@ public final class ObservableGameState {
     public ObservableGameState(PlayerId id) {
         this.id = id;
 
-        //1.
+        // 1.
         this.ticketsPercentage = new SimpleIntegerProperty();
         this.cardsPercentage = new SimpleIntegerProperty();
         this.faceUpCards = createFaceUpCards();
         this.routesOwner = createRoutesOwner();
 
-        //2.
+        // 2.
         this.ticketCount = createPlayerIdMap();
         this.cardCount = createPlayerIdMap();
         this.carCount = createPlayerIdMap();
         this.claimPoints = createPlayerIdMap();
 
-        //3.
+        // 3.
         this.tickets = FXCollections.observableArrayList();
         this.cardOccurrences = createCardOccurrences();
         this.routesClaimable = createRoutesClaimable();
@@ -139,7 +139,7 @@ public final class ObservableGameState {
         this.gameState = newGameState;
         this.playerState = playerState;
 
-        //1.
+        // 1.
         ticketsPercentage.setValue(100 * newGameState.ticketsCount() / ChMap.tickets().size());
         cardsPercentage.setValue(100 * newGameState.cardState().deckSize() / TOTAL_CARDS_COUNT);
 
@@ -156,7 +156,7 @@ public final class ObservableGameState {
             }
         }
 
-        //2.
+        // 2.
         for (PlayerId pId : PlayerId.ALL) {
             ticketCount.get(pId).setValue(newGameState.playerState(pId).ticketCount());
             cardCount.get(pId).setValue(newGameState.playerState(pId).cardCount());
@@ -164,7 +164,7 @@ public final class ObservableGameState {
             claimPoints.get(pId).setValue(newGameState.playerState(pId).claimPoints());
         }
 
-        //3.
+        // 3.
         tickets.setAll(playerState.tickets().toList());
 
         for (Card card : Card.ALL)

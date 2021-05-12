@@ -43,7 +43,7 @@ public final class CardState extends PublicCardState {
 
         //On n'appelle pas deck.topCards(Constants.FACE_UP_CARDS_COUNT) car ça trierait les cartes automatiquement
         //à cause du SortedBag, ce n'est pas le comportement voulu.
-        final List<Card> newTopCards = new ArrayList<>();
+        List<Card> newTopCards = new ArrayList<>();
         for (int slot : Constants.FACE_UP_CARD_SLOTS) {
             newTopCards.add(deck.topCard());
             deck = deck.withoutTopCard();
@@ -66,10 +66,10 @@ public final class CardState extends PublicCardState {
         Objects.checkIndex(slot, faceUpCards().size());
         Preconditions.checkArgument(!isDeckEmpty());
 
-        final List<Card> newCardsFaceUp = new ArrayList<>(faceUpCards());
-        newCardsFaceUp.set(slot, this.deck.topCard());
+        List<Card> newCardsFaceUp = new ArrayList<>(faceUpCards());
+        newCardsFaceUp.set(slot, deck.topCard());
 
-        return new CardState(newCardsFaceUp, this.deck.withoutTopCard(), this.discards);
+        return new CardState(newCardsFaceUp, deck.withoutTopCard(), discards);
     }
 
     /**
@@ -80,7 +80,7 @@ public final class CardState extends PublicCardState {
      */
     public Card topDeckCard() {
         Preconditions.checkArgument(!isDeckEmpty());
-        return this.deck.topCard();
+        return deck.topCard();
     }
 
     /**
@@ -91,7 +91,7 @@ public final class CardState extends PublicCardState {
      */
     public CardState withoutTopDeckCard() {
         Preconditions.checkArgument(!isDeckEmpty());
-        return new CardState(faceUpCards(), this.deck.withoutTopCard(), this.discards);
+        return new CardState(faceUpCards(), deck.withoutTopCard(), discards);
     }
 
     /**
@@ -105,7 +105,7 @@ public final class CardState extends PublicCardState {
     public CardState withDeckRecreatedFromDiscards(Random rng) {
         Preconditions.checkArgument(isDeckEmpty());
 
-        Deck<Card> newDeck = Deck.of(this.discards, rng);
+        Deck<Card> newDeck = Deck.of(discards, rng);
         return new CardState(faceUpCards(), newDeck, SortedBag.of());
     }
 
@@ -116,7 +116,7 @@ public final class CardState extends PublicCardState {
      * @return un état de cartes identique à celui-ci, mais avec les cartes données ajoutées à la défausse
      */
     public CardState withMoreDiscardedCards(SortedBag<Card> additionalDiscards) {
-        return new CardState(faceUpCards(), this.deck, this.discards.union(additionalDiscards));
+        return new CardState(faceUpCards(), deck, discards.union(additionalDiscards));
     }
 }
 

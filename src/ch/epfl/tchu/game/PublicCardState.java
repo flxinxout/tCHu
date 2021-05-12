@@ -46,8 +46,8 @@ public class PublicCardState {
      *                                   et le nombre de cartes face visible (exclu)
      */
     public Card faceUpCard(int slot) {
-        Objects.checkIndex(slot, this.faceUpCards.size());
-        return this.faceUpCards.get(slot);
+        Objects.checkIndex(slot, faceUpCards.size());
+        return faceUpCards.get(slot);
     }
 
     /**
@@ -56,7 +56,7 @@ public class PublicCardState {
      * @return les 5 cartes face visible
      */
     public List<Card> faceUpCards() {
-        return this.faceUpCards;
+        return faceUpCards;
     }
 
     /**
@@ -65,7 +65,7 @@ public class PublicCardState {
      * @return la taille de la pioche
      */
     public int deckSize() {
-        return this.deckSize;
+        return deckSize;
     }
 
     /**
@@ -74,7 +74,7 @@ public class PublicCardState {
      * @return ssi la pioche est vide
      */
     public boolean isDeckEmpty() {
-        return this.deckSize == 0;
+        return deckSize == 0;
     }
 
     /**
@@ -83,7 +83,7 @@ public class PublicCardState {
      * @return la taille de la défausse
      */
     public int discardsSize() {
-        return this.discardsSize;
+        return discardsSize;
     }
 }
 

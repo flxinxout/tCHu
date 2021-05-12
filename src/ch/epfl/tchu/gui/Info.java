@@ -87,6 +87,8 @@ public final class Info {
      * Retourne la représentation textuelle de la route donnée.
      */
     private static String nameOf(Trail trail) {
+        //TODO: assert nécessaire pour avoid un nullpointer ?
+        assert trail.station1() != null && trail.station2() != null;
         return (trail.station1().name() + EN_DASH_SEPARATOR + trail.station2().name());
     }
 
@@ -118,7 +120,7 @@ public final class Info {
      * @return le message déclarant que ce joueur jouera en premier
      */
     public String willPlayFirst() {
-        return String.format(WILL_PLAY_FIRST, this.playerName);
+        return String.format(WILL_PLAY_FIRST, playerName);
     }
 
     /**
@@ -129,14 +131,14 @@ public final class Info {
      */
     public String keptTickets(int count) {
         String plural = plural(count);
-        return String.format(KEPT_N_TICKETS, this.playerName, count, plural);
+        return String.format(KEPT_N_TICKETS, playerName, count, plural);
     }
 
     /**
      * @return le message déclarant que ce joueur peut jouer
      */
     public String canPlay() {
-        return String.format(CAN_PLAY, this.playerName);
+        return String.format(CAN_PLAY, playerName);
     }
 
     /**
@@ -147,7 +149,7 @@ public final class Info {
      */
     public String drewTickets(int count) {
         String plural = plural(count);
-        return String.format(DREW_TICKETS, this.playerName, count, plural);
+        return String.format(DREW_TICKETS, playerName, count, plural);
     }
 
     /**
@@ -156,7 +158,7 @@ public final class Info {
      * @return le message déclarant que ce joueur a tiré une carte "à l'aveugle"
      */
     public String drewBlindCard() {
-        return String.format(DREW_BLIND_CARD, this.playerName);
+        return String.format(DREW_BLIND_CARD, playerName);
     }
 
     /**
@@ -166,7 +168,7 @@ public final class Info {
      * @return le message déclarant que ce joueur a tiré la carte disposée face visible {@code card}
      */
     public String drewVisibleCard(Card card) {
-        return String.format(DREW_VISIBLE_CARD, this.playerName, cardName(card, 1));
+        return String.format(DREW_VISIBLE_CARD, playerName, cardName(card, 1));
     }
 
     /**
@@ -178,7 +180,7 @@ public final class Info {
      */
     public String claimedRoute(Route route, SortedBag<Card> cards) {
         return String.format(CLAIMED_ROUTE,
-                this.playerName,
+                playerName,
                 nameOf(route),
                 descriptionOf(cards));
     }
@@ -194,7 +196,7 @@ public final class Info {
      */
     public String attemptsTunnelClaim(Route route, SortedBag<Card> initialCards) {
         return String.format(ATTEMPTS_TUNNEL_CLAIM,
-                this.playerName,
+                playerName,
                 nameOf(route),
                 descriptionOf(initialCards));
     }
@@ -210,9 +212,10 @@ public final class Info {
      */
     public String drewAdditionalCards(SortedBag<Card> drawnCards, int additionalCost) {
         String additionalCardsAre = String.format(ADDITIONAL_CARDS_ARE, descriptionOf(drawnCards));
+
         String additionalCosts = additionalCost != 0 ?
                 String.format(SOME_ADDITIONAL_COST, additionalCost, plural(additionalCost)) :
-                String.format(NO_ADDITIONAL_COST);
+                NO_ADDITIONAL_COST;
 
         return additionalCardsAre + additionalCosts;
     }
@@ -224,7 +227,7 @@ public final class Info {
      * @return le message déclarant que ce joueur n'a pas pu (ou voulu) s'emparer du tunnel {@code route}.
      */
     public String didNotClaimRoute(Route route) {
-        return String.format(DID_NOT_CLAIM_ROUTE, this.playerName, nameOf(route));
+        return String.format(DID_NOT_CLAIM_ROUTE, playerName, nameOf(route));
     }
 
     /**
@@ -235,7 +238,7 @@ public final class Info {
      * @return le message déclarant que le dernier tour commence
      */
     public String lastTurnBegins(int carCount) {
-        return String.format(LAST_TURN_BEGINS, this.playerName, carCount, plural(carCount));
+        return String.format(LAST_TURN_BEGINS, playerName, carCount, plural(carCount));
     }
 
     /**
@@ -246,7 +249,7 @@ public final class Info {
      * @return le message déclarant que ce joueur obtient le bonus de fin de partie grâce à {@code longestTrail}
      */
     public String getsLongestTrailBonus(Trail longestTrail) {
-        return String.format(GETS_BONUS, this.playerName, nameOf(longestTrail));
+        return String.format(GETS_BONUS, playerName, nameOf(longestTrail));
     }
 
     /**
@@ -260,7 +263,7 @@ public final class Info {
      */
     public String won(int points, int loserPoints) {
         return String.format(WINS,
-                this.playerName,
+                playerName,
                 points,
                 plural(points),
                 loserPoints,

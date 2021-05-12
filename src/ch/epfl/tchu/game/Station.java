@@ -32,7 +32,7 @@ public final class Station {
      * @return le numéro d'identification de cette gare
      */
     public int id() {
-        return this.id;
+        return id;
     }
 
     /**
@@ -41,7 +41,7 @@ public final class Station {
      * @return le nom de cette gare
      */
     public String name() {
-        return this.name;
+        return name;
     }
 
     @Override

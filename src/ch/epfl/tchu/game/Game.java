@@ -17,8 +17,7 @@ import static java.lang.Math.*;
 public final class Game {
     private final static int CARDS_DRAWN_COUNT = 2;
 
-    private Game() {
-    }
+    private Game() {}
 
     /**
      * Fait jouer une partie de tCHu aux joueurs donnés, dont les noms figurent dans la table {@code playerNames};
@@ -41,25 +40,22 @@ public final class Game {
         final Map<PlayerId, Info> infos = new EnumMap<>(PlayerId.class);
         playerNames.forEach((id, name) -> infos.put(id, new Info(name)));
 
-        //1. Initialisation des joueurs
+        // 1. Initialisation de la partie
         players.forEach((id, player) -> player.initPlayers(id, playerNames));
 
-        //Initialisation de la partie
         GameState gameState = GameState.initial(tickets, rng);
         sendInformation(infos.get(gameState.currentPlayerId()).willPlayFirst(), playersValues);
 
-        //Affichage et choix des tickets initiaux
-        for (Player player : playersValues) { //Affichage
+        for (Player player : playersValues) {
             player.setInitialTicketChoice(gameState.topTickets(Constants.INITIAL_TICKETS_COUNT));
             gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
         }
+        sendStateUpdate(gameState, players);
 
-        sendStateUpdate(gameState, players); //Adapter l'interface graphique
-
-        for (PlayerId id : PlayerId.ALL) //Choix
+        for (PlayerId id : PlayerId.ALL)
             gameState = gameState.withInitiallyChosenTickets(id, players.get(id).chooseInitialTickets());
 
-        for (PlayerId id : PlayerId.ALL) //Envoi de l'information
+        for (PlayerId id : PlayerId.ALL)
             sendInformation(infos.get(id).keptTickets(gameState.playerState(id).ticketCount()), playersValues);
 
         //2. Début de la partie
@@ -72,7 +68,7 @@ public final class Game {
             sendInformation(currentPlayerInfo.canPlay(), playersValues);
             sendStateUpdate(gameState, players);
 
-            //Choix de l'action du joueur
+            // Choix de l'action du joueur
             switch (currentPlayer.nextTurn()) {
                 case DRAW_TICKETS:
                     SortedBag<Ticket> drawnTickets = gameState.topTickets(Constants.IN_GAME_TICKETS_COUNT);
@@ -90,7 +86,7 @@ public final class Game {
                         if (i == 1)
                             sendStateUpdate(gameState, players);
 
-                        final int slot = currentPlayer.drawSlot();
+                        int slot = currentPlayer.drawSlot();
 
                         if (slot != Constants.DECK_SLOT) {
                             sendInformation(currentPlayerInfo
@@ -113,7 +109,7 @@ public final class Game {
                     } else {
                         sendInformation(currentPlayerInfo.attemptsTunnelClaim(claimedRoute, initialCards), playersValues);
 
-                        //Tire des cartes du haut de la pioche
+                        // Tire des cartes du haut de la pioche
                         SortedBag.Builder<Card> drawnCardsBuilder = new SortedBag.Builder<>();
                         for (int i = 0; i < Constants.ADDITIONAL_TUNNEL_CARDS; i++) {
                             gameState = gameState.withCardsDeckRecreatedIfNeeded(rng);
@@ -122,12 +118,12 @@ public final class Game {
                         }
                         SortedBag<Card> drawnCards = drawnCardsBuilder.build();
 
-                        //Calcule le nombre éventuel de cartes additionnelles
+                        // Calcule le nombre éventuel de cartes additionnelles
                         int additionalCardsCount = claimedRoute.additionalClaimCardsCount(initialCards, drawnCards);
                         sendInformation(currentPlayerInfo
                                 .drewAdditionalCards(drawnCards, additionalCardsCount), playersValues);
 
-                        //S'il y a des cartes additionnelles, calcule les cartes que le joueur pourrait jouer
+                        // S'il y a des cartes additionnelles, calcule les cartes que le joueur pourrait jouer
                         SortedBag<Card> additionalCards = SortedBag.of();
 
                         if (additionalCardsCount > 0) {
@@ -162,13 +158,13 @@ public final class Game {
             gameState = gameState.forNextTurn();
         }
 
-        //3. Fin de la partie
+        // 3. Fin de la partie
         sendStateUpdate(gameState, players);
 
         Map<PlayerId, Integer> points = new EnumMap<>(PlayerId.class);
         Map<PlayerId, Trail> longestTrails = new EnumMap<>(PlayerId.class);
 
-        //Calcul du chemin le plus long de chacun des joueurs
+        // Calcul du chemin le plus long de chacun des joueurs
         int maxLength = 0;
         for (PlayerId id : PlayerId.ALL) {
             Trail longest = Trail.longest(gameState.playerState(id).routes());

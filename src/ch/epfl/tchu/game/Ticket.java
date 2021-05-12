@@ -54,11 +54,11 @@ public final class Ticket implements Comparable<Ticket> {
     private static String computeText(List<Trip> trips) {
         Trip firstTrip = trips.get(0);
 
-        //Billet d'un trajet
+        // Même si on nous a dit que l'on pouvait enlever ce check, nous le laissons car si c'est le cas cela évite
+        // le foreach qui vient par la suite.
         if (trips.size() == 1)
             return String.format("%s - %s (%s)", firstTrip.from(), firstTrip.to(), firstTrip.points());
 
-        //Billet de plus d'un trajet
         TreeSet<String> stationsToTexts = new TreeSet<>();
         trips.forEach(trip -> stationsToTexts.add(String.format("%s (%s)", trip.to().name(), trip.points())));
 
@@ -98,12 +98,12 @@ public final class Ticket implements Comparable<Ticket> {
      */
     @Override
     public int compareTo(Ticket that) {
-        return this.text.compareTo(that.text());
+        return text.compareTo(that.text());
     }
 
     @Override
     public String toString() {
-        return this.text;
+        return text;
     }
 
     /**
@@ -112,7 +112,7 @@ public final class Ticket implements Comparable<Ticket> {
      * @return la représentation textuelle de ce billet
      */
     public String text() {
-        return this.text;
+        return text;
     }
 }
 

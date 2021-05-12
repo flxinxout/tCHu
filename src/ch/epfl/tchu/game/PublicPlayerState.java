@@ -36,11 +36,11 @@ public class PublicPlayerState {
         this.routes = List.copyOf(routes);
 
         this.carCount = Constants.INITIAL_CAR_COUNT - routes.stream()
-                .mapToInt(r -> r.length())
+                .mapToInt(Route::length)
                 .sum();
 
         this.claimPoints = routes.stream()
-                .mapToInt(r -> r.claimPoints())
+                .mapToInt(Route::claimPoints)
                 .sum();
     }
 
@@ -49,7 +49,7 @@ public class PublicPlayerState {
      * @return le nombre de tickets que possède ce joueur
      */
     public int ticketCount() {
-        return this.ticketCount;
+        return ticketCount;
     }
 
     /**
@@ -57,7 +57,7 @@ public class PublicPlayerState {
      * @return le nombre de cartes possède ce joueur
      */
     public int cardCount() {
-        return this.cardCount;
+        return cardCount;
     }
 
     /**
@@ -65,7 +65,7 @@ public class PublicPlayerState {
      * @return les routes dont ce joueur s'est emparé
      */
     public List<Route> routes() {
-        return this.routes;
+        return routes;
     }
 
     /**
@@ -73,7 +73,7 @@ public class PublicPlayerState {
      * @return le nombre de wagons que possède ce joueur
      */
     public int carCount() {
-        return this.carCount;
+        return carCount;
     }
 
     /**
@@ -81,6 +81,6 @@ public class PublicPlayerState {
      * @return le nombre de points de construction qu'à obtenu ce joueur
      */
     public int claimPoints() {
-        return this.claimPoints;
+        return claimPoints;
     }
 }

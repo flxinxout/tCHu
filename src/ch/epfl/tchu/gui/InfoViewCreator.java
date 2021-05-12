@@ -29,8 +29,7 @@ class InfoViewCreator {
 
     private final static double CIRCLE_RADIUS = 5D;
 
-    private InfoViewCreator() {
-    }
+    private InfoViewCreator() {}
 
     /**
      * Permet de créer la vue des informations correspondant au joueur donné, à l'aide de l'état du jeu observable, les

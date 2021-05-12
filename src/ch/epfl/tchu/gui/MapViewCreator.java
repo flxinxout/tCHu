@@ -24,6 +24,7 @@ import static ch.epfl.tchu.gui.ActionHandlers.ClaimRouteHandler;
  * @author Giovanni Ranieri (326870)
  */
 class MapViewCreator {
+
     private final static String CAR_CS = "car";
     private final static String FILLED_SC = "filled";
     private final static String NEUTRAL_SC = "NEUTRAL";
@@ -35,8 +36,7 @@ class MapViewCreator {
     private final static double RECT_HEIGHT = 12D;
     private final static double RECT_WIDTH = 36D;
 
-    private MapViewCreator() {
-    }
+    private MapViewCreator() {}
 
     /**
      * Permet de créer la vue de la carte à l'aide de l'état du jeu observable, de la propriété contenant le gestionnaire

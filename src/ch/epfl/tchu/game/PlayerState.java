@@ -55,7 +55,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return un état identique à celui-ci, si ce n'est que ce joueur possède en plus les billets {@code newTickets}
      */
     public PlayerState withAddedTickets(SortedBag<Ticket> newTickets) {
-        return new PlayerState(this.tickets.union(newTickets), this.cards, routes());
+        return new PlayerState(tickets.union(newTickets), cards, routes());
     }
 
     /**
@@ -65,7 +65,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return un état identique à celui-ci, si ce n'est que ce joueur possède en plus la carte {@code card}
      */
     public PlayerState withAddedCard(Card card) {
-        return new PlayerState(tickets(), this.cards.union(SortedBag.of(card)), routes());
+        return new PlayerState(tickets(), cards.union(SortedBag.of(card)), routes());
     }
 
     /**
@@ -93,7 +93,7 @@ public final class PlayerState extends PublicPlayerState {
         Preconditions.checkArgument(carCount() >= route.length());
 
         return route.possibleClaimCards().stream()
-                .filter(this.cards::contains)
+                .filter(cards::contains)
                 .collect(Collectors.toList());
     }
 
@@ -119,7 +119,7 @@ public final class PlayerState extends PublicPlayerState {
         Preconditions.checkArgument(!initialCards.isEmpty() && initialCards.toSet().size() <= 2);
         Preconditions.checkArgument(drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
 
-        //1. Create a set of all possible cards in our hands (minus the initial cards)
+        // 1. Create a set of all possible cards in our hands (minus the initial cards)
         Card initialCardType = initialCards.stream()
                 .distinct()
                 .filter(c -> c != Card.LOCOMOTIVE)
@@ -131,14 +131,14 @@ public final class PlayerState extends PublicPlayerState {
                 .collect(Collectors.toList()))
                 .difference(initialCards);
 
-        //2. Create all possible subsets and put it in a list
+        // 2. Create all possible subsets and put it in a list
         Set<SortedBag<Card>> optionsSet = new HashSet<>();
         if (possibleCardsInHand.size() >= additionalCardsCount)
             optionsSet = possibleCardsInHand.subsetsOfSize(additionalCardsCount);
 
         List<SortedBag<Card>> optionsList = new ArrayList<>(optionsSet);
 
-        //3. Sort the list
+        // 3. Sort the list
         optionsList.sort(Comparator.comparingInt(cs -> cs.countOf(Card.LOCOMOTIVE)));
 
         return optionsList;
@@ -154,10 +154,9 @@ public final class PlayerState extends PublicPlayerState {
      * si ce n'est que ce joueur s'est de plus emparé de la route {@code route} au moyen des cartes {@code claimCards}
      */
     public PlayerState withClaimedRoute(Route route, SortedBag<Card> claimCards) {
-        //TODO: Après rendu intermédiaire, vérifier que le joueur ait bien les cartes en main
-        final SortedBag<Card> newCards = this.cards.difference(claimCards);
+        SortedBag<Card> newCards = cards.difference(claimCards);
 
-        final List<Route> newRoutes = new ArrayList<>(routes());
+        List<Route> newRoutes = new ArrayList<>(routes());
         newRoutes.add(route);
 
         return new PlayerState(tickets(), newCards, newRoutes);
@@ -198,7 +197,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return les billets de ce joueur
      */
     public SortedBag<Ticket> tickets() {
-        return this.tickets;
+        return tickets;
     }
 
     /**
@@ -207,7 +206,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return les cartes wagon/locomotive de ce joueur
      */
     public SortedBag<Card> cards() {
-        return this.cards;
+        return cards;
     }
 }
 

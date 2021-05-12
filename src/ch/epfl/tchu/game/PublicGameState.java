@@ -58,7 +58,7 @@ public class PublicGameState {
      * @return ssi il est possible de tirer des cartes
      */
     public boolean canDrawCards() {
-        return this.cardState.deckSize() + this.cardState.discardsSize() >= IN_GAME_CARDS_COUNT + Constants.ADDITIONAL_TUNNEL_CARDS;
+        return cardState.deckSize() + cardState.discardsSize() >= IN_GAME_CARDS_COUNT + Constants.ADDITIONAL_TUNNEL_CARDS;
     }
 
     /**
@@ -68,7 +68,7 @@ public class PublicGameState {
      * @return la partie publique de l'état du joueur d'identité {@code playerId}
      */
     public PublicPlayerState playerState(PlayerId playerId) {
-        return this.playerState.get(playerId);
+        return playerState.get(playerId);
     }
 
     /**
@@ -77,7 +77,7 @@ public class PublicGameState {
      * @return la partie publique de l'état du joueur courant
      */
     public PublicPlayerState currentPlayerState() {
-        return this.playerState.get(this.currentPlayerId);
+        return playerState.get(currentPlayerId);
     }
 
     /**
@@ -87,7 +87,7 @@ public class PublicGameState {
      */
     public List<Route> claimedRoutes() {
         List<Route> routes = new ArrayList<>();
-        for (PublicPlayerState ps : this.playerState.values()) {
+        for (PublicPlayerState ps : playerState.values()) {
             routes.addAll(ps.routes());
         }
 
@@ -100,7 +100,7 @@ public class PublicGameState {
      * @return l'identité du dernier joueur
      */
     public PlayerId lastPlayer() {
-        return this.lastPlayer;
+        return lastPlayer;
     }
 
     /**
@@ -109,7 +109,7 @@ public class PublicGameState {
      * @return l'identité du joueur actuel
      */
     public PlayerId currentPlayerId() {
-        return this.currentPlayerId;
+        return currentPlayerId;
     }
 
     /**
@@ -118,7 +118,7 @@ public class PublicGameState {
      * @return la taille de la pioche de billets
      */
     public int ticketsCount() {
-        return this.ticketsCount;
+        return ticketsCount;
     }
 
     /**
@@ -127,7 +127,7 @@ public class PublicGameState {
      * @return ssi il est possible de tirer des billets
      */
     public boolean canDrawTickets() {
-        return this.ticketsCount > 0;
+        return ticketsCount > 0;
     }
 
     /**
@@ -136,6 +136,6 @@ public class PublicGameState {
      * @return la partie publique de l'état des cartes wagon/locomotive
      */
     public PublicCardState cardState() {
-        return this.cardState;
+        return cardState;
     }
 }

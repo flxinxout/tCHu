@@ -128,7 +128,7 @@ public final class Trail {
      * @return la longueur de ce chemin
      */
     public int length() {
-        return this.length;
+        return length;
     }
 
     /**
@@ -137,7 +137,7 @@ public final class Trail {
      * @return la station de départ de ce chemin
      */
     public Station station1() {
-        return length() == 0 ? null : this.from;
+        return length() == 0 ? null : from;
     }
 
     /**
@@ -146,7 +146,7 @@ public final class Trail {
      * @return la station d'arrivée de ce chemin
      */
     public Station station2() {
-        return length() == 0 ? null : this.to;
+        return length() == 0 ? null : to;
     }
 }
 

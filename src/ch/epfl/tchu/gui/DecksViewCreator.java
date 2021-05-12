@@ -28,6 +28,7 @@ import static ch.epfl.tchu.gui.ActionHandlers.DrawTicketsHandler;
  * @author Giovanni Ranieri (326870)
  */
 class DecksViewCreator {
+
     private final static String CARD_PANE_ID = "card-pane";
     private final static String HAND_PANE_ID = "hand-pane";
     private final static String TICKETS_ID = "tickets";
@@ -50,8 +51,7 @@ class DecksViewCreator {
     private final static double OUTSIDE_HEIGHT = 90D;
     private final static double OUTSIDE_WIDTH = 60D;
 
-    private DecksViewCreator() {
-    }
+    private DecksViewCreator() {}
 
     /**
      * Crée la vue de la main du joueur à l'aide de l'état du jeu observable donné.

@@ -15,14 +15,6 @@ import java.util.Objects;
  */
 public final class Route {
 
-    /**
-     * Énumération des deux niveaux possibles pour une route
-     */
-    public enum Level {
-        OVERGROUND,
-        UNDERGROUND
-    }
-
     private final String id;
     private final Station station1;
     private final Station station2;
@@ -63,7 +55,7 @@ public final class Route {
      * @return la liste des deux gares de cette route
      */
     public List<Station> stations() {
-        return List.of(this.station1, this.station2);
+        return List.of(station1, station2);
     }
 
     /**
@@ -143,7 +135,7 @@ public final class Route {
      * @return l'identité de cette route
      */
     public String id() {
-        return this.id;
+        return id;
     }
 
     /**
@@ -152,7 +144,7 @@ public final class Route {
      * @return la première gare de cette route
      */
     public Station station1() {
-        return this.station1;
+        return station1;
     }
 
     /**
@@ -161,7 +153,7 @@ public final class Route {
      * @return la deuxième gare de cette route
      */
     public Station station2() {
-        return this.station2;
+        return station2;
     }
 
     /**
@@ -170,7 +162,7 @@ public final class Route {
      * @return la longueur de cette route
      */
     public int length() {
-        return this.length;
+        return length;
     }
 
     /**
@@ -179,7 +171,7 @@ public final class Route {
      * @return le niveau de cette route
      */
     public Level level() {
-        return this.level;
+        return level;
     }
 
     /**
@@ -188,6 +180,14 @@ public final class Route {
      * @return la couleur de cette route
      */
     public Color color() {
-        return this.color;
+        return color;
+    }
+
+    /**
+     * Énumération des deux niveaux possibles pour une route
+     */
+    public enum Level {
+        OVERGROUND,
+        UNDERGROUND
     }
 }

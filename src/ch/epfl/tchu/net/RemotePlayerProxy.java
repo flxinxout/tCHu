@@ -111,9 +111,7 @@ public final class RemotePlayerProxy implements Player {
      */
     @Override
     public void updateState(PublicGameState newState, PlayerState ownState) {
-        writeMessage(UPDATE_STATE,
-                OF_PUBLIC_GAME_STATE.serialize(newState),
-                OF_PLAYER_STATE.serialize(ownState));
+        writeMessage(UPDATE_STATE, OF_PUBLIC_GAME_STATE.serialize(newState), OF_PLAYER_STATE.serialize(ownState));
     }
 
     /**

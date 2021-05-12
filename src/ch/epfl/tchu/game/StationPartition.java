@@ -60,7 +60,7 @@ public final class StationPartition implements StationConnectivity {
          * @return {@code this}
          */
         public Builder connect(Station s1, Station s2) {
-            this.relations[representative(s2.id())] = representative(s1.id());
+            relations[representative(s2.id())] = representative(s1.id());
             return this;
         }
 

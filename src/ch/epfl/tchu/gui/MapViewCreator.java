@@ -18,12 +18,12 @@ import static ch.epfl.tchu.gui.ActionHandlers.ChooseCardsHandler;
 import static ch.epfl.tchu.gui.ActionHandlers.ClaimRouteHandler;
 
 /**
- * Permet de créer la vue de la carte d'une partie de tCHu.
+ * Créateur de la vue de la carte d'une partie de tCHu.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
  */
-class MapViewCreator {
+final class MapViewCreator {
 
     private final static String CAR_CS = "car";
     private final static String FILLED_SC = "filled";
@@ -36,10 +36,11 @@ class MapViewCreator {
     private final static double RECT_HEIGHT = 12D;
     private final static double RECT_WIDTH = 36D;
 
-    private MapViewCreator() {}
+    private MapViewCreator() {
+    }
 
     /**
-     * Permet de créer la vue de la carte à l'aide de l'état du jeu observable, de la propriété contenant le gestionnaire
+     * Crée la vue de la carte à l'aide de l'état du jeu observable, de la propriété contenant le gestionnaire
      * d'action à utiliser lorsque le joueur désire s'emparer d'une route et du sélectionneur de cartes donnés.
      *
      * @param gameState    l'état de jeu observable
@@ -59,7 +60,7 @@ class MapViewCreator {
             Group routeGroup = new Group();
             routeGroup.setId(route.id());
             routeGroup.getStyleClass().addAll(ROUTE_SC, route.level().name(),
-                    route.color() != null ? route.color().name() : NEUTRAL_SC);
+                    route.color() == null ? NEUTRAL_SC : route.color().name());
 
             gameState.ownerOf(route).addListener((o, oV, nV) -> routeGroup.getStyleClass().add(nV.name()));
 
@@ -67,12 +68,11 @@ class MapViewCreator {
 
             routeGroup.setOnMouseClicked(e -> {
                 List<SortedBag<Card>> possibleClaimCards = gameState.possibleClaimCards(route);
-                ClaimRouteHandler claimRouteH = claimRouteHP.get();
 
                 if (possibleClaimCards.size() == 1) {
-                    claimRouteH.onClaimRoute(route, possibleClaimCards.get(0));
+                    claimRouteHP.get().onClaimRoute(route, possibleClaimCards.get(0));
                 } else {
-                    ChooseCardsHandler chooseCardsH = chosenCards -> claimRouteH.onClaimRoute(route, chosenCards);
+                    ChooseCardsHandler chooseCardsH = chosenCards -> claimRouteHP.get().onClaimRoute(route, chosenCards);
                     cardChooser.chooseCards(possibleClaimCards, chooseCardsH);
                 }
             });
@@ -114,9 +114,8 @@ class MapViewCreator {
     @FunctionalInterface
     interface CardChooser {
         /**
-         * Est appelée lorsque le joueur doit choisir les cartes qu'il désire utiliser pour s'emparer d'une route.
-         * Les possibilités qui s'offrent à lui sont données par l'argument {@code options},
-         * tandis que le gestionnaire d'action {@code handler} est destiné à être utilisé lorsqu'il a fait son choix.
+         * Est appelée lorsque le joueur doit choisir les cartes qu'il désire utiliser pour s'emparer d'une route. Il doit
+         * les choisir parmi les options données et le gestionnaire d'action donné est utilisé pour effectuer le choix.
          *
          * @param options les différents choix de cartes possibles
          * @param handler le gestionnaire d'action à utiliser lorsque le joueur à fait son choix

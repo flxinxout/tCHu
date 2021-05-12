@@ -23,11 +23,11 @@ public final class StringsFr {
     public static final String TICKETS_CHOICE = "Choix de billets";
     public static final String CARDS_CHOICE = "Choix de cartes";
 
-    // Noms par défaut
+    // Noms de joueur par défaut
     public static final String DEFAULT_NAME_P1 = "Ada";
     public static final String DEFAULT_NAME_P2 = "Charles";
 
-    // Identifiants pas défaut du server
+    // Identifiants par défaut du serveur
     public static final String DEFAULT_HOSTNAME = "localhost";
     public static final int DEFAULT_PORT = 5108;
 

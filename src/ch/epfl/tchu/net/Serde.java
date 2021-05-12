@@ -18,29 +18,12 @@ import java.util.stream.Collectors;
 public interface Serde<E> {
 
     /**
-     * Sérialise {@code obj} et retourne la chaîne correspondante.
-     *
-     * @param obj l'objet à sérialiser
-     * @return la chaîne correspondant à la sérialisation de {@code obj}
-     */
-    String serialize(E obj);
-
-    /**
-     * Désérialise {@code str} et retourne l'objet correspondant.
-     *
-     * @param str la chaîne à désérialiser
-     * @return l'objet correspondant à la désérialisation de {@code str}
-     */
-    E deserialize(String str);
-
-    /**
-     * Retourne le {@code Serde} correspondant aux fonctions de (dé)sérialisation
-     * {@code serialization} et {@code deserialization}.
+     * Crée le {@code Serde} correspondant aux fonctions de (dé)sérialisation données.
      *
      * @param serialization   la fonction de sérialisation
      * @param deserialization la fonction de désérialisation
-     * @param <T>             le paramètre de type de la méthode
-     * @return le serde correspondant aux 2 fonctions
+     * @param <T>             le type des objets à (dé)sérialiser
+     * @return le serde correspondant aux deux fonctions données
      */
     static <T> Serde<T> of(Function<T, String> serialization, Function<String, T> deserialization) {
         return new Serde<>() {
@@ -57,12 +40,13 @@ public interface Serde<E> {
     }
 
     /**
-     * Retourne le {@code Serde} correspondant à la (dé)sérialisation de {@code values} qui représente
-     * la liste de toutes les valeurs d'un ensemble de valeurs énuméré.
+     * Crée le {@code Serde} correspondant à la (dé)sérialisation des valeurs de la liste de valeurs donnée.
+     * Cette liste contient toutes les valeurs d'un ensemble de valeurs énuméré et le {@code Serde} retourné se base sur
+     * l'index des valeurs au sein de cette liste pour les (dé)sérialiser.
      *
-     * @param values les valeurs à sérialiser
-     * @param <T>    le paramètre de type de la méthode
-     * @return le serde correspondant à la sérialisation et la désérialisation de {@code values}
+     * @param values la liste de toutes les valeurs de l'ensemble de valeurs énuméré
+     * @param <T>    le type des objets contenus dans la liste
+     * @return le serde correspondant à la (dé)sérialisation des valeurs de la liste donnée
      * @throws IllegalArgumentException si la liste est vide
      */
     static <T> Serde<T> oneOf(List<T> values) {
@@ -71,55 +55,55 @@ public interface Serde<E> {
     }
 
     /**
-     * Retourne un serde capable de (dé)sérialiser une liste de valeurs (dé)sérialisées par le serde {@code serde}.
+     * Crée un {@code Serde} capable de (dé)sérialiser une liste de valeurs du type donné.
+     * Ces dernières sont (dé)sérialisées à l'aide du {@code Serde} donné.
      *
-     * @param serde     le serde donné
-     * @param delimiter le caractère de séparation
-     * @param <T>       le paramètre de type de la méthode
-     * @return un serde capable de (dé)sérialiser des listes de valeurs (dé)sérialisées par le serde donné
+     * @param serde     le {@code Serde} utilisé pour (dé)sérialiser les valeurs du type donné
+     * @param delimiter le caractère de séparation utilisé pour délimiter les valeurs de la liste
+     * @param <T>       le type des valeurs contenues dans les listes à (dé)sérialiser
+     * @return un {@code Serde} capable de (dé)sérialiser des listes de valeurs du type donné
      */
     static <T> Serde<List<T>> listOf(Serde<T> serde, char delimiter) {
-        return new Serde<>() {
-            @Override
-            public String serialize(List<T> list) {
-                return list.stream()
+        return Serde.of(list -> list.stream()
                         .map(serde::serialize)
-                        .collect(Collectors.joining(String.valueOf(delimiter)));
-            }
-
-            @Override
-            public List<T> deserialize(String str) {
-                String[] splits = str.split(Pattern.quote(String.valueOf(delimiter)), -1);
-                return str.isEmpty() ?
-                        List.of() :
-                        Arrays.stream(splits)
-                                .map(serde::deserialize)
-                                .collect(Collectors.toList());
-            }
-        };
+                        .collect(Collectors.joining(String.valueOf(delimiter))),
+                str -> {
+                    String[] splits = str.split(Pattern.quote(String.valueOf(delimiter)), -1);
+                    return str.isEmpty() ?
+                            List.of() :
+                            Arrays.stream(splits)
+                                    .map(serde::deserialize)
+                                    .collect(Collectors.toList());
+                });
     }
 
     /**
-     * Retourne un serde capable de (dé)sérialiser un {@code SortedBag} de valeurs (dé)sérialisées par le serde donné.
+     * Crée un {@code Serde} capable de (dé)sérialiser un multi-ensemble de valeurs du type donné.
+     * Ces dernières sont (dé)sérialisées à l'aide du {@code Serde} donné.
      *
-     * @param serde     le serde donné
-     * @param delimiter le caractère de séparation
-     * @param <T>       le paramètre de type de la méthode
-     * @return un serde capable de (dé)sérialiser des listes de valeurs (dé)sérialisées par le serde donné.
+     * @param serde     le {@code Serde} utilisé pour (dé)sérialiser les valeurs du type donné
+     * @param delimiter le caractère de séparation utilisé pour délimiter les valeurs du multi-ensemble
+     * @param <T>       le type des valeurs contenues dans les multi-ensembles à (dé)sérialiser
+     * @return un {@code Serde} capable de (dé)sérialiser des multi-ensembles de valeurs du type donné
      */
     static <T extends Comparable<T>> Serde<SortedBag<T>> bagOf(Serde<T> serde, char delimiter) {
         Serde<List<T>> listSerde = Serde.listOf(serde, delimiter);
-
-        return new Serde<>() {
-            @Override
-            public String serialize(SortedBag<T> bag) {
-                return listSerde.serialize(bag.toList());
-            }
-
-            @Override
-            public SortedBag<T> deserialize(String str) {
-                return SortedBag.of(listSerde.deserialize(str));
-            }
-        };
+        return Serde.of(bag -> listSerde.serialize(bag.toList()), str -> SortedBag.of(listSerde.deserialize(str)));
     }
+
+    /**
+     * Sérialise l'objet donné et retourne la chaîne de caractères correspondante.
+     *
+     * @param obj l'objet à sérialiser
+     * @return la chaîne de caractères correspondant à la sérialisation de l'objet donné
+     */
+    String serialize(E obj);
+
+    /**
+     * Désérialise la chaîne de caractères donnée et retourne l'objet correspondant.
+     *
+     * @param str la chaîne de caractères à désérialiser
+     * @return l'objet correspondant à la désérialisation de la chaîne de caractères donnée
+     */
+    E deserialize(String str);
 }

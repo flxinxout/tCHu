@@ -90,7 +90,7 @@ class DecksViewCreator {
     }
 
     /**
-     * Crée la vue de la main du joueur à l'aide de l'état du jeu observable, les gestionnaires d'action
+     * Crée la vue des cartes du jeu à l'aide de l'état du jeu observable, les gestionnaires d'action
      * à utiliser lorsque le joueur désire tirer une carte ou un billet.
      *
      * @param gameState    l'état de jeu observable
@@ -123,6 +123,7 @@ class DecksViewCreator {
                     cardPane.getStyleClass().add(nV != LOCOMOTIVE ? nV.name() : NEUTRAL_SC);
             });
             cardPane.setOnMouseClicked(e -> drawCardHP.get().onDrawCard(slot));
+            cardPane.disableProperty().bind(drawCardHP.isNull());
             root.getChildren().add(cardPane);
         }
 

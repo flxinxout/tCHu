@@ -3,7 +3,6 @@ package ch.epfl.tchu.net;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
 import ch.epfl.tchu.gui.Info;
-import ch.epfl.test.TestRandomizer;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -17,11 +16,11 @@ import static ch.epfl.tchu.game.PlayerId.PLAYER_2;
 
 public class TestServer {
 
-    private static SortedBag<Card> cards = SortedBag.of(3, Card.LOCOMOTIVE, 2, Card.BLUE);
-    private static List<SortedBag<Card>> cardsOptions = List.of(SortedBag.of(Card.YELLOW), cards);
-    private static SortedBag<Ticket> tickets = SortedBag.of(ChMap.tickets().subList(5, 10));
-    private static List<Route> routes = List.of();
-    private static Random rng = TestRandomizer.newRandom();
+    private static final SortedBag<Card> cards = SortedBag.of(3, Card.LOCOMOTIVE, 2, Card.BLUE);
+    private static final List<SortedBag<Card>> cardsOptions = List.of(SortedBag.of(Card.YELLOW), cards);
+    private static final SortedBag<Ticket> tickets = SortedBag.of(ChMap.tickets().subList(5, 10));
+    private static final List<Route> routes = List.of();
+    private static final Random rng = new Random();
 
     public static void main(String[] args) throws IOException {
         System.out.println("Starting server!");

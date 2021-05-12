@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SerdesTest {
 
-    private static final Serde<Integer> intSerde = Serdes.OF_INTEGERS;
-    private static final Serde<String> stringSerde = Serdes.OF_STRINGS;
+    private static final Serde<Integer> intSerde = Serdes.OF_INTEGER;
+    private static final Serde<String> stringSerde = Serdes.OF_STRING;
     private static final Serde<PlayerId> playerIdSerde = Serdes.OF_PLAYER_ID;
     private static final Serde<Player.TurnKind> turnKindSerde = Serdes.OF_TURN_KIND;
     private static final Serde<PublicCardState> publicCardStateSerde = Serdes.OF_PUBLIC_CARD_STATE;

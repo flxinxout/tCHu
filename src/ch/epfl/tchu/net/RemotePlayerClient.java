@@ -15,24 +15,24 @@ import java.util.regex.Pattern;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 /**
- * Représente un client de joueur distant.
+ * Un client de joueur distant.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
  */
-public class RemotePlayerClient {
+public final class RemotePlayerClient {
 
     private final Player player;
     private final String hostName;
     private final int port;
 
     /**
-     * Construit un client de joueur distant basé sur le joueur auquel il doit fournir un accès distant,
-     * ainsi que le nom d'hôte et le port d'écoute à utiliser pour se connecter au mandataire.
+     * Construit le client du joueur donné, auquel il doit fournir un accès distant à l'aide
+     * du nom d'hôte et du port d'écoute à utiliser pour se connecter au mandataire.
      *
-     * @param player le joueur auquel le client fourni un accès distant
-     * @param hostName   le nom d'hôte
-     * @param port   le numéro du port d'écoute
+     * @param player   le joueur auquel le client fourni un accès distant
+     * @param hostName le nom d'hôte
+     * @param port     le port d'écoute
      * @throws UncheckedIOException en cas d'erreur d'entrée/sortie
      */
     public RemotePlayerClient(Player player, String hostName, int port) {
@@ -42,15 +42,15 @@ public class RemotePlayerClient {
     }
 
     /**
-     * Permet au client d'écouter sur toute la durée de la partie sur le port donné du nom d'hôte donné.
+     * Permet au client d'écouter, durant la partie entière, sur le port et le nom d'hôte donnés.
      * Quand un message peut être lu sur ce port, il est récupéré et désérialisé en fonction de son type.
      * Après leur désérialisation, les arguments sont utilisés pour appeler la méthode associée au type du message.
-     * Quand plus rien ne peut être lu sur le port en question, la connexion est fermée.
+     * Si cette méthode retourne un résultat, il est sérialisé et renvoyer au mandataire en réponse.
      */
     public void run() {
         try (Socket socket = new Socket(hostName, port);
-             final BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), US_ASCII));
-             final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), US_ASCII))) {
+             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), US_ASCII));
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), US_ASCII))) {
 
             String str;
             while ((str = reader.readLine()) != null) {
@@ -67,7 +67,7 @@ public class RemotePlayerClient {
                         break;
 
                     case RECEIVE_INFO:
-                        player.receiveInfo(Serdes.OF_STRINGS.deserialize(message[1]));
+                        player.receiveInfo(Serdes.OF_STRING.deserialize(message[1]));
                         break;
 
                     case UPDATE_STATE:
@@ -76,11 +76,11 @@ public class RemotePlayerClient {
                         break;
 
                     case SET_INITIAL_TICKETS:
-                        player.setInitialTicketChoice(Serdes.OF_SORTEDBAG_OF_TICKETS.deserialize(message[1]));
+                        player.setInitialTicketChoice(Serdes.OF_SORTED_BAG_OF_TICKETS.deserialize(message[1]));
                         break;
 
                     case CHOOSE_INITIAL_TICKETS:
-                        writer.write(Serdes.OF_SORTEDBAG_OF_TICKETS.serialize(player.chooseInitialTickets()));
+                        writer.write(Serdes.OF_SORTED_BAG_OF_TICKETS.serialize(player.chooseInitialTickets()));
                         writer.write('\n');
                         writer.flush();
                         break;
@@ -93,40 +93,40 @@ public class RemotePlayerClient {
 
                     case CHOOSE_TICKETS:
                         SortedBag<Ticket> chosenTickets = player
-                                .chooseTickets(Serdes.OF_SORTEDBAG_OF_TICKETS.deserialize(message[1]));
-                        writer.write(Serdes.OF_SORTEDBAG_OF_TICKETS.serialize(chosenTickets));
+                                .chooseTickets(Serdes.OF_SORTED_BAG_OF_TICKETS.deserialize(message[1]));
+                        writer.write(Serdes.OF_SORTED_BAG_OF_TICKETS.serialize(chosenTickets));
                         writer.write('\n');
                         writer.flush();
                         break;
 
                     case DRAW_SLOT:
-                        writer.write(Serdes.OF_INTEGERS.serialize(player.drawSlot()));
+                        writer.write(Serdes.OF_INTEGER.serialize(player.drawSlot()));
                         writer.write('\n');
                         writer.flush();
                         break;
 
                     case ROUTE:
-                        writer.write(Serdes.OF_ROUTES.serialize(player.claimedRoute()));
+                        writer.write(Serdes.OF_ROUTE.serialize(player.claimedRoute()));
                         writer.write('\n');
                         writer.flush();
                         break;
 
                     case CARDS:
-                        writer.write(Serdes.OF_SORTEDBAG_OF_CARD.serialize(player.initialClaimCards()));
+                        writer.write(Serdes.OF_SORTED_BAG_OF_CARD.serialize(player.initialClaimCards()));
                         writer.write('\n');
                         writer.flush();
                         break;
 
                     case CHOOSE_ADDITIONAL_CARDS:
                         SortedBag<Card> chosenCards = player
-                                .chooseAdditionalCards(Serdes.OF_LIST_OF_SORTEDBAG_OF_CARDS.deserialize(message[1]));
-                        writer.write(Serdes.OF_SORTEDBAG_OF_CARD.serialize(chosenCards));
+                                .chooseAdditionalCards(Serdes.OF_LIST_OF_SORTED_BAGS_OF_CARDS.deserialize(message[1]));
+                        writer.write(Serdes.OF_SORTED_BAG_OF_CARD.serialize(chosenCards));
                         writer.write('\n');
                         writer.flush();
                         break;
 
                     default:
-                        break;
+                        throw new Error("Type de message (MessageId) non reconnu: " + MessageId.valueOf(message[0]));
                 }
             }
         } catch (IOException e) {

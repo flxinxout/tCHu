@@ -1,4 +1,4 @@
-package ch.epfl.tchu.gui;
+package ch.epfl.tchu.net;
 
 import java.io.*;
 import java.net.ServerSocket;

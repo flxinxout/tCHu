@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
@@ -23,7 +24,44 @@ import static ch.epfl.tchu.game.PlayerId.PLAYER_2;
 import static ch.epfl.tchu.gui.ActionHandlers.*;
 
 public final class Stage9Test extends Application {
-    public static void main(String[] args) { launch(args); }
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    private static void claimRoute(Route route, SortedBag<Card> cards) {
+        System.out.printf("Prise de possession d'une route : %s - %s %s%n",
+                route.station1(), route.station2(), cards);
+    }
+
+    private static void chooseCards(List<SortedBag<Card>> options,
+                                    ChooseCardsHandler chooser) {
+        chooser.onChooseCards(options.get(0));
+    }
+
+    private static void drawTickets() {
+        System.out.println("Tirage de billets !");
+    }
+
+    private static void drawCard(int slot) {
+        System.out.printf("Tirage de cartes (emplacement %s)!\n", slot);
+    }
+
+    public static void dumpTree(Node root) {
+        dumpTree(0, root);
+    }
+
+    public static void dumpTree(int indent, Node root) {
+        System.out.printf("%s%s (id: %s, classes: [%s])%n",
+                " ".repeat(indent),
+                root.getTypeSelector(),
+                root.getId(),
+                String.join(", ", root.getStyleClass()));
+        if (root instanceof Parent) {
+            Parent parent = ((Parent) root);
+            for (Node child : parent.getChildrenUnmodifiable())
+                dumpTree(indent + 2, child);
+        }
+    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -60,24 +98,6 @@ public final class Stage9Test extends Application {
         PublicCardState cardState = new PublicCardState(Card.ALL.subList(4, 9), 110 - 2 * 4 - 5, 0);
         PublicGameState publicGameState = new PublicGameState(36, cardState, PLAYER_1, pubPlayerStates, null);
         gameState.setState(publicGameState, p1State);
-    }
-
-    private static void claimRoute(Route route, SortedBag<Card> cards) {
-        System.out.printf("Prise de possession d'une route : %s - %s %s%n",
-                route.station1(), route.station2(), cards);
-    }
-
-    private static void chooseCards(List<SortedBag<Card>> options,
-                                    ChooseCardsHandler chooser) {
-        chooser.onChooseCards(options.get(0));
-    }
-
-    private static void drawTickets() {
-        System.out.println("Tirage de billets !");
-    }
-
-    private static void drawCard(int slot) {
-        System.out.printf("Tirage de cartes (emplacement %s)!\n", slot);
     }
 }
 

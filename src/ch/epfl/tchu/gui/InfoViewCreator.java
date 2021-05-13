@@ -14,40 +14,44 @@ import javafx.scene.text.TextFlow;
 import java.util.List;
 import java.util.Map;
 
+import static ch.epfl.tchu.gui.MapViewCreator.FILLED_SC;
+
 /**
- * Permet de créer la vue des informations d'une partie de tCHu.
+ * Créateur de la vue des informations d'une partie de tCHu.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
  */
-class InfoViewCreator {
+final class InfoViewCreator {
 
     private final static String GAME_INFO_ID = "game-info";
     private final static String PLAYER_STATS_ID = "player-stats";
 
-    private final static String FILLED_SC = "filled";
-
     private final static double CIRCLE_RADIUS = 5D;
 
-    private InfoViewCreator() {}
+    private InfoViewCreator() {
+    }
 
     /**
-     * Permet de créer la vue des informations correspondant au joueur donné, à l'aide de l'état du jeu observable, les
+     * Crée la vue des informations du jeu à l'aide de l'état du jeu observable, les
      * noms des joueurs ainsi que la liste observable des messages à afficher donnés.
      *
-     * @param playerId    identité du joueur auquel cette vue est attachée
-     * @param playerNames carte associative entre les joueurs et leur nom
-     * @param gameState   l'état de jeu observable
-     * @param messages    la liste observable des différents messages à observer
-     * @return la vue des informations de l'état de jeu
+     * @param playerId    l'identité du joueur auquel cette vue est attachée
+     * @param playerNames la table associative entre les joueurs et leur nom
+     * @param gameState   l'état de jeu observable actuel
+     * @param messages    les différents messages à observer
+     * @return la vue des informations du jeu
      */
-    public static Node createInfoView(PlayerId playerId, Map<PlayerId, String> playerNames,
-                                      ObservableGameState gameState, ObservableList<Text> messages) {
+    public static Node createInfoView(PlayerId playerId,
+                                      Map<PlayerId, String> playerNames,
+                                      ObservableGameState gameState,
+                                      ObservableList<Text> messages) {
         VBox root = new VBox();
         root.getStylesheets().addAll("info.css", "colors.css");
 
         VBox playerStats = new VBox();
         playerStats.setId(PLAYER_STATS_ID);
+        //TODO: better way than this List.of? Peu maintenable par ex. si 3 joueurs
         for (PlayerId id : List.of(playerId, playerId.next())) {
             TextFlow playerTextFlow = new TextFlow();
             playerTextFlow.getStyleClass().add(id.name());

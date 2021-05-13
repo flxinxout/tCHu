@@ -105,19 +105,16 @@ public final class PlayerState extends PublicPlayerState {
      *
      * @param additionalCardsCount le nombre de cartes additionnelles pour s'emparer du tunnel
      * @param initialCards         les cartes initialement posées par le joueur pour s'emparer du tunnel
-     * @param drawnCards           les cartes tirées du sommet de la pioche
      * @return la liste de tous les ensembles de cartes que ce joueur pourrait utiliser pour s'emparer d'un tunnel
      * @throws IllegalArgumentException si le nombre de cartes additionnelles n'est pas compris entre 1 et 3 (inclus),
      *                                  si l'ensemble des cartes initiales est vide ou contient plus de 2 types de cartes différents,
      *                                  ou si l'ensemble des cartes tirées ne contient pas exactement 3 cartes.
      */
     public List<SortedBag<Card>> possibleAdditionalCards(int additionalCardsCount,
-                                                         SortedBag<Card> initialCards,
-                                                         SortedBag<Card> drawnCards) {
+                                                         SortedBag<Card> initialCards) {
         Preconditions.checkArgument(additionalCardsCount >= 1 &&
                 additionalCardsCount <= Constants.ADDITIONAL_TUNNEL_CARDS);
         Preconditions.checkArgument(!initialCards.isEmpty() && initialCards.toSet().size() <= 2);
-        Preconditions.checkArgument(drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
 
         // 1. Create a set of all possible cards in our hands (minus the initial cards)
         Card initialCardType = initialCards.stream()

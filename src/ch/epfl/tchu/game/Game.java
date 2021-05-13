@@ -129,7 +129,7 @@ public final class Game {
                         if (additionalCardsCount > 0) {
                             List<SortedBag<Card>> options = gameState
                                     .currentPlayerState()
-                                    .possibleAdditionalCards(additionalCardsCount, initialCards, drawnCards);
+                                    .possibleAdditionalCards(additionalCardsCount, initialCards);
 
                             if (!options.isEmpty())
                                 additionalCards = currentPlayer.chooseAdditionalCards(options);

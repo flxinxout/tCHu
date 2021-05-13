@@ -63,55 +63,50 @@ public final class GraphicalPlayerAdapter implements Player {
     }
 
     /**
-     * Appelle la méthode du même nom du joueur graphique.
+     * Ajoute l'information donnée aux messages d'information de cette interface graphique. S'il y a déjà 5 messages
+     * affichés, le plus ancien est remplacé par celui donné.
      *
      * @param info l'information qui doit être communiquée
+     * @see GraphicalPlayer#receiveInfo(String)
      */
     @Override
     public void receiveInfo(String info) {
-        runLater(() -> {
-            //TODO: null check obligatoire?
-            if (graphicalPlayer != null)
-                graphicalPlayer.receiveInfo(info);
-        });
+        runLater(() -> graphicalPlayer.receiveInfo(info));
     }
 
     /**
-     * Appelle la méthode setState du joueur graphique.
+     * Met à jour la totalité des propriétés de l'état de jeu lié à cette interface graphique
+     * en fonction des deux états donnés.
      *
-     * @param newState le nouvel état de la partie
-     * @param ownState l'état du joueur
+     * @param newState le nouvel état de jeu
+     * @param ownState le nouvel état du joueur associé à cette interface graphique
      * @see GraphicalPlayer#setState(PublicGameState, PlayerState)
      */
     @Override
     public void updateState(PublicGameState newState, PlayerState ownState) {
-        runLater(() -> {
-            //TODO: null check obligatoire?
-            if (graphicalPlayer != null)
-                graphicalPlayer.setState(newState, ownState);
-        });
+        runLater(() -> graphicalPlayer.setState(newState, ownState));
     }
 
     /**
-     * Appelle la méthode chooseTickets du joueur graphique, pour lui demander de choisir ses billets initiaux,
-     * en lui passant un gestionnaire de choix qui stocke le choix du joueur dans une file bloquante.
+     * Ouvre une fenêtre permettant au joueur de faire son choix entre les billets donnés. Une fois celui-ci confirmé,
+     * la fenêtre de sélection est fermée.
+     * À utiliser en complément avec {@link GraphicalPlayerAdapter#chooseInitialTickets()}.
      *
      * @param tickets les billets distribués au joueur
      * @see GraphicalPlayer#chooseTickets(SortedBag, ActionHandlers.ChooseTicketsHandler)
+     * @see GraphicalPlayerAdapter#chooseInitialTickets()
      */
     @Override
     public void setInitialTicketChoice(SortedBag<Ticket> tickets) {
-        runLater(() -> {
-            //TODO: null check obligatoire?
-            if (graphicalPlayer != null)
-                graphicalPlayer.chooseTickets(tickets, ticketsBQ::add);
-        });
+        runLater(() -> graphicalPlayer.chooseTickets(tickets, ticketsBQ::add));
     }
 
     /**
-     * Bloque en attendant que la file des billets contienne une valeur, puis la retourne.
+     * Retourne le choix initial des billets du joueur parmi ceux proposés dans
+     * {@link GraphicalPlayerAdapter#setInitialTicketChoice(SortedBag)}.
+     * Bloque l'interface graphique le temps qu'il fasse ce choix.
      *
-     * @return la valeur contenue dans la file des billets.
+     * @return le choix initial des billets du joueur
      */
     @Override
     public SortedBag<Ticket> chooseInitialTickets() {
@@ -119,12 +114,10 @@ public final class GraphicalPlayerAdapter implements Player {
     }
 
     /**
-     * Appelle la méthode startTurn du joueur graphique, en lui passant des gestionnaires d'action qui placent le type
-     * de tour choisi, de même que les éventuels «arguments» de l'action— p.ex. la route dont le joueur désire
-     * s'emparer — dans des files bloquantes, puis bloque en attendant qu'une valeur soit placée dans la file contenant
-     * le type de tour, qu'elle retire et retourne.
+     * Autorise le joueur à effectuer des actions durant son tour. Bloque l'interface graphique tant que son choix n'a
+     * pas été fait.
      *
-     * @return la valeur stockée dans la file de type d'action des joueurs
+     * @return le type de tour que le joueur désire effectuer
      * @see GraphicalPlayer#startTurn(ActionHandlers.DrawTicketsHandler, ActionHandlers.DrawCardHandler, ActionHandlers.ClaimRouteHandler)
      */
     @Override
@@ -133,8 +126,8 @@ public final class GraphicalPlayerAdapter implements Player {
 
         runLater(() -> graphicalPlayer.startTurn(() -> turnKindBQ.add(TurnKind.DRAW_TICKETS),
                 (slot) -> {
-                    turnKindBQ.add(TurnKind.DRAW_CARDS);
                     cardSlotBQ.add(slot);
+                    turnKindBQ.add(TurnKind.DRAW_CARDS);
                 },
                 (route, cards) -> {
                     routeBQ.add(route);
@@ -146,10 +139,13 @@ public final class GraphicalPlayerAdapter implements Player {
     }
 
     /**
-     * Enchaîne les actions effectuées par setInitialTicketChoice et chooseInitialTickets.
+     * Ouvre une fenêtre permettant au joueur de faire son choix entre les billets donnés; une fois celui-ci confirmé,
+     * le retourne et ferme la fenêtre.
      *
-     * @param options les billets tirés
-     * @return les billets choisit
+     * @param options les billets tirés de la pioche
+     * @return les billets gardés par le joueur
+     * @see GraphicalPlayerAdapter#setInitialTicketChoice(SortedBag)
+     * @see GraphicalPlayerAdapter#chooseInitialTickets()
      */
     @Override
     public SortedBag<Ticket> chooseTickets(SortedBag<Ticket> options) {
@@ -158,15 +154,10 @@ public final class GraphicalPlayerAdapter implements Player {
     }
 
     /**
-     * Teste (sans bloquer!) si la file contenant les emplacements des cartes contient une valeur; si c'est le cas,
-     * cela signifie que drawSlot est appelée pour la première fois du tour, et que le gestionnaire installé par
-     * nextTurn a placé l'emplacement de la première carte tirée dans cette file, qu'il suffit donc de retourner;
-     * sinon, cela signifie que drawSlot est appelée pour la seconde fois du tour, afin que le joueur tire sa seconde
-     * carte, et il faut donc appeler, sur le fil JavaFX, la méthode drawCard du joueur graphique, avant de bloquer
-     * en attendant que le gestionnaire qu'on lui passe place l'emplacement de la carte tirée dans la file,
-     * qui est alors extrait et retourné.
+     * Si le joueur tire sa première carte du tour, retourne son emplacement. Sinon, autorise le joueur
+     * à en tirer une deuxième et bloque l'interface graphique en attendant son choix, qui est retourné.
      *
-     * @return la valeur de la file relative aux entiers si celle-ci en possède une, sinon elle attend d'en avoir une.
+     * @return l'emplacement de la carte tirée par le joueur
      */
     @Override
     public int drawSlot() {
@@ -178,10 +169,9 @@ public final class GraphicalPlayerAdapter implements Player {
     }
 
     /**
-     * Extrait et retourne le premier élément de la file contenant les routes, qui y aura été placé par le
-     * gestionnaire passé à startTurn par nextTurn.
+     * Retourne la route dont le joueur tente de s'emparer.
      *
-     * @return le premier élément de la contenant les routes
+     * @return la route dont le joueur tente de s'emparer
      */
     @Override
     public Route claimedRoute() {
@@ -189,9 +179,10 @@ public final class GraphicalPlayerAdapter implements Player {
     }
 
     /**
-     * Similaire à claimedRoute mais utilise la file contenant les multiensembles de cartes.
+     * Bloque l'interface graphique tant que le joueur n'a choisi aucune cartes initiales pour s'emparer d'une route,
+     * les retourne une fois qu'il les a choisies.
      *
-     * @return
+     * @return les cartes utilisées initialement par le joueur pour s'emparer d'une route
      */
     @Override
     public SortedBag<Card> initialClaimCards() {
@@ -199,11 +190,12 @@ public final class GraphicalPlayerAdapter implements Player {
     }
 
     /**
-     * Appelle la méthode du même nom du joueur graphique puis bloque en attendant qu'un élément soit placé
-     * dans la file contenant les multiensembles de cartes, qu'elle retourne.
+     * Ouvre une fenêtre permettant au joueur de faire son choix sur les cartes additionnelles qu'il peut utiliser pour
+     * s'emparer d'un tunnel; l'interface graphique est bloquée jusqu'à ce que celui-ci ait été confirmé.
+     * Une fois le choix effectué, cette méthode le retourne et la fenêtre de choix est fermée.
      *
-     * @param options les possibilités de cartes pour s'emparer du tunnel
-     * @return le sortedbag contenu dans la file des multiensembles de cartes
+     * @param options les possibilités de cartes pour s'emparer d'un tunnel
+     * @return le multi-ensemble de cartes utilisé pour s'emparer d'un tunnel
      */
     @Override
     public SortedBag<Card> chooseAdditionalCards(List<SortedBag<Card>> options) {

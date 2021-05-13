@@ -17,17 +17,18 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
 import static ch.epfl.tchu.game.Card.ALL;
-import static ch.epfl.tchu.game.Card.LOCOMOTIVE;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawCardHandler;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawTicketsHandler;
+import static ch.epfl.tchu.gui.MapViewCreator.FILLED_SC;
+import static ch.epfl.tchu.gui.MapViewCreator.colorSC;
 
 /**
- * Permet de créer la vue de la main et celle des cartes d'une partie de tCHu.
+ * Créateur de la vue de la main et de celle des cartes d'une partie de tCHu.
  *
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
  */
-class DecksViewCreator {
+final class DecksViewCreator {
 
     private final static String CARD_PANE_ID = "card-pane";
     private final static String HAND_PANE_ID = "hand-pane";
@@ -36,11 +37,9 @@ class DecksViewCreator {
     private final static String BACKGROUND_SC = "background";
     private final static String CARD_SC = "card";
     private final static String COUNT_SC = "count";
-    private final static String FILLED_SC = "filled";
     private final static String FOREGROUND_SC = "foreground";
     private final static String GAUGED_SC = "gauged";
     private final static String INSIDE_SC = "inside";
-    private final static String NEUTRAL_SC = "NEUTRAL";
     private final static String OUTSIDE_SC = "outside";
     private final static String TRAIN_IMAGE_SC = "train-image";
 
@@ -51,10 +50,11 @@ class DecksViewCreator {
     private final static double OUTSIDE_HEIGHT = 90D;
     private final static double OUTSIDE_WIDTH = 60D;
 
-    private DecksViewCreator() {}
+    private DecksViewCreator() {
+    }
 
     /**
-     * Crée la vue de la main du joueur à l'aide de l'état du jeu observable donné.
+     * Crée la vue de la main de cartes du joueur à l'aide de l'état du jeu observable donné.
      *
      * @param gameState l'état de jeu observable
      * @return la vue de la main du joueur
@@ -66,8 +66,8 @@ class DecksViewCreator {
         ListView<Ticket> tickets = new ListView<>(gameState.tickets());
         tickets.setId(TICKETS_ID);
 
-        HBox handPaneHBox = new HBox();
-        handPaneHBox.setId(HAND_PANE_ID);
+        HBox handPane = new HBox();
+        handPane.setId(HAND_PANE_ID);
 
         for (Card card : ALL) {
             StackPane cardPane = stackPaneOf(card);
@@ -82,21 +82,21 @@ class DecksViewCreator {
             text.textProperty().bind(Bindings.convert(count));
             text.visibleProperty().bind(Bindings.greaterThan(count, 1));
 
-            handPaneHBox.getChildren().add(cardPane);
+            handPane.getChildren().add(cardPane);
         }
 
-        root.getChildren().addAll(tickets, handPaneHBox);
+        root.getChildren().addAll(tickets, handPane);
         return root;
     }
 
     /**
-     * Crée la vue des cartes du jeu à l'aide de l'état du jeu observable, les gestionnaires d'action
-     * à utiliser lorsque le joueur désire tirer une carte ou un billet.
+     * Crée la vue des cartes du jeu à l'aide de l'état du jeu observable et les gestionnaires d'action
+     * à utiliser lorsque le joueur désire tirer une carte ou un billet donnés.
      *
      * @param gameState    l'état de jeu observable
-     * @param drawCardHP   la propriété contenant le gestionnaire d'action à utiliser lorsque le joueur désire tirer une carte
-     * @param drawTicketHP la propriété contenant le gestionnaire d'action à utiliser lorsque le joueur désire tirer un billet
-     * @return la vue de la main du joueur
+     * @param drawCardHP   la propriété contenant le gestionnaire d'action pour tirer une carte
+     * @param drawTicketHP la propriété contenant le gestionnaire d'action pour tirer un billet
+     * @return la vue des cartes du jeu
      */
     public static Node createCardsView(ObservableGameState gameState,
                                        ObjectProperty<DrawTicketsHandler> drawTicketHP,
@@ -117,10 +117,10 @@ class DecksViewCreator {
             gameState.faceUpCardAt(slot).addListener((o, oV, nV) -> {
                 int index;
                 if (oV != null) {
-                    index = cardPane.getStyleClass().indexOf(oV != LOCOMOTIVE ? oV.name() : NEUTRAL_SC);
-                    cardPane.getStyleClass().set(index, nV != LOCOMOTIVE ? nV.name() : NEUTRAL_SC);
+                    index = cardPane.getStyleClass().indexOf(colorSC(oV.color()));
+                    cardPane.getStyleClass().set(index, colorSC(nV.color()));
                 } else
-                    cardPane.getStyleClass().add(nV != LOCOMOTIVE ? nV.name() : NEUTRAL_SC);
+                    cardPane.getStyleClass().add(colorSC(nV.color()));
             });
             cardPane.setOnMouseClicked(e -> drawCardHP.get().onDrawCard(slot));
             cardPane.disableProperty().bind(drawCardHP.isNull());
@@ -144,7 +144,7 @@ class DecksViewCreator {
     private static StackPane stackPaneOf(Card card) {
         StackPane cardPane = new StackPane();
         if (card != null)
-            cardPane.getStyleClass().add(card != LOCOMOTIVE ? card.name() : NEUTRAL_SC);
+            cardPane.getStyleClass().add(colorSC(card.color()));
         cardPane.getStyleClass().add(CARD_SC);
 
         Rectangle outside = new Rectangle(OUTSIDE_WIDTH, OUTSIDE_HEIGHT);
@@ -161,11 +161,11 @@ class DecksViewCreator {
     }
 
     /**
-     * Crée un bouton possédant le texte donné et la propriété donnée, liée au pourcentage de la jauge.
+     * Crée un bouton à l'aide du texte donné et de la propriété donnée, liée au pourcentage de la jauge.
      *
      * @param text            le texte
      * @param gaugePercentage la propriété liée au pourcentage de la jauge
-     * @return un bouton
+     * @return le bouton ayant le texte donné et dont la jauge de remplissage est liée à la propriété donnée
      */
     private static Button buttonOf(String text, ReadOnlyIntegerProperty gaugePercentage) {
         Button button = new Button(text);
@@ -175,7 +175,7 @@ class DecksViewCreator {
         gaugeBackground.getStyleClass().add(BACKGROUND_SC);
         Rectangle gaugeForeground = new Rectangle(GAUGE_INITIAL_WIDTH, GAUGE_HEIGHT);
         gaugeForeground.getStyleClass().add(FOREGROUND_SC);
-        gaugeForeground.widthProperty().bind(gaugePercentage.multiply(50).divide(100));
+        gaugeForeground.widthProperty().bind(gaugePercentage.multiply(GAUGE_INITIAL_WIDTH).divide(100));
 
         Group gaugeGroup = new Group(gaugeBackground, gaugeForeground);
         button.setGraphic(gaugeGroup);

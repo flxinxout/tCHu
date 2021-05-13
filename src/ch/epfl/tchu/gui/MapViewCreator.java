@@ -3,6 +3,7 @@ package ch.epfl.tchu.gui;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.Card;
 import ch.epfl.tchu.game.ChMap;
+import ch.epfl.tchu.game.Color;
 import ch.epfl.tchu.game.Route;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.Group;
@@ -25,8 +26,10 @@ import static ch.epfl.tchu.gui.ActionHandlers.ClaimRouteHandler;
  */
 final class MapViewCreator {
 
+    //Package-private car ils sont réutilisés par d'autres classes du package
+    final static String FILLED_SC = "filled";
+
     private final static String CAR_CS = "car";
-    private final static String FILLED_SC = "filled";
     private final static String NEUTRAL_SC = "NEUTRAL";
     private final static String ROUTE_SC = "route";
     private final static String TRACK_SC = "track";
@@ -59,8 +62,9 @@ final class MapViewCreator {
         for (Route route : ChMap.routes()) {
             Group routeGroup = new Group();
             routeGroup.setId(route.id());
-            routeGroup.getStyleClass().addAll(ROUTE_SC, route.level().name(),
-                    route.color() == null ? NEUTRAL_SC : route.color().name());
+            routeGroup.getStyleClass().addAll(ROUTE_SC,
+                    route.level().name(),
+                    colorSC(route.color()));
 
             gameState.ownerOf(route).addListener((o, oV, nV) -> routeGroup.getStyleClass().add(nV.name()));
 
@@ -93,7 +97,8 @@ final class MapViewCreator {
 
                 for (int j = 1; j <= 2; j++) {
                     Circle carCircle = new Circle((carRect.getWidth() / 2 - CIRCLE_MARGIN) * j,
-                            carRect.getHeight() / 2, CIRCLE_RADIUS);
+                            carRect.getHeight() / 2,
+                            CIRCLE_RADIUS);
                     carGroup.getChildren().add(carCircle);
                 }
 
@@ -103,6 +108,17 @@ final class MapViewCreator {
             root.getChildren().add(routeGroup);
         }
         return root;
+    }
+
+    /**
+     * Retourne la classe de style correspondante à la couleur donnée. Cette méthode est package-private car elle est
+     * utilisée dans plusieurs classes du paquetage.
+     *
+     * @param color la couleur
+     * @return la classe de style attachée à la couleur donnée
+     */
+    static String colorSC(Color color) {
+        return color == null ? NEUTRAL_SC : color.name();
     }
 
     /**

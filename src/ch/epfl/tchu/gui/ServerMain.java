@@ -22,15 +22,17 @@ import static ch.epfl.tchu.gui.StringsFr.DEFAULT_NAME_P2;
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
  */
-public class ServerMain extends Application {
-    public static void main(String[] args) { launch(args); }
+public final class ServerMain extends Application {
+    public static void main(String[] args) {
+        launch(args);
+    }
 
     /**
-     * Analyse les arguments passés au programme afin de déterminer les noms des deux joueurs, attend une connexion
-     * de la part du client sur le port 5108, crée les deux joueurs, le premier étant un joueur graphique, le second
-     * un mandataire du joueur distant qui se trouve sur le client et démarre le fil d'exécution gérant la partie.
+     * Analyse les arguments passés au programme afin de déterminer les noms des deux joueurs. Attend une connexion
+     * de la part du client sur le port passé en argument et crée les deux joueurs. Le premier étant un joueur graphique,
+     * le second un mandataire du joueur distant qui se trouve sur le client. Démarre le fil d'exécution gérant la partie.
      *
-     * @param primaryStage le stage principal
+     * @param primaryStage la scène principale
      */
     @Override
     public void start(Stage primaryStage) throws IOException {

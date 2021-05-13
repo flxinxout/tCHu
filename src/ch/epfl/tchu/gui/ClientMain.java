@@ -12,14 +12,14 @@ import java.util.List;
  * @author Dylan Vairoli (326603)
  * @author Giovanni Ranieri (326870)
  */
-public class ClientMain extends Application {
+public final class ClientMain extends Application {
 
     public static void main(String[] args) {
         launch(args);
     }
 
     /**
-     * Analyse les arguments passés au programme afin de déterminer le nom de l'hôte et le numéro de port du serveur,
+     * Analyse les arguments passés au programme afin de déterminer le nom de l'hôte et le numéro de port du serveur et
      * crée un client distant associé à un joueur graphique et démarre le fil gérant l'accès au réseau.
      *
      * @param primaryStage la scène principale

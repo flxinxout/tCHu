@@ -136,8 +136,8 @@ public final class ObservableGameState {
      * @param playerState  le nouvel état du joueur associé à cet état de jeu
      */
     public void setState(PublicGameState newGameState, PlayerState playerState) {
-        this.gameState = newGameState;
-        this.playerState = playerState;
+        gameState = newGameState;
+        playerState = playerState;
 
         // 1.
         ticketsPercentage.setValue(100 * newGameState.ticketsCount() / ChMap.tickets().size());

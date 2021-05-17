@@ -19,22 +19,12 @@ import static javafx.application.Platform.runLater;
  */
 public final class GraphicalPlayerAdapter implements Player {
 
-    private final BlockingQueue<SortedBag<Ticket>> ticketsBQ;
-    private final BlockingQueue<Integer> cardSlotBQ;
-    private final BlockingQueue<SortedBag<Card>> cardsBQ;
-    private final BlockingQueue<Route> routeBQ;
+    private final BlockingQueue<SortedBag<Ticket>> ticketsBQ = new ArrayBlockingQueue<>(1);
+    private final BlockingQueue<Integer> cardSlotBQ = new ArrayBlockingQueue<>(1);
+    private final BlockingQueue<SortedBag<Card>> cardsBQ = new ArrayBlockingQueue<>(1);
+    private final BlockingQueue<Route> routeBQ = new ArrayBlockingQueue<>(1);
 
     private GraphicalPlayer graphicalPlayer;
-
-    /**
-     * Construit les différentes files bloquantes utilisées pour bloquer le fil d'exécution de JavaFX
-     */
-    public GraphicalPlayerAdapter() {
-        this.ticketsBQ = new ArrayBlockingQueue<>(1);
-        this.cardSlotBQ = new ArrayBlockingQueue<>(1);
-        this.cardsBQ = new ArrayBlockingQueue<>(1);
-        this.routeBQ = new ArrayBlockingQueue<>(1);
-    }
 
     /**
      * Retourne le premier élément de la file bloquante donnée, qui en est retiré.

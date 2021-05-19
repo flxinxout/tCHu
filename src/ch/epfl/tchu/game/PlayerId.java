@@ -15,30 +15,34 @@ public enum PlayerId {
     PLAYER_2("Charles"),
     PLAYER_3("Odor");
 
-    private final String name;
-
-    PlayerId(String name) {
-        this.name = name;
-    }
-
     /**
      * La liste contenant les différentes identités joueurs.
      */
     public static final List<PlayerId> ALL = List.of(values());
-
     /**
      * Le nombre de joueurs disponibles.
      */
     public static final int COUNT = ALL.size();
 
+    private final String defaultName;
+
+    PlayerId(String name) {
+        defaultName = name;
+    }
+
     /**
-     * Le nom du joueur.
+     * Retourne le nom par défaut du joueur avec cette identité.
+     *
+     * @return le nom par défaut du joueur avec cette identité
      */
-    public String getName() { return name; }
+    public String defaultName() {
+        return defaultName;
+    }
 
     /**
      * Retourne une liste triée de toutes les identités de joueur possibles. Le premier élément de la liste
      * est {@code this}, puis les autres sont triés dans leur ordre de déclaration à partir de {@code this}.
+     *
      * @return une liste triée de toutes les identités de joueur possibles
      */
     public List<PlayerId> sorted() {
@@ -54,6 +58,7 @@ public enum PlayerId {
 
     /**
      * Retourne l'identité du joueur qui suit celui auquel on l'applique.
+     *
      * @return l'identité du joueur qui suit celui auquel on l'applique
      */
     public PlayerId next() {

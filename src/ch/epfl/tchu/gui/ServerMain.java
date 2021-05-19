@@ -39,13 +39,13 @@ public final class ServerMain extends Application {
     public void start(Stage primaryStage) throws IOException {
         List<String> args = getParameters().getRaw();
 
-
         Map<PlayerId, String> playerNames = new EnumMap<>(PlayerId.class);
         for (int i = 0; i < PlayerId.COUNT; i++) {
             PlayerId id = PlayerId.ALL.get(i);
-            playerNames.put(id, args.size() < (i + 1) ? id.getName() : args.get(i));
+            playerNames.put(id, args.size() < (i + 1) ? id.defaultName() : args.get(i));
         }
 
+        //TODO adapt for three
         Socket socket;
         try (ServerSocket s0 = new ServerSocket(DEFAULT_PORT)) {
             socket = s0.accept();

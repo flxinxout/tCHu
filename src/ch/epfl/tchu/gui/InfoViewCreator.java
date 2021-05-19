@@ -51,8 +51,8 @@ final class InfoViewCreator {
 
         VBox playerStats = new VBox();
         playerStats.setId(PLAYER_STATS_ID);
-        //TODO: better way than this List.of? Peu maintenable par ex. si 3 joueurs
-        for (PlayerId id : List.of(playerId, playerId.next())) {
+
+        for (PlayerId id : playerId.sorted()) {
             TextFlow playerTextFlow = new TextFlow();
             playerTextFlow.getStyleClass().add(id.name());
 

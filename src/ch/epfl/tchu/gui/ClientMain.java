@@ -1,5 +1,6 @@
 package ch.epfl.tchu.gui;
 
+import ch.epfl.tchu.game.PlayerId;
 import ch.epfl.tchu.net.RemotePlayerClient;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -14,6 +15,9 @@ import java.util.List;
  */
 public final class ClientMain extends Application {
 
+    private static final String DEFAULT_HOSTNAME = "localhost";
+    private static final int DEFAULT_PORT = 5108;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -27,8 +31,8 @@ public final class ClientMain extends Application {
     @Override
     public void start(Stage primaryStage) {
         List<String> args = getParameters().getRaw();
-        String hostName = args.isEmpty() ? StringsFr.DEFAULT_HOSTNAME : args.get(0);
-        int port = args.size() < 2 ? StringsFr.DEFAULT_PORT : Integer.parseInt(args.get(1));
+        String hostName = args.isEmpty() ? DEFAULT_HOSTNAME : args.get(0);
+        int port = args.size() < 2 ? DEFAULT_PORT : Integer.parseInt(args.get(1));
 
         GraphicalPlayerAdapter playerAdapter = new GraphicalPlayerAdapter();
         RemotePlayerClient playerClient = new RemotePlayerClient(playerAdapter, hostName, port);

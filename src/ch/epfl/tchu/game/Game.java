@@ -5,6 +5,8 @@ import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.gui.Info;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.lang.Math.*;
 
@@ -181,19 +183,20 @@ public final class Game {
                 points.put(id, gameState.playerState(id).finalPoints());
         }
 
-        boolean playersAreEqual = points.values().stream()
-                .distinct()
-                .count() == 1;
+        //TODO upgrade maybe system
+        int maxPoints = points.values().stream().mapToInt(Integer::valueOf).max().orElseThrow();
+        List<PlayerId> winnersId = PlayerId.ALL.stream().filter(i -> points.get(i) == maxPoints).collect(Collectors.toList());
 
-        if (playersAreEqual)
+        if (winnersId.size() == PlayerId.COUNT) {
             sendInformation(Info.draw(new ArrayList<>(playerNames.values()), points.get(PlayerId.PLAYER_1)), playersValues);
-        else {
-            PlayerId winnerId = points.entrySet().stream()
-                    .max(Comparator.comparingInt(Map.Entry::getValue))
-                    .orElseThrow()
-                    .getKey();
 
-            sendInformation(infos.get(winnerId).won(points.get(winnerId), points.get(winnerId.next())), playersValues);
+        } else if(winnersId.size() == 2) {
+            sendInformation(new Info(playerNames.get(winnersId.get(0)), playerNames.get(winnersId.get(1))).draw2Players(maxPoints,
+                    points.get(playerNames.keySet().stream()
+                            .filter(i -> !winnersId.contains(i)).collect(Collectors.toList()).get(0))), playersValues);
+        } else {
+            PlayerId winner = winnersId.get(0);
+           sendInformation(infos.get(winner).won(maxPoints, points.get(winner.next()), points.get(winner.next().next())), playersValues);
         }
     }
 

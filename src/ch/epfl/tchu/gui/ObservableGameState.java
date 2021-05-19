@@ -137,7 +137,7 @@ public final class ObservableGameState {
      */
     public void setState(PublicGameState newGameState, PlayerState playerState) {
         gameState = newGameState;
-        playerState = playerState;
+        this.playerState = playerState;
 
         // 1.
         ticketsPercentage.setValue(100 * newGameState.ticketsCount() / ChMap.tickets().size());
@@ -170,13 +170,10 @@ public final class ObservableGameState {
         for (Card card : Card.ALL)
             cardOccurrences.get(card).setValue(playerState.cards().countOf(card));
 
-        Set<List<Station>> stations = newGameState.claimedRoutes().stream()
-                .map(Route::stations)
-                .collect(Collectors.toSet());
         for (Route route : routes())
             routesClaimable.get(route).setValue(newGameState.currentPlayerId() == id &&
                     !newGameState.claimedRoutes().contains(route) &&
-                    !stations.contains(route.stations()) &&
+                    !playerState.routes().contains(route) &&
                     playerState.canClaimRoute(route));
     }
 

@@ -9,12 +9,10 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import static ch.epfl.tchu.gui.StringsFr.DEFAULT_NAME_P1;
-import static ch.epfl.tchu.gui.StringsFr.DEFAULT_NAME_P2;
 
 /**
  * Programme principal du serveur tCHu.
@@ -23,6 +21,9 @@ import static ch.epfl.tchu.gui.StringsFr.DEFAULT_NAME_P2;
  * @author Giovanni Ranieri (326870)
  */
 public final class ServerMain extends Application {
+
+    private static final int DEFAULT_PORT = 5108;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -38,14 +39,15 @@ public final class ServerMain extends Application {
     public void start(Stage primaryStage) throws IOException {
         List<String> args = getParameters().getRaw();
 
-        Map<PlayerId, String> playerNames = Map.of(
-                PlayerId.PLAYER_1,
-                args.isEmpty() ? DEFAULT_NAME_P1 : args.get(0),
-                PlayerId.PLAYER_2,
-                args.size() < 2 ? DEFAULT_NAME_P2 : args.get(1));
+
+        Map<PlayerId, String> playerNames = new EnumMap<>(PlayerId.class);
+        for (int i = 0; i < PlayerId.COUNT; i++) {
+            PlayerId id = PlayerId.ALL.get(i);
+            playerNames.put(id, args.size() < (i + 1) ? id.getName() : args.get(i));
+        }
 
         Socket socket;
-        try (ServerSocket s0 = new ServerSocket(StringsFr.DEFAULT_PORT)) {
+        try (ServerSocket s0 = new ServerSocket(DEFAULT_PORT)) {
             socket = s0.accept();
         }
         Player playerProxy = new RemotePlayerProxy(socket);

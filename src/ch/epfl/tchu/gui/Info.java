@@ -2,11 +2,13 @@ package ch.epfl.tchu.gui;
 
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.Card;
+import ch.epfl.tchu.game.PlayerId;
 import ch.epfl.tchu.game.Route;
 import ch.epfl.tchu.game.Trail;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static ch.epfl.tchu.gui.StringsFr.*;
 
@@ -19,6 +21,7 @@ import static ch.epfl.tchu.gui.StringsFr.*;
 public final class Info {
 
     private final String playerName;
+    private final String playerName2;
 
     /**
      * Construit un générateur de messages liés au joueur ayant le nom donné.
@@ -26,7 +29,17 @@ public final class Info {
      * @param playerName le nom du joueur
      */
     public Info(String playerName) {
+        this(playerName, null);
+    }
+
+    /**
+     * Construit un générateur de messages liés au joueur ayant le nom donné.
+     *
+     * @param playerName le nom du joueur
+     */
+    public Info(String playerName, String playerName2) {
         this.playerName = playerName;
+        this.playerName2 = playerName2;
     }
 
     /**
@@ -77,6 +90,19 @@ public final class Info {
     }
 
     /**
+     * Retourne le message déclarant que les joueurs, dont les noms sont {@code playerNames},
+     * ont terminé la partie ex æqo en ayant chacun remporté {@code points} points.
+     *
+     * @param playerNames la liste des noms des joueurs
+     * @param points      les points remportés par les joueurs
+     * @return le message déclarant que les joueurs ont terminé la partie ex æqo
+     */
+    public static String draw_2_players(List<String> playerNames, int points) {
+        String playersNamesTogether = String.join(AND_SEPARATOR, playerNames);
+        return String.format(DRAW_2_PLAYERS, playersNamesTogether, points);
+    }
+
+    /**
      * Retourne la représentation textuelle de {@code route}.
      */
     private static String nameOf(Route route) {
@@ -87,8 +113,6 @@ public final class Info {
      * Retourne la représentation textuelle de la route donnée.
      */
     private static String nameOf(Trail trail) {
-        //TODO: assert nécessaire pour avoid un nullpointer ?
-        assert trail.station1() != null && trail.station2() != null;
         return (trail.station1().name() + EN_DASH_SEPARATOR + trail.station2().name());
     }
 
@@ -253,20 +277,50 @@ public final class Info {
     }
 
     /**
-     * Retourne le message déclarant que le joueur remporte la partie avec {@code points} points ,
-     * son adversaire n'en ayant obtenu que {@code loserPoints} points.
+     * Retourne le message déclarant que le joueur remporte la partie avec {@code points} points
+     * et ses adversaires n'en ayant obtenu que {@code loserPointsOne} points et {@code loserPointsTwo} points.
      *
      * @param points      les points du vainqueur
-     * @param loserPoints les points du perdant
-     * @return le message déclarant que le joueur remporte la partie avec {@code points} points,
-     * son adversaire n'en ayant obtenu que {@code loserPoints} points
+     * @param loserPointsOne les points du perdant numéro 1
+     * @param loserPointsTwo les points du perdant numéro 2
+     * @return le message déclarant que le joueur remporte la partie avec {@code points} points
+     *      * et ses adversaires n'en ayant obtenu que {@code loserPointsOne} points et {@code loserPointsTwo} points.
      */
-    public String won(int points, int loserPoints) {
+    public String won(int points, int loserPointsOne, int loserPointsTwo) {
         return String.format(WINS,
                 playerName,
+                points,
+                plural(points),
+                loserPointsOne,
+                plural(loserPointsOne),
+                loserPointsTwo,
+                plural(loserPointsTwo));
+    }
+
+    //todo PAS OUF DE FAIRE COMME çA
+    public String draw2Players(int points, int loserPoints) {
+        return String.format(DRAW_2_PLAYERS,
+                playerName,
+                playerName2,
                 points,
                 plural(points),
                 loserPoints,
                 plural(loserPoints));
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

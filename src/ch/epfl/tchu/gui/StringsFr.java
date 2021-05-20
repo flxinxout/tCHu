@@ -64,7 +64,7 @@ public final class StringsFr {
     public static final String WINS =
             "\n%s remporte la victoire avec %s point%s, contre %s point%s et %s point%s !\n";
     public static final String DRAW_2_PLAYERS =
-            "\n%s et %s remportent la victoire avec %s point%s, contre %s point%s pour %s ! \n";
+            "\n%s et %s remportent la victoire avec %s point%s, contre %s point%s !\n";
     public static final String DRAW =
             "\n%s sont ex æqo avec %s points !\n";
 

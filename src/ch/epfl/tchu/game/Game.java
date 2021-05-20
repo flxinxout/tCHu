@@ -183,7 +183,6 @@ public final class Game {
                 points.put(id, gameState.playerState(id).finalPoints());
         }
 
-        //TODO upgrade maybe system
         int maxPoints = points.values().stream().mapToInt(Integer::valueOf).max().orElseThrow();
         List<PlayerId> winnersId = PlayerId.ALL.stream().filter(i -> points.get(i) == maxPoints).collect(Collectors.toList());
 
@@ -191,12 +190,16 @@ public final class Game {
             sendInformation(Info.draw(new ArrayList<>(playerNames.values()), points.get(PlayerId.PLAYER_1)), playersValues);
 
         } else if(winnersId.size() == 2) {
-            sendInformation(new Info(playerNames.get(winnersId.get(0)), playerNames.get(winnersId.get(1))).draw2Players(maxPoints,
+            sendInformation(Info.draw2Players(
+                    playerNames.get(winnersId.get(0)),
+                    playerNames.get(winnersId.get(1)),
+                    maxPoints,
                     points.get(playerNames.keySet().stream()
-                            .filter(i -> !winnersId.contains(i)).collect(Collectors.toList()).get(0))), playersValues);
+                            .filter(i -> !winnersId.contains(i)).collect(Collectors.toList()).get(0))),
+                    playersValues);
         } else {
             PlayerId winner = winnersId.get(0);
-           sendInformation(infos.get(winner).won(maxPoints, points.get(winner.next()), points.get(winner.next().next())), playersValues);
+            sendInformation(infos.get(winner).won(maxPoints, points.get(winner.next()), points.get(winner.next().next())), playersValues);
         }
     }
 

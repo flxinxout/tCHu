@@ -21,7 +21,6 @@ import static ch.epfl.tchu.gui.StringsFr.*;
 public final class Info {
 
     private final String playerName;
-    private final String playerName2;
 
     /**
      * Construit un générateur de messages liés au joueur ayant le nom donné.
@@ -29,17 +28,7 @@ public final class Info {
      * @param playerName le nom du joueur
      */
     public Info(String playerName) {
-        this(playerName, null);
-    }
-
-    /**
-     * Construit un générateur de messages liés au joueur ayant le nom donné.
-     *
-     * @param playerName le nom du joueur
-     */
-    public Info(String playerName, String playerName2) {
         this.playerName = playerName;
-        this.playerName2 = playerName2;
     }
 
     /**
@@ -87,19 +76,6 @@ public final class Info {
     public static String draw(List<String> playerNames, int points) {
         String playersNamesTogether = String.join(AND_SEPARATOR, playerNames);
         return String.format(DRAW, playersNamesTogether, points);
-    }
-
-    /**
-     * Retourne le message déclarant que les joueurs, dont les noms sont {@code playerNames},
-     * ont terminé la partie ex æqo en ayant chacun remporté {@code points} points.
-     *
-     * @param playerNames la liste des noms des joueurs
-     * @param points      les points remportés par les joueurs
-     * @return le message déclarant que les joueurs ont terminé la partie ex æqo
-     */
-    public static String draw_2_players(List<String> playerNames, int points) {
-        String playersNamesTogether = String.join(AND_SEPARATOR, playerNames);
-        return String.format(DRAW_2_PLAYERS, playersNamesTogether, points);
     }
 
     /**
@@ -297,11 +273,20 @@ public final class Info {
                 plural(loserPointsTwo));
     }
 
-    //todo PAS OUF DE FAIRE COMME çA
-    public String draw2Players(int points, int loserPoints) {
+    /**
+     * Retourne le message déclarant que les joueurs, dont les noms sont {@code playerNames},
+     * ont terminé la partie ex æqo en ayant chacun remporté {@code points} points.
+     *
+     * @param firstPlayer un des 2 joueurs ayant eu le même nombre de points
+     * @param secondPlayer l'autre joueur avec le même nombre de points
+     * @param points      les points remportés par les joueurs
+     * @param loserPoints les points du joueur perdant
+     * @return le message déclarant que les joueurs ont terminé la partie ex æqo
+     */
+    public static String draw2Players(String firstPlayer, String secondPlayer, int points, int loserPoints) {
         return String.format(DRAW_2_PLAYERS,
-                playerName,
-                playerName2,
+                firstPlayer,
+                secondPlayer,
                 points,
                 plural(points),
                 loserPoints,

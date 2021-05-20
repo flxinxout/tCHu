@@ -28,8 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static ch.epfl.tchu.game.Constants.INITIAL_TICKETS_COUNT;
-import static ch.epfl.tchu.game.Constants.IN_GAME_TICKETS_COUNT;
+import static ch.epfl.tchu.game.Constants.*;
 import static ch.epfl.tchu.gui.ActionHandlers.*;
 import static ch.epfl.tchu.gui.DecksViewCreator.createCardsView;
 import static ch.epfl.tchu.gui.DecksViewCreator.createHandView;
@@ -148,7 +147,7 @@ public class GraphicalPlayer {
         int optionsSize = options.size();
         Preconditions.checkArgument(optionsSize == INITIAL_TICKETS_COUNT ||
                 optionsSize == IN_GAME_TICKETS_COUNT);
-        int minCount = optionsSize - 2;
+        int minCount = optionsSize - DISCARDABLE_TICKETS_COUNT;
 
         ListView<Ticket> optionsLV = new ListView<>(FXCollections.observableArrayList(options.toList()));
         optionsLV.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);

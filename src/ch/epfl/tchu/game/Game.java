@@ -6,9 +6,8 @@ import ch.epfl.tchu.gui.Info;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import static java.lang.Math.*;
+import static java.lang.Math.max;
 
 /**
  * Une partie de tCHu.
@@ -19,7 +18,8 @@ import static java.lang.Math.*;
 public final class Game {
     private final static int CARDS_DRAWN_COUNT = 2;
 
-    private Game() {}
+    private Game() {
+    }
 
     /**
      * Fait jouer une partie de tCHu aux joueurs donnés, dont les noms figurent dans la table {@code playerNames};
@@ -31,15 +31,15 @@ public final class Game {
      * @param playerNames table associant le nom des joueurs à leur identité
      * @param tickets     les billets disponibles pour cette partie
      * @param rng         générateur aléatoire utilisé
-     * @throws IllegalArgumentException si {@code players} ou {@code playerNames} ont une taille différente de 2
+     * @throws IllegalArgumentException si {@code players} ou {@code playerNames} ont une taille différente de 3
      */
     public static void play(Map<PlayerId, Player> players, Map<PlayerId, String> playerNames,
                             SortedBag<Ticket> tickets, Random rng) {
         Preconditions.checkArgument(players.size() == PlayerId.COUNT);
         Preconditions.checkArgument(playerNames.size() == PlayerId.COUNT);
 
-        final Collection<Player> playersValues = players.values();
-        final Map<PlayerId, Info> infos = new EnumMap<>(PlayerId.class);
+        Collection<Player> playersValues = players.values();
+        Map<PlayerId, Info> infos = new EnumMap<>(PlayerId.class);
         playerNames.forEach((id, name) -> infos.put(id, new Info(name)));
 
         // 1. Initialisation de la partie
@@ -62,7 +62,7 @@ public final class Game {
 
         //2. Début de la partie
         boolean gameHasEnded = false;
-        while(!gameHasEnded) {
+        while (!gameHasEnded) {
 
             Player currentPlayer = players.get(gameState.currentPlayerId());
             Info currentPlayerInfo = infos.get(gameState.currentPlayerId());
@@ -105,7 +105,7 @@ public final class Game {
                     Route claimedRoute = currentPlayer.claimedRoute();
                     SortedBag<Card> initialCards = currentPlayer.initialClaimCards();
 
-                    if(claimedRoute.level() == Route.Level.OVERGROUND) {
+                    if (claimedRoute.level() == Route.Level.OVERGROUND) {
                         sendInformation(currentPlayerInfo.claimedRoute(claimedRoute, initialCards), playersValues);
                         gameState = gameState.withClaimedRoute(claimedRoute, initialCards);
                     } else {
@@ -183,22 +183,28 @@ public final class Game {
                 points.put(id, gameState.playerState(id).finalPoints());
         }
 
-        int maxPoints = points.values().stream().mapToInt(Integer::valueOf).max().orElseThrow();
-        List<PlayerId> winnersId = PlayerId.ALL.stream().filter(i -> points.get(i) == maxPoints).collect(Collectors.toList());
+        int maxPoints = points.values().stream()
+                .mapToInt(Integer::valueOf)
+                .max().orElseThrow();
+        List<PlayerId> winnerIds = PlayerId.ALL.stream()
+                .filter(id -> points.get(id) == maxPoints)
+                .collect(Collectors.toList());
 
-        if (winnersId.size() == PlayerId.COUNT) {
+        if (winnerIds.size() == PlayerId.COUNT) {
             sendInformation(Info.draw(new ArrayList<>(playerNames.values()), points.get(PlayerId.PLAYER_1)), playersValues);
-
-        } else if(winnersId.size() == 2) {
+        } else if (winnerIds.size() == PlayerId.COUNT - 1) {
+            List<String> winnerNames = winnerIds.stream()
+                    .map(playerNames::get)
+                    .collect(Collectors.toList());
+            PlayerId loserId = PlayerId.ALL.stream()
+                    .filter(id -> !winnerIds.contains(id))
+                    .findAny().orElseThrow();
             sendInformation(Info.draw2Players(
-                    playerNames.get(winnersId.get(0)),
-                    playerNames.get(winnersId.get(1)),
+                    winnerNames,
                     maxPoints,
-                    points.get(playerNames.keySet().stream()
-                            .filter(i -> !winnersId.contains(i)).collect(Collectors.toList()).get(0))),
-                    playersValues);
+                    points.get(loserId)), playersValues);
         } else {
-            PlayerId winner = winnersId.get(0);
+            PlayerId winner = winnerIds.get(0);
             sendInformation(infos.get(winner).won(maxPoints, points.get(winner.next()), points.get(winner.next().next())), playersValues);
         }
     }

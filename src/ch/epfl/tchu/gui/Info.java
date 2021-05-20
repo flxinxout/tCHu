@@ -1,5 +1,6 @@
 package ch.epfl.tchu.gui;
 
+import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.Card;
 import ch.epfl.tchu.game.PlayerId;
@@ -8,7 +9,6 @@ import ch.epfl.tchu.game.Trail;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static ch.epfl.tchu.gui.StringsFr.*;
 
@@ -256,11 +256,11 @@ public final class Info {
      * Retourne le message déclarant que le joueur remporte la partie avec {@code points} points
      * et ses adversaires n'en ayant obtenu que {@code loserPointsOne} points et {@code loserPointsTwo} points.
      *
-     * @param points      les points du vainqueur
+     * @param points         les points du vainqueur
      * @param loserPointsOne les points du perdant numéro 1
      * @param loserPointsTwo les points du perdant numéro 2
      * @return le message déclarant que le joueur remporte la partie avec {@code points} points
-     *      * et ses adversaires n'en ayant obtenu que {@code loserPointsOne} points et {@code loserPointsTwo} points.
+     * * et ses adversaires n'en ayant obtenu que {@code loserPointsOne} points et {@code loserPointsTwo} points.
      */
     public String won(int points, int loserPointsOne, int loserPointsTwo) {
         return String.format(WINS,
@@ -274,19 +274,19 @@ public final class Info {
     }
 
     /**
-     * Retourne le message déclarant que les joueurs, dont les noms sont {@code playerNames},
-     * ont terminé la partie ex æqo en ayant chacun remporté {@code points} points.
+     * Retourne le message déclarant que deux joueurs, dont les noms sont {@code winnerNames}, ont terminé la partie
+     * ex æqo en ayant chacun remporté {@code points} points et le joueur restant a perdu avec {@code loserPoints}.
      *
-     * @param firstPlayer un des 2 joueurs ayant eu le même nombre de points
-     * @param secondPlayer l'autre joueur avec le même nombre de points
-     * @param points      les points remportés par les joueurs
-     * @param loserPoints les points du joueur perdant
-     * @return le message déclarant que les joueurs ont terminé la partie ex æqo
+     * @param winnerNames la liste des noms des gagnants
+     * @param points      les points remportés par les gagnants
+     * @param loserPoints les points remportés par le perdant
+     * @return le message déclarant que deux joueurs ont terminé la partie ex æqo
      */
-    public static String draw2Players(String firstPlayer, String secondPlayer, int points, int loserPoints) {
+    public static String draw2Players(List<String> winnerNames, int points, int loserPoints) {
+        Preconditions.checkArgument(winnerNames.size() == PlayerId.COUNT - 1);
         return String.format(DRAW_2_PLAYERS,
-                firstPlayer,
-                secondPlayer,
+                winnerNames.get(0),
+                winnerNames.get(1),
                 points,
                 plural(points),
                 loserPoints,

@@ -11,33 +11,20 @@ import java.util.List;
  */
 public enum PlayerId {
 
-    PLAYER_1("Ada"),
-    PLAYER_2("Charles"),
-    PLAYER_3("Odor");
+    PLAYER_1,
+    PLAYER_2,
+    PLAYER_3,
+    PLAYER_4;
 
     /**
-     * La liste contenant les différentes identités joueurs.
+     * La liste contenant les différentes identités des joueurs.
      */
     public static final List<PlayerId> ALL = List.of(values());
+
     /**
      * Le nombre de joueurs disponibles.
      */
     public static final int COUNT = ALL.size();
-
-    private final String defaultName;
-
-    PlayerId(String name) {
-        defaultName = name;
-    }
-
-    /**
-     * Retourne le nom par défaut du joueur avec cette identité.
-     *
-     * @return le nom par défaut du joueur avec cette identité
-     */
-    public String defaultName() {
-        return defaultName;
-    }
 
     /**
      * Retourne une liste triée de toutes les identités de joueur possibles. Le premier élément de la liste
@@ -68,6 +55,8 @@ public enum PlayerId {
             case PLAYER_2:
                 return PLAYER_3;
             case PLAYER_3:
+                return PLAYER_4;
+            case PLAYER_4:
                 return PLAYER_1;
             default:
                 throw new Error();

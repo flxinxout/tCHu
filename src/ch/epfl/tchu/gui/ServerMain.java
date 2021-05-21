@@ -1,5 +1,6 @@
 package ch.epfl.tchu.gui;
 
+import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
 import ch.epfl.tchu.net.RemotePlayerProxy;
@@ -9,10 +10,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Programme principal du serveur tCHu.
@@ -23,6 +21,9 @@ import java.util.Random;
 public final class ServerMain extends Application {
 
     private static final int DEFAULT_PORT = 5108;
+    private static final int DEFAULT_PLAYER_NUMBER = 2;
+    private static final List<String> DEFAULT_NAMES = List.of("Ada", "Charles", "Odor", "Renée");
+
 
     public static void main(String[] args) {
         launch(args);
@@ -39,25 +40,31 @@ public final class ServerMain extends Application {
     public void start(Stage primaryStage) throws IOException {
         List<String> args = getParameters().getRaw();
 
+        int playerCount = args.isEmpty() ? DEFAULT_PLAYER_NUMBER : Integer.parseInt(args.get(0));
+        Preconditions.checkArgument(playerCount >= 2);
+        List<PlayerId> playerIds = PlayerId.ALL.subList(0, playerCount);
+
         Map<PlayerId, String> playerNames = new EnumMap<>(PlayerId.class);
-        for (int i = 0; i < PlayerId.COUNT; i++) {
-            PlayerId id = PlayerId.ALL.get(i);
-            playerNames.put(id, args.size() < (i + 1) ? id.defaultName() : args.get(i));
+        for (int i = 0; i < playerCount; i++) {
+            PlayerId id = playerIds.get(i);
+            playerNames.put(id, args.size() < (i + 2) ? DEFAULT_NAMES.get(i) : args.get(i + 1));
         }
 
-        //TODO adapt for three
-        Socket socket;
-        try (ServerSocket s0 = new ServerSocket(DEFAULT_PORT)) {
-            socket = s0.accept();
+        List<Player> playersProxy = new ArrayList<>();
+        for (int i = 0; i < playerCount - 1; i++) {
+            Socket socket;
+            try (ServerSocket s0 = new ServerSocket(DEFAULT_PORT)) {
+                socket = s0.accept();
+            }
+            playersProxy.add(new RemotePlayerProxy(socket));
         }
-        Player playerProxy = new RemotePlayerProxy(socket);
+
         SortedBag<Ticket> tickets = SortedBag.of(ChMap.tickets());
 
-        Map<PlayerId, Player> players = Map.of(
-                PlayerId.PLAYER_1,
-                new GraphicalPlayerAdapter(),
-                PlayerId.PLAYER_2,
-                playerProxy);
+        Map<PlayerId, Player> players = new HashMap<>();
+        players.put(PlayerId.PLAYER_1, new GraphicalPlayerAdapter());
+        for (int i = 1; i < playerCount; i++)
+            players.put(playerIds.get(i), playersProxy.get(i-1));
 
         new Thread(() -> Game.play(players, playerNames, tickets, new Random())).start();
     }

@@ -48,7 +48,7 @@ public final class Game {
         // 1. Initialisation de la partie
         players.forEach((id, player) -> player.initPlayers(id, playerNames));
 
-        GameState gameState = GameState.initial(tickets, rng);
+        GameState gameState = GameState.initial(playerIds, tickets, rng);
         sendInformation(infos.get(gameState.currentPlayerId()).willPlayFirst(), playersValues);
 
         for (Player player : playersValues) {
@@ -202,7 +202,7 @@ public final class Game {
             PlayerId loserId = playerIds.stream()
                     .filter(id -> !winnerIds.contains(id))
                     .findAny().orElseThrow();
-            sendInformation(Info.draw2Players(
+            sendInformation(Info.drawMultiplePlayers(
                     winnerNames,
                     maxPoints,
                     points.get(loserId)), playersValues);

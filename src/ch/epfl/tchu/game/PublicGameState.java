@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static ch.epfl.tchu.game.Constants.*;
+
 /**
  * La partie publique de l'état d'une partie de tCHu.
  *
@@ -42,7 +44,8 @@ public class PublicGameState {
      */
     public PublicGameState(int ticketsCount, PublicCardState cardState, PlayerId currentPlayerId,
                            Map<PlayerId, PublicPlayerState> playerState, PlayerId lastPlayer) {
-        Preconditions.checkArgument(ticketsCount >= 0 && playerState.size() == PlayerId.COUNT);
+        Preconditions.checkArgument(ticketsCount >= 0);
+        Preconditions.checkArgument(playerState.size() <= PlayerId.COUNT && playerState.size() >= MINIMUM_NUMBER_PLAYERS);
 
         this.cardState = Objects.requireNonNull(cardState);
         this.currentPlayerId = Objects.requireNonNull(currentPlayerId);
@@ -58,7 +61,7 @@ public class PublicGameState {
      * @return ssi il est possible de tirer des cartes
      */
     public boolean canDrawCards() {
-        return cardState.deckSize() + cardState.discardsSize() >= IN_GAME_CARDS_COUNT + Constants.ADDITIONAL_TUNNEL_CARDS;
+        return cardState.deckSize() + cardState.discardsSize() >= IN_GAME_CARDS_COUNT + ADDITIONAL_TUNNEL_CARDS;
     }
 
     /**

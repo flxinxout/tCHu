@@ -9,7 +9,10 @@ import ch.epfl.tchu.game.Trail;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static ch.epfl.tchu.game.Constants.MINIMUM_NUMBER_PLAYERS;
 import static ch.epfl.tchu.gui.StringsFr.*;
 
 /**
@@ -79,6 +82,25 @@ public final class Info {
     }
 
     /**
+     * Retourne le message déclarant que plusieurs joueurs (mais pas tous), dont les noms sont {@code winnerNames},
+     * ont terminé la partie ex æqo en ayant chacun remporté {@code points} points et le joueur restant a perdu avec {@code loserPoints}.
+     *
+     * @param winnerNames la liste des noms des gagnants
+     * @param points      les points remportés par les gagnants
+     * @param loserPoints les points remportés par le perdant
+     * @return le message déclarant que deux joueurs ont terminé la partie ex æqo
+     */
+    public static String drawMultiplePlayers(List<String> winnerNames, int points, int loserPoints) {
+        Preconditions.checkArgument(winnerNames.size() <= PlayerId.COUNT && winnerNames.size() >= MINIMUM_NUMBER_PLAYERS);
+        return String.format(DRAW_2_PLAYERS,
+                joinListToString(winnerNames),
+                points,
+                plural(points),
+                loserPoints,
+                plural(loserPoints));
+    }
+
+    /**
      * Retourne la représentation textuelle de {@code route}.
      */
     private static String nameOf(Route route) {
@@ -103,14 +125,24 @@ public final class Info {
             singleCardNames.add(n + " " + cardName(c, n));
         }
 
-        int lastCardIndex = singleCardNames.size() - 1;
+        return joinListToString(singleCardNames);
+    }
+
+    /**
+     * Joint une liste de chaînes de caractères de la manière suivante: e_1, e_2, ..., e_s-1 et e_s où s est la taille
+     * de la liste donnée.
+     *
+     * @param strings la liste dont les chaînes de caractères doivent être jointes
+     * @return la représentation textuelle des éléments de la liste donnée joints
+     */
+    private static String joinListToString(List<String> strings) {
         String joined;
-        if (singleCardNames.size() == 1) {
-            joined = singleCardNames.get(0);
+        if (strings.size() == 1) {
+            joined = strings.get(0);
         } else {
             joined = String.join(AND_SEPARATOR,
-                    String.join(", ", singleCardNames.subList(0, lastCardIndex)),
-                    singleCardNames.get(lastCardIndex));
+                    String.join(", ", strings.subList(0, strings.size() - 1)),
+                    strings.get(strings.size() - 1));
         }
 
         return joined;
@@ -254,43 +286,25 @@ public final class Info {
 
     /**
      * Retourne le message déclarant que le joueur remporte la partie avec {@code points} points
-     * et ses adversaires n'en ayant obtenu que {@code loserPointsOne} points et {@code loserPointsTwo} points.
+     * et ses adversaires n'en ayant obtenu que {@code loserPoints}. Si plus de 3 éléments sont donnés en tant
+     * que loserPoints, seuls les 3 donnés sont comptés
      *
-     * @param points         les points du vainqueur
-     * @param loserPointsOne les points du perdant numéro 1
-     * @param loserPointsTwo les points du perdant numéro 2
+     * @param points      les points du vainqueur
+     * @param loserPoints les points des perdants
      * @return le message déclarant que le joueur remporte la partie avec {@code points} points
-     * * et ses adversaires n'en ayant obtenu que {@code loserPointsOne} points et {@code loserPointsTwo} points.
+     * @throws IllegalArgumentException si {@code loserPoints} est vide ou plus grand que 3
      */
-    public String won(int points, int loserPointsOne, int loserPointsTwo) {
+    public String won(int points, int... loserPoints) {
+        Preconditions.checkArgument(loserPoints.length > 0 && loserPoints.length <= 3);
+        List<String> pointsStr = Stream.of(loserPoints)
+                .map(String::valueOf)
+                .collect(Collectors.toList());
+
         return String.format(WINS,
                 playerName,
                 points,
                 plural(points),
-                loserPointsOne,
-                plural(loserPointsOne),
-                loserPointsTwo,
-                plural(loserPointsTwo));
-    }
-
-    /**
-     * Retourne le message déclarant que deux joueurs, dont les noms sont {@code winnerNames}, ont terminé la partie
-     * ex æqo en ayant chacun remporté {@code points} points et le joueur restant a perdu avec {@code loserPoints}.
-     *
-     * @param winnerNames la liste des noms des gagnants
-     * @param points      les points remportés par les gagnants
-     * @param loserPoints les points remportés par le perdant
-     * @return le message déclarant que deux joueurs ont terminé la partie ex æqo
-     */
-    public static String draw2Players(List<String> winnerNames, int points, int loserPoints) {
-        Preconditions.checkArgument(winnerNames.size() == PlayerId.COUNT - 1);
-        return String.format(DRAW_2_PLAYERS,
-                winnerNames.get(0),
-                winnerNames.get(1),
-                points,
-                plural(points),
-                loserPoints,
-                plural(loserPoints));
+                pointsStr);
     }
 }
 

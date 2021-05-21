@@ -2,11 +2,8 @@ package ch.epfl.tchu.gui;
 
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -232,7 +229,7 @@ class InfoTest {
         var info = new Info("Martin");
 
         var actual1 = info.lastTurnBegins(0);
-        var expected1 = "\nMartin n'a plus que 0 wagons, le dernier tour commence !\n";
+        var expected1 = "\nMartin n'a plus que 0 wagon, le dernier tour commence !\n";
         assertEquals(expected1, actual1);
 
         var actual2 = info.lastTurnBegins(1);
@@ -263,11 +260,11 @@ class InfoTest {
     void infoWonWorks() {
         var info = new Info("Bjarne");
 
-        var actual1 = info.won(2, 1);
+        var actual1 = info.won(2, 1, 3);
         var expected1 = "\nBjarne remporte la victoire avec 2 points, contre 1 point !\n";
         assertEquals(expected1, actual1);
 
-        var actual2 = info.won(3, 2);
+        var actual2 = info.won(3, 2, 3);
         var expected2 = "\nBjarne remporte la victoire avec 3 points, contre 2 points !\n";
         assertEquals(expected2, actual2);
     }

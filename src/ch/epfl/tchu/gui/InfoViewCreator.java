@@ -11,8 +11,9 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static ch.epfl.tchu.gui.MapViewCreator.FILLED_SC;
 
@@ -52,7 +53,17 @@ final class InfoViewCreator {
         VBox playerStats = new VBox();
         playerStats.setId(PLAYER_STATS_ID);
 
-        for (PlayerId id : playerId.sorted()) {
+        Set<PlayerId> playerIds = new TreeSet<>((i1, i2) -> {
+            if (i1 == playerId)
+                return Integer.MAX_VALUE;
+            else if (i1 == i2)
+                return 0;
+            else
+                return i1.ordinal() - i2.ordinal();
+        });
+        playerIds.addAll(playerNames.keySet());
+
+        for (PlayerId id : playerIds) {
             TextFlow playerTextFlow = new TextFlow();
             playerTextFlow.getStyleClass().add(id.name());
 

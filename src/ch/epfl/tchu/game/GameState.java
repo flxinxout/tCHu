@@ -3,10 +3,7 @@ package ch.epfl.tchu.game;
 import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 /**
  * L'état d'une partie de tCHu.
@@ -28,8 +25,11 @@ public final class GameState extends PublicGameState {
     /**
      * Construit l'état d'une partie de tCHu.
      */
-    private GameState(Deck<Ticket> tickets, CardState cardState, PlayerId currentPlayerId,
-                      Map<PlayerId, PlayerState> playerState, PlayerId lastPlayer) {
+    private GameState(Deck<Ticket> tickets,
+                      CardState cardState,
+                      PlayerId currentPlayerId,
+                      Map<PlayerId, PlayerState> playerState,
+                      PlayerId lastPlayer) {
         super(tickets.size(), cardState, currentPlayerId, Map.copyOf(playerState), lastPlayer);
 
         this.playerState = Map.copyOf(playerState);
@@ -43,22 +43,26 @@ public final class GameState extends PublicGameState {
      * aux joueurs; ces pioches sont mélangées au moyen du générateur aléatoire {@code rng}
      * qui est aussi utilisé pour choisir au hasard l'identité du premier joueur.
      *
-     * @param tickets les billets constituant la pioche
-     * @param rng     le générateur aléatoire utilisé
+     * @param playerIds les identités de joueur utilisées durant la partie
+     * @param tickets   les billets constituant la pioche
+     * @param rng       le générateur aléatoire utilisé
      * @return l'état initial d'une partie de tCHu
      */
-    public static GameState initial(SortedBag<Ticket> tickets, Random rng) {
+    public static GameState initial(Collection<PlayerId> playerIds, SortedBag<Ticket> tickets, Random rng) {
         Deck<Ticket> ticketsDeck = Deck.of(tickets, rng);
         Deck<Card> cardsDeck = Deck.of(Constants.ALL_CARDS, rng);
 
         Map<PlayerId, PlayerState> playerState = new EnumMap<>(PlayerId.class);
-        for (PlayerId playerId : PlayerId.ALL) {
-            playerState.put(playerId, PlayerState.initial(cardsDeck.topCards(Constants.INITIAL_CARDS_COUNT)));
+        for (PlayerId id : playerIds) {
+            playerState.put(id, PlayerState.initial(cardsDeck.topCards(Constants.INITIAL_CARDS_COUNT)));
             cardsDeck = cardsDeck.withoutTopCards(Constants.INITIAL_CARDS_COUNT);
         }
 
         CardState cardState = CardState.of(cardsDeck);
-        PlayerId firstPlayer = PlayerId.ALL.get(rng.nextInt(PlayerId.COUNT));
+        PlayerId firstPlayer = playerIds.stream()
+                .skip(rng.nextInt(playerIds.size()))
+                .findFirst()
+                .orElseThrow();
 
         return new GameState(ticketsDeck, cardState, firstPlayer, playerState, null);
     }

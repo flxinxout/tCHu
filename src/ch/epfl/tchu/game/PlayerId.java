@@ -1,6 +1,5 @@
 package ch.epfl.tchu.game;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,23 +24,6 @@ public enum PlayerId {
      * Le nombre de joueurs disponibles.
      */
     public static final int COUNT = ALL.size();
-
-    /**
-     * Retourne une liste triée de toutes les identités de joueur possibles. Le premier élément de la liste
-     * est {@code this}, puis les autres sont triés dans leur ordre de déclaration à partir de {@code this}.
-     *
-     * @return une liste triée de toutes les identités de joueur possibles
-     */
-    public List<PlayerId> sorted() {
-        List<PlayerId> ids = new ArrayList<>(COUNT);
-        ids.add(this);
-
-        PlayerId lastId = this;
-        for (int i = 0; i < COUNT - 1; i++) {
-            ids.add(lastId.next());
-        }
-        return ids;
-    }
 
     /**
      * Retourne l'identité du joueur qui suit celui auquel on l'applique.

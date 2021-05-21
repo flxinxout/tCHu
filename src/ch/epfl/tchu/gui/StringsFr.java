@@ -62,9 +62,9 @@ public final class StringsFr {
     public static final String GETS_BONUS =
             "\n%s reçoit un bonus de 10 points pour le plus long trajet (%s).\n";
     public static final String WINS =
-            "\n%s remporte la victoire avec %s point%s, contre %s point%s et %s point%s !\n";
+            "\n%s remporte la victoire avec %s point%s, contre %s points !\n";
     public static final String DRAW_2_PLAYERS =
-            "\n%s et %s remportent la victoire avec %s point%s, contre %s point%s !\n";
+            "\n%s remportent la victoire avec %s point%s, contre %s point%s !\n";
     public static final String DRAW =
             "\n%s sont ex æqo avec %s points !\n";
 

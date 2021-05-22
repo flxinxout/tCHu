@@ -17,6 +17,7 @@ import static java.lang.Math.*;
  */
 public final class PlayerState extends PublicPlayerState {
 
+    private final int playerNb;
     private final SortedBag<Ticket> tickets;
     private final SortedBag<Card> cards;
 
@@ -28,9 +29,10 @@ public final class PlayerState extends PublicPlayerState {
      * @param cards   les cartes que possède le joueur
      * @param routes  les routes dont le joueur s'est emparées
      */
-    public PlayerState(SortedBag<Ticket> tickets, SortedBag<Card> cards, List<Route> routes) {
-        super(tickets.size(), cards.size(), routes);
+    public PlayerState(int playerNb, SortedBag<Ticket> tickets, SortedBag<Card> cards, List<Route> routes) {
+        super(playerNb, tickets.size(), cards.size(), routes);
 
+        this.playerNb = playerNb;
         this.tickets = tickets;
         this.cards = cards;
     }
@@ -43,9 +45,9 @@ public final class PlayerState extends PublicPlayerState {
      * @return l'état initial de ce joueur auquel les cartes initiales données ont été distribuées
      * @throws IllegalArgumentException si {@code initialCards} ne contient pas exactement 4 éléments
      */
-    public static PlayerState initial(SortedBag<Card> initialCards) {
+    public static PlayerState initial(int playerNb, SortedBag<Card> initialCards) {
         Preconditions.checkArgument(initialCards.size() == Constants.INITIAL_CARDS_COUNT);
-        return new PlayerState(SortedBag.of(), initialCards, List.of());
+        return new PlayerState(playerNb, SortedBag.of(), initialCards, List.of());
     }
 
     /**
@@ -55,7 +57,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return un état identique à celui-ci, si ce n'est que ce joueur possède en plus les billets {@code newTickets}
      */
     public PlayerState withAddedTickets(SortedBag<Ticket> newTickets) {
-        return new PlayerState(tickets.union(newTickets), cards, routes());
+        return new PlayerState(playerNb, tickets.union(newTickets), cards, routes());
     }
 
     /**
@@ -65,7 +67,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return un état identique à celui-ci, si ce n'est que ce joueur possède en plus la carte {@code card}
      */
     public PlayerState withAddedCard(Card card) {
-        return new PlayerState(tickets(), cards.union(SortedBag.of(card)), routes());
+        return new PlayerState(playerNb, tickets(), cards.union(SortedBag.of(card)), routes());
     }
 
     /**
@@ -156,7 +158,7 @@ public final class PlayerState extends PublicPlayerState {
         List<Route> newRoutes = new ArrayList<>(routes());
         newRoutes.add(route);
 
-        return new PlayerState(tickets(), newCards, newRoutes);
+        return new PlayerState(playerNb, tickets(), newCards, newRoutes);
     }
 
     /**

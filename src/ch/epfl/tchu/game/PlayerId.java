@@ -1,5 +1,6 @@
 package ch.epfl.tchu.game;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -43,5 +44,14 @@ public enum PlayerId {
             default:
                 throw new Error();
         }
+    }
+
+    /**
+     * Retourne l'identité du joueur qui suit celui auquel on l'applique dans la collection donnée.
+     *
+     * @return l'identité du joueur qui suit celui auquel on l'applique dans la collection donnée
+     */
+    public PlayerId next(Collection<PlayerId> ids) {
+        return ids.contains(this.next()) ? this.next() : PLAYER_1;
     }
 }

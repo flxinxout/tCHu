@@ -160,7 +160,7 @@ public final class Game {
 
             gameHasEnded = gameState.lastPlayer() == gameState.currentPlayerId();
 
-            gameState = gameState.forNextTurn();
+            gameState = gameState.forNextTurn(playerIds);
         }
 
         // 3. Fin de la partie

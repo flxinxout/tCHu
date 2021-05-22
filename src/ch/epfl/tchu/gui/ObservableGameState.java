@@ -9,7 +9,7 @@ import javafx.collections.ObservableList;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ch.epfl.tchu.game.ChMap.*;
+import static ch.epfl.tchu.game.ChMap.routes;
 import static ch.epfl.tchu.game.Constants.*;
 
 /**
@@ -24,6 +24,7 @@ import static ch.epfl.tchu.game.Constants.*;
 public final class ObservableGameState {
 
     private final PlayerId id;
+    private final Collection<PlayerId> playerIds;
 
     // Groupe 1: propriétés de l'état public de la partie
     private final IntegerProperty ticketsPercentage, cardsPercentage;
@@ -45,10 +46,12 @@ public final class ObservableGameState {
      * Construit un état de jeu observable correspondant au joueur d'identité donnée. À la création, la totalité des
      * propriétés de cet état ont leur valeur par défaut.
      *
-     * @param id l'identité du joueur attaché à cet état de jeu observable
+     * @param playerIds la collection des identités de joueur utilisées durant la partie
+     * @param id        l'identité du joueur attaché à cet état de jeu observable
      */
-    public ObservableGameState(PlayerId id) {
+    public ObservableGameState(Collection<PlayerId> playerIds, PlayerId id) {
         this.id = id;
+        this.playerIds = playerIds;
 
         // 1.
         this.ticketsPercentage = new SimpleIntegerProperty();
@@ -57,10 +60,10 @@ public final class ObservableGameState {
         this.routesOwner = createRoutesOwner();
 
         // 2.
-        this.ticketCount = createPlayerIdMap();
-        this.cardCount = createPlayerIdMap();
-        this.carCount = createPlayerIdMap();
-        this.claimPoints = createPlayerIdMap();
+        this.ticketCount = createPlayerIdMap(playerIds);
+        this.cardCount = createPlayerIdMap(playerIds);
+        this.carCount = createPlayerIdMap(playerIds);
+        this.claimPoints = createPlayerIdMap(playerIds);
 
         // 3.
         this.tickets = FXCollections.observableArrayList();
@@ -110,9 +113,9 @@ public final class ObservableGameState {
      *
      * @return la table associative entre les joueurs du jeu et leurs différents comptes publics
      */
-    private static Map<PlayerId, IntegerProperty> createPlayerIdMap() {
+    private static Map<PlayerId, IntegerProperty> createPlayerIdMap(Collection<PlayerId> ids) {
         Map<PlayerId, IntegerProperty> map = new EnumMap<>(PlayerId.class);
-        for (PlayerId id : PlayerId.ALL)
+        for (PlayerId id : ids)
             map.put(id, new SimpleIntegerProperty());
         return map;
     }
@@ -141,7 +144,7 @@ public final class ObservableGameState {
 
         // 1.
         ticketsPercentage.setValue(100 * newGameState.ticketsCount() / ChMap.tickets().size());
-        cardsPercentage.setValue(100 * newGameState.cardState().deckSize() / TOTAL_CARDS_COUNT);
+        cardsPercentage.setValue(100 * newGameState.cardState().deckSize() / computeTotalCardsCount(newGameState.playerNb()));
 
         for (int slot : FACE_UP_CARD_SLOTS)
             faceUpCards.get(slot).setValue(newGameState.cardState().faceUpCard(slot));
@@ -149,7 +152,7 @@ public final class ObservableGameState {
         for (Route claimedRoute : newGameState.claimedRoutes()) {
             ObjectProperty<PlayerId> ownerP = routesOwner.get(claimedRoute);
             if (ownerP.getValue() == null) {
-                for (PlayerId pId : PlayerId.ALL) {
+                for (PlayerId pId : playerIds) {
                     if (newGameState.playerState(pId).routes().contains(claimedRoute))
                         ownerP.setValue(pId);
                 }
@@ -157,7 +160,7 @@ public final class ObservableGameState {
         }
 
         // 2.
-        for (PlayerId pId : PlayerId.ALL) {
+        for (PlayerId pId : playerIds) {
             ticketCount.get(pId).setValue(newGameState.playerState(pId).ticketCount());
             cardCount.get(pId).setValue(newGameState.playerState(pId).cardCount());
             carCount.get(pId).setValue(newGameState.playerState(pId).carCount());
@@ -170,11 +173,20 @@ public final class ObservableGameState {
         for (Card card : Card.ALL)
             cardOccurrences.get(card).setValue(playerState.cards().countOf(card));
 
-        for (Route route : routes())
+        for (Route route : routes()) {
+            Set<List<Station>> stations;
+            stations = playerIds.size() == MINIMUM_NUMBER_PLAYERS ?
+                    newGameState.claimedRoutes().stream()
+                            .map(Route::stations)
+                            .collect(Collectors.toSet()) :
+                    newGameState.playerState(id).routes().stream()
+                            .map(Route::stations)
+                            .collect(Collectors.toSet());
             routesClaimable.get(route).setValue(newGameState.currentPlayerId() == id &&
                     !newGameState.claimedRoutes().contains(route) &&
-                    !playerState.routes().contains(route) &&
+                    !stations.contains(route.stations()) &&
                     playerState.canClaimRoute(route));
+        }
     }
 
     /**

@@ -12,6 +12,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
+import static ch.epfl.tchu.game.Constants.*;
+
 /**
  * Programme principal du serveur tCHu.
  *
@@ -41,13 +43,13 @@ public final class ServerMain extends Application {
         List<String> args = getParameters().getRaw();
 
         int playerCount = args.isEmpty() ? DEFAULT_PLAYER_NUMBER : Integer.parseInt(args.get(0));
-        Preconditions.checkArgument(playerCount >= 2);
+        Preconditions.checkArgument(playerCount >= MINIMUM_NUMBER_PLAYERS && playerCount <= PlayerId.COUNT);
         List<PlayerId> playerIds = PlayerId.ALL.subList(0, playerCount);
 
         Map<PlayerId, String> playerNames = new EnumMap<>(PlayerId.class);
         for (int i = 0; i < playerCount; i++) {
             PlayerId id = playerIds.get(i);
-            playerNames.put(id, args.size() < (i + 2) ? DEFAULT_NAMES.get(i) : args.get(i + 1));
+            playerNames.put(id, args.size() <= (i + 1) ? DEFAULT_NAMES.get(i) : args.get(i + 1));
         }
 
         List<Player> playersProxy = new ArrayList<>();
@@ -59,12 +61,12 @@ public final class ServerMain extends Application {
             playersProxy.add(new RemotePlayerProxy(socket));
         }
 
-        SortedBag<Ticket> tickets = SortedBag.of(ChMap.tickets());
-
-        Map<PlayerId, Player> players = new HashMap<>();
+        Map<PlayerId, Player> players = new EnumMap<>(PlayerId.class);
         players.put(PlayerId.PLAYER_1, new GraphicalPlayerAdapter());
         for (int i = 1; i < playerCount; i++)
             players.put(playerIds.get(i), playersProxy.get(i-1));
+
+        SortedBag<Ticket> tickets = SortedBag.of(ChMap.tickets());
 
         new Thread(() -> Game.play(players, playerNames, tickets, new Random())).start();
     }

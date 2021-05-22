@@ -15,7 +15,7 @@ class PublicGameStateTest {
     void publicGameStateConstructorFailsWithInvalidTicketsCount() {
         var faceUpCards = SortedBag.of(5, Card.LOCOMOTIVE).toList();
         var cardState = new PublicCardState(faceUpCards, 0, 0);
-        var initialPlayerState = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
+        var initialPlayerState = (PublicPlayerState) PlayerState.initial(2, SortedBag.of(4, Card.RED));
         var playerState = Map.of(
                 PLAYER_1, initialPlayerState,
                 PLAYER_2, initialPlayerState);
@@ -32,7 +32,7 @@ class PublicGameStateTest {
     void publicGameStateConstructorFailsWithInvalidPlayerState() {
         var faceUpCards = SortedBag.of(5, Card.LOCOMOTIVE).toList();
         var cardState = new PublicCardState(faceUpCards, 0, 0);
-        var initialPlayerState = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
+        var initialPlayerState = (PublicPlayerState) PlayerState.initial(2,SortedBag.of(4, Card.RED));
         var playerState = Map.of(PLAYER_1, initialPlayerState);
         assertThrows(IllegalArgumentException.class, () -> {
             new PublicGameState(1, cardState, PLAYER_1, playerState, PLAYER_1);
@@ -43,7 +43,7 @@ class PublicGameStateTest {
     void publicGameStateConstructorFailsWithNullArguments() {
         var faceUpCards = SortedBag.of(5, Card.LOCOMOTIVE).toList();
         var cardState = new PublicCardState(faceUpCards, 0, 0);
-        var initialPlayerState = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
+        var initialPlayerState = (PublicPlayerState) PlayerState.initial(2, SortedBag.of(4, Card.RED));
         var playerState = Map.of(
                 PLAYER_1, initialPlayerState,
                 PLAYER_2, initialPlayerState);
@@ -65,7 +65,7 @@ class PublicGameStateTest {
     void publicGameStateTicketsCountReturnsTicketsCount() {
         var faceUpCards = SortedBag.of(5, Card.LOCOMOTIVE).toList();
         var cardState = new PublicCardState(faceUpCards, 0, 0);
-        var initialPlayerState = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
+        var initialPlayerState = (PublicPlayerState) PlayerState.initial(2,SortedBag.of(4, Card.RED));
         var playerState = Map.of(
                 PLAYER_1, initialPlayerState,
                 PLAYER_2, initialPlayerState);
@@ -79,7 +79,7 @@ class PublicGameStateTest {
     void publicGameStateCanDrawTicketsWorks() {
         var faceUpCards = SortedBag.of(5, Card.LOCOMOTIVE).toList();
         var cardState = new PublicCardState(faceUpCards, 0, 0);
-        var initialPlayerState = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
+        var initialPlayerState = (PublicPlayerState) PlayerState.initial(2,SortedBag.of(4, Card.RED));
         var playerState = Map.of(
                 PLAYER_1, initialPlayerState,
                 PLAYER_2, initialPlayerState);
@@ -94,7 +94,7 @@ class PublicGameStateTest {
     void publicGameStateCardStateReturnsCardState() {
         var faceUpCards = SortedBag.of(5, Card.LOCOMOTIVE).toList();
         var cardState = new PublicCardState(faceUpCards, 0, 0);
-        var initialPlayerState = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
+        var initialPlayerState = (PublicPlayerState) PlayerState.initial(2,SortedBag.of(4, Card.RED));
         var playerState = Map.of(
                 PLAYER_1, initialPlayerState,
                 PLAYER_2, initialPlayerState);
@@ -105,7 +105,7 @@ class PublicGameStateTest {
     @Test
     void publicGameStateCanDrawCardsWorks() {
         var faceUpCards = SortedBag.of(5, Card.LOCOMOTIVE).toList();
-        var initialPlayerState = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
+        var initialPlayerState = (PublicPlayerState) PlayerState.initial(2,SortedBag.of(4, Card.RED));
         var playerState = Map.of(
                 PLAYER_1, initialPlayerState,
                 PLAYER_2, initialPlayerState);
@@ -124,7 +124,7 @@ class PublicGameStateTest {
     void publicGameStateCurrentPlayerIdReturnsCurrentPlayerId() {
         var faceUpCards = SortedBag.of(5, Card.LOCOMOTIVE).toList();
         var cardState = new PublicCardState(faceUpCards, 0, 0);
-        var initialPlayerState = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
+        var initialPlayerState = (PublicPlayerState) PlayerState.initial(2,SortedBag.of(4, Card.RED));
         var playerState = Map.of(
                 PLAYER_1, initialPlayerState,
                 PLAYER_2, initialPlayerState);
@@ -138,8 +138,8 @@ class PublicGameStateTest {
     void publicGameStatePlayerStateReturnsPlayerState() {
         var faceUpCards = SortedBag.of(5, Card.LOCOMOTIVE).toList();
         var cardState = new PublicCardState(faceUpCards, 0, 0);
-        var initialPlayerState1 = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
-        var initialPlayerState2 = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
+        var initialPlayerState1 = (PublicPlayerState) PlayerState.initial(2,SortedBag.of(4, Card.RED));
+        var initialPlayerState2 = (PublicPlayerState) PlayerState.initial(2,SortedBag.of(4, Card.RED));
         var playerState = Map.of(
                 PLAYER_1, initialPlayerState1,
                 PLAYER_2, initialPlayerState2);
@@ -152,8 +152,8 @@ class PublicGameStateTest {
     void publicGameStateCurrentPlayerStateReturnsCurrentPlayerState() {
         var faceUpCards = SortedBag.of(5, Card.LOCOMOTIVE).toList();
         var cardState = new PublicCardState(faceUpCards, 0, 0);
-        var initialPlayerState1 = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
-        var initialPlayerState2 = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
+        var initialPlayerState1 = (PublicPlayerState) PlayerState.initial(2,SortedBag.of(4, Card.RED));
+        var initialPlayerState2 = (PublicPlayerState) PlayerState.initial(2,SortedBag.of(4, Card.RED));
         var playerState = Map.of(
                 PLAYER_1, initialPlayerState1,
                 PLAYER_2, initialPlayerState2);
@@ -181,8 +181,8 @@ class PublicGameStateTest {
             routes12.addAll(routes2);
 
             var playerState = Map.of(
-                    PLAYER_1, new PublicPlayerState(0, 0, routes1),
-                    PLAYER_2, new PublicPlayerState(0, 0, routes2));
+                    PLAYER_1, new PublicPlayerState(2,0, 0, routes1),
+                    PLAYER_2, new PublicPlayerState(2,0, 0, routes2));
 
             var pgs = new PublicGameState(1, cardState, PLAYER_1, playerState, PLAYER_1);
             assertEquals(routes12, new HashSet<>(pgs.claimedRoutes()));
@@ -193,7 +193,7 @@ class PublicGameStateTest {
     void publicGameStateLastPlayerReturnsLastPlayer() {
         var faceUpCards = SortedBag.of(5, Card.LOCOMOTIVE).toList();
         var cardState = new PublicCardState(faceUpCards, 0, 0);
-        var initialPlayerState = (PublicPlayerState) PlayerState.initial(SortedBag.of(4, Card.RED));
+        var initialPlayerState = (PublicPlayerState) PlayerState.initial(2,SortedBag.of(4, Card.RED));
         var playerState = Map.of(
                 PLAYER_1, initialPlayerState,
                 PLAYER_2, initialPlayerState);

@@ -10,31 +10,29 @@ public final class Constants {
     /**
      * Nombre de cartes wagon de chaque couleur.
      */
-    public static final int CAR_CARDS_COUNT = 12;
+    public static final int INDIVIDUAL_CAR_CARDS_COUNT = 6;
 
     /**
      * Nombre de cartes locomotive.
      */
-    public static final int LOCOMOTIVE_CARDS_COUNT = 14;
+    public static final int INDIVIDUAL_LOCOMOTIVE_CARDS_COUNT = 7;
+
+    /**
+     * Toutes les cartes du jeu.
+     */
+    public static SortedBag<Card> computeAllCards(int playerNb) {
+        var cardsBuilder = new SortedBag.Builder<Card>();
+        cardsBuilder.add(INDIVIDUAL_LOCOMOTIVE_CARDS_COUNT * playerNb, Card.LOCOMOTIVE);
+        for (Card card : Card.CARS)
+            cardsBuilder.add(INDIVIDUAL_CAR_CARDS_COUNT * playerNb, card);
+        return cardsBuilder.build();
+    }
 
     /**
      * Nombre total de cartes wagon/locomotive.
      */
-    public static final int TOTAL_CARDS_COUNT =
-            LOCOMOTIVE_CARDS_COUNT + CAR_CARDS_COUNT * Color.COUNT;
-
-    /**
-     * Ensemble de toutes les cartes (110 au total).
-     */
-    public static final SortedBag<Card> ALL_CARDS = computeAllCards();
-
-    private static SortedBag<Card> computeAllCards() {
-        var cardsBuilder = new SortedBag.Builder<Card>();
-        cardsBuilder.add(LOCOMOTIVE_CARDS_COUNT, Card.LOCOMOTIVE);
-        for (Card card : Card.CARS)
-            cardsBuilder.add(CAR_CARDS_COUNT, card);
-        assert cardsBuilder.size() == TOTAL_CARDS_COUNT;
-        return cardsBuilder.build();
+    public static int computeTotalCardsCount(int playerNb){
+        return computeAllCards(playerNb).size();
     }
 
     /**
@@ -65,7 +63,7 @@ public final class Constants {
     /**
      * Nombre de wagons dont dispose chaque joueur en début de partie.
      */
-    public static final int INITIAL_CAR_COUNT = 40;
+    public static final int INITIAL_CAR_COUNT = 60;
 
     /**
      * Nombre de billets tirés à la fois en cours de partie.
@@ -85,7 +83,7 @@ public final class Constants {
     /**
      * Nombre de points obtenus pour la construction de routes de longueur 1 à 6.
      * (L'élément à l'index i correspond à une longueur de route i. Une valeur
-     * invalide est placée à l'index 0, car les routes de longueur 0 n'existent pas).
+     @ -89,24 +44,73 @@ public final class Constants {
      */
     public static final List<Integer> ROUTE_CLAIM_POINTS =
             List.of(Integer.MIN_VALUE, 1, 2, 4, 7, 10, 15);

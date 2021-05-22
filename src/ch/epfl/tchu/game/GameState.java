@@ -5,6 +5,8 @@ import ch.epfl.tchu.SortedBag;
 
 import java.util.*;
 
+import static ch.epfl.tchu.game.Constants.*;
+
 /**
  * L'état d'une partie de tCHu.
  *
@@ -50,12 +52,12 @@ public final class GameState extends PublicGameState {
      */
     public static GameState initial(Collection<PlayerId> playerIds, SortedBag<Ticket> tickets, Random rng) {
         Deck<Ticket> ticketsDeck = Deck.of(tickets, rng);
-        Deck<Card> cardsDeck = Deck.of(Constants.ALL_CARDS, rng);
+        Deck<Card> cardsDeck = Deck.of(computeAllCards(playerIds.size()), rng);
 
         Map<PlayerId, PlayerState> playerState = new EnumMap<>(PlayerId.class);
         for (PlayerId id : playerIds) {
-            playerState.put(id, PlayerState.initial(cardsDeck.topCards(Constants.INITIAL_CARDS_COUNT)));
-            cardsDeck = cardsDeck.withoutTopCards(Constants.INITIAL_CARDS_COUNT);
+            playerState.put(id, PlayerState.initial(playerIds.size(), cardsDeck.topCards(INITIAL_CARDS_COUNT)));
+            cardsDeck = cardsDeck.withoutTopCards(INITIAL_CARDS_COUNT);
         }
 
         CardState cardState = CardState.of(cardsDeck);
@@ -270,8 +272,8 @@ public final class GameState extends PublicGameState {
      * @return un état identique à celui-ci, si ce n'est que le le tour des joueurs a été inversé
      * @see GameState#lastTurnBegins()
      */
-    public GameState forNextTurn() {
+    public GameState forNextTurn(Collection<PlayerId> ids) {
         PlayerId lastPlayer = lastTurnBegins() ? currentPlayerId() : lastPlayer();
-        return new GameState(tickets, cardState, currentPlayerId().next(), playerState, lastPlayer);
+        return new GameState(tickets, cardState, currentPlayerId().next(ids), playerState, lastPlayer);
     }
 }

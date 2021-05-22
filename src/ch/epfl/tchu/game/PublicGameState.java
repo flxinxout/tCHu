@@ -26,6 +26,7 @@ public class PublicGameState {
     private final PublicCardState cardState;
     private final PlayerId currentPlayerId;
     private final Map<PlayerId, PublicPlayerState> playerState;
+    private final int playerNb;
     private final PlayerId lastPlayer;
 
     /**
@@ -45,7 +46,8 @@ public class PublicGameState {
     public PublicGameState(int ticketsCount, PublicCardState cardState, PlayerId currentPlayerId,
                            Map<PlayerId, PublicPlayerState> playerState, PlayerId lastPlayer) {
         Preconditions.checkArgument(ticketsCount >= 0);
-        Preconditions.checkArgument(playerState.size() <= PlayerId.COUNT && playerState.size() >= MINIMUM_NUMBER_PLAYERS);
+        this.playerNb = playerState.size();
+        Preconditions.checkArgument(playerNb <= PlayerId.COUNT && playerNb >= MINIMUM_NUMBER_PLAYERS);
 
         this.cardState = Objects.requireNonNull(cardState);
         this.currentPlayerId = Objects.requireNonNull(currentPlayerId);
@@ -72,6 +74,15 @@ public class PublicGameState {
      */
     public PublicPlayerState playerState(PlayerId playerId) {
         return playerState.get(playerId);
+    }
+
+    /**
+     * Retourne le nombre de joueurs de cet état de jeu.
+     *
+     * @return le nombre de joueurs de cet état de jeu
+     */
+    public int playerNb(){
+        return playerNb;
     }
 
     /**

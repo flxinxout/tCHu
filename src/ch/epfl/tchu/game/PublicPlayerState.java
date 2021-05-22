@@ -4,6 +4,8 @@ import ch.epfl.tchu.Preconditions;
 
 import java.util.List;
 
+import static ch.epfl.tchu.game.Constants.*;
+
 /**
  * Partie publique (visible par tous les joueurs) de l'état d'un joueur, à savoir le nombre de billets, de cartes et de
  * wagons qu'il possède, les routes dont il s'est emparé, et le nombre de points de construction qu'il a ainsi obtenu.
@@ -28,14 +30,14 @@ public class PublicPlayerState {
      * @param routes      les routes dont le joueur s'est emparées
      * @throws IllegalArgumentException si {@code ticketCount} ou {@code cardCount} < 0
      */
-    public PublicPlayerState(int ticketCount, int cardCount, List<Route> routes) {
+    public PublicPlayerState(int playerNb, int ticketCount, int cardCount, List<Route> routes) {
         Preconditions.checkArgument(ticketCount >= 0 && cardCount >= 0);
 
         this.ticketCount = ticketCount;
         this.cardCount = cardCount;
         this.routes = List.copyOf(routes);
 
-        this.carCount = Constants.INITIAL_CAR_COUNT - routes.stream()
+        this.carCount = INITIAL_CAR_COUNT - 10 * playerNb - routes.stream()
                 .mapToInt(Route::length)
                 .sum();
 

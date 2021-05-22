@@ -114,8 +114,8 @@ public class SerdesTest {
         PublicCardState cs = new PublicCardState(fu, 30, 31);
         List<Route> rs1 = ChMap.routes().subList(0, 2);
         Map<PlayerId, PublicPlayerState> ps = Map.of(
-                PlayerId.PLAYER_1, new PublicPlayerState(0, 0, rs1),
-                PlayerId.PLAYER_2, new PublicPlayerState(20, 21, List.of()));
+                PlayerId.PLAYER_1, new PublicPlayerState(2,0, 0, rs1),
+                PlayerId.PLAYER_2, new PublicPlayerState(2,20, 21, List.of()));
         PublicGameState gs =
                 new PublicGameState(40, cs, PlayerId.PLAYER_2, ps, PlayerId.PLAYER_1);
 
@@ -149,14 +149,14 @@ public class SerdesTest {
     void playerStateSerdeTest() {
         List<Route> rs1 = ChMap.routes().subList(10, 15);
 
-        PlayerState playerState = new PlayerState(SortedBag.of(ChMap.tickets().get(2)),
+        PlayerState playerState = new PlayerState(2, SortedBag.of(ChMap.tickets().get(2)),
                 SortedBag.of(2, Card.LOCOMOTIVE, 5, Card.BLACK), rs1);
 
-        String s = Serdes.OF_PLAYER_STATE.serialize(playerState);
+        String s = Serdes.ofPlayerState(2).serialize(playerState);
         System.out.println(s);
         System.out.println();
 
-        PlayerState e = Serdes.OF_PLAYER_STATE.deserialize(s);
+        PlayerState e = Serdes.ofPlayerState(2).deserialize(s);
 
         System.out.println("tickets size: " + e.tickets().size());
         for(Ticket ticket : e.tickets()) {
@@ -182,13 +182,13 @@ public class SerdesTest {
     void publicPlayerStateSerdeTest() {
         List<Route> rs1 = ChMap.routes().subList(0, 2);
 
-        PublicPlayerState publicPlayerState = new PublicPlayerState(20, 20, List.of());
+        PublicPlayerState publicPlayerState = new PublicPlayerState(2,20, 20, List.of());
 
-        String s = Serdes.OF_PUBLIC_PLAYER_STATE.serialize(publicPlayerState);
+        String s = Serdes.ofPublicPlayerState(2).serialize(publicPlayerState);
         System.out.println(s);
         System.out.println("");
 
-        PublicPlayerState e = Serdes.OF_PUBLIC_PLAYER_STATE.deserialize(s);
+        PublicPlayerState e = Serdes.ofPublicPlayerState(2).deserialize(s);
 
         System.out.println("tickets size: " + e.ticketCount());
 

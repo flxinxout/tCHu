@@ -65,7 +65,7 @@ public final class Stage9Test extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        ObservableGameState gameState = new ObservableGameState(PLAYER_1);
+        ObservableGameState gameState = new ObservableGameState(PlayerId.ALL.subList(0, 2), PLAYER_1);
 
         ObjectProperty<ClaimRouteHandler> claimRoute = new SimpleObjectProperty<>(Stage9Test::claimRoute);
         ObjectProperty<DrawTicketsHandler> drawTickets = new SimpleObjectProperty<>(Stage9Test::drawTickets);
@@ -88,11 +88,11 @@ public final class Stage9Test extends Application {
     }
 
     private void setState(ObservableGameState gameState) {
-        PlayerState p1State = new PlayerState(SortedBag.of(tickets().subList(0, 4)),
+        PlayerState p1State = new PlayerState(2, SortedBag.of(tickets().subList(0, 4)),
                 SortedBag.of(List.of(Card.WHITE, Card.RED, Card.RED, Card.LOCOMOTIVE, Card.BLUE, Card.BLACK)),
                 routes().subList(0, 3));
 
-        PublicPlayerState p2State = new PublicPlayerState(0, 0, routes().subList(3, 6));
+        PublicPlayerState p2State = new PublicPlayerState(2,0, 0, routes().subList(3, 6));
 
         Map<PlayerId, PublicPlayerState> pubPlayerStates = Map.of(PLAYER_1, p1State, PLAYER_2, p2State);
         PublicCardState cardState = new PublicCardState(Card.ALL.subList(4, 9), 110 - 2 * 4 - 5, 0);

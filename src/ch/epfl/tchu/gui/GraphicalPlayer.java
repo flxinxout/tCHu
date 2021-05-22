@@ -61,7 +61,7 @@ public class GraphicalPlayer {
      */
     public GraphicalPlayer(PlayerId playerId, Map<PlayerId, String> playerNames) {
         assert isFxApplicationThread();
-        gameState = new ObservableGameState(playerId);
+        gameState = new ObservableGameState(playerNames.keySet(), playerId);
         texts = FXCollections.observableArrayList();
 
         mainStage = new Stage();

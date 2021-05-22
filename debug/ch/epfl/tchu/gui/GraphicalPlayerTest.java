@@ -16,11 +16,11 @@ import static ch.epfl.tchu.gui.ActionHandlers.*;
 
 public final class GraphicalPlayerTest extends Application {
     private void setState(GraphicalPlayer player) {
-        PlayerState p1State = new PlayerState(SortedBag.of(tickets().subList(0, 4)),
+        PlayerState p1State = new PlayerState(2,SortedBag.of(tickets().subList(0, 4)),
                 SortedBag.of(List.of(Card.WHITE, Card.RED, Card.RED, Card.LOCOMOTIVE, Card.BLUE, Card.BLACK)),
                 routes().subList(0, 3));
 
-        PublicPlayerState p2State = new PublicPlayerState(0, 0, routes().subList(3, 6));
+        PublicPlayerState p2State = new PublicPlayerState(2,0, 0, routes().subList(3, 6));
 
         Map<PlayerId, PublicPlayerState> pubPlayerStates = Map.of(PLAYER_1, p1State, PLAYER_2, p2State);
         PublicCardState cardState = new PublicCardState(Card.ALL.subList(4, 9), 110 - 2 * 4 - 5, 0);

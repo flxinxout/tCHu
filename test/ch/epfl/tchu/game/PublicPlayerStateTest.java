@@ -17,17 +17,17 @@ class PublicPlayerStateTest {
     @Test
     void publicPlayerStateConstructorFailsWithNegativeTicketOrCardCount() {
         assertThrows(IllegalArgumentException.class, () -> {
-            new PublicPlayerState(-1, +1, List.of());
+            new PublicPlayerState(2,-1, +1, List.of());
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            new PublicPlayerState(+1, -1, List.of());
+            new PublicPlayerState(2,+1, -1, List.of());
         });
     }
 
     @Test
     void publicPlayerStateTicketCountReturnsTicketCount() {
         for (int t = 0; t < 10; t++) {
-            var state = new PublicPlayerState(t, 0, List.of());
+            var state = new PublicPlayerState(2,t, 0, List.of());
             assertEquals(t, state.ticketCount());
         }
     }
@@ -35,7 +35,7 @@ class PublicPlayerStateTest {
     @Test
     void publicPlayerStateCardCountReturnsCardCount() {
         for (int c = 0; c < 10; c++) {
-            var state = new PublicPlayerState(0, c, List.of());
+            var state = new PublicPlayerState(2,0, c, List.of());
             assertEquals(c, state.cardCount());
         }
     }
@@ -45,7 +45,7 @@ class PublicPlayerStateTest {
         var rng = TestRandomizer.newRandom();
         for (int i = 0; i < TestRandomizer.RANDOM_ITERATIONS; i++) {
             var routes = randomRoutes(rng);
-            var state = new PublicPlayerState(0, 0, routes);
+            var state = new PublicPlayerState(2,0, 0, routes);
             assertEquals(routes, state.routes());
         }
     }
@@ -58,7 +58,7 @@ class PublicPlayerStateTest {
             var routesLength = 0;
             for (var route : routes) routesLength += route.length();
 
-            var state = new PublicPlayerState(0, 0, routes);
+            var state = new PublicPlayerState(2,0, 0, routes);
             assertEquals(TOTAL_CAR_COUNT - routesLength, state.carCount());
         }
     }
@@ -72,7 +72,7 @@ class PublicPlayerStateTest {
             var points = 0;
             for (var route : routes) points += claimPoints[route.length()];
 
-            var state = new PublicPlayerState(0, 0, routes);
+            var state = new PublicPlayerState(2,0, 0, routes);
             assertEquals(points, state.claimPoints());
         }
     }

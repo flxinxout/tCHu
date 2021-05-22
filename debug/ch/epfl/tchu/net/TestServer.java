@@ -31,7 +31,7 @@ public class TestServer {
                     PLAYER_2, "Charles");
             playerProxy.initPlayers(PLAYER_1, playerNames);
             playerProxy.receiveInfo(new Info(PLAYER_1.name()).canPlay());
-            playerProxy.updateState(GameState.initial(PlayerId.ALL, tickets, rng), new PlayerState(tickets, cards, routes));
+            playerProxy.updateState(GameState.initial(PlayerId.ALL, tickets, rng), new PlayerState(2,tickets, cards, routes));
             playerProxy.setInitialTicketChoice(tickets);
             System.out.printf("chosen initial tickets: %s\n", playerProxy.chooseInitialTickets());
             System.out.printf("turn kind: %s\n", playerProxy.nextTurn());

@@ -45,6 +45,7 @@ import static javafx.application.Platform.isFxApplicationThread;
  * @author Giovanni Ranieri (326870)
  */
 public class GraphicalPlayer {
+    private static final int MAX_MESSAGE_COUNT = 6;
 
     private final ObservableGameState gameState;
     private final ObservableList<Text> texts;
@@ -102,7 +103,7 @@ public class GraphicalPlayer {
      */
     public void receiveInfo(String message) {
         assert isFxApplicationThread();
-        if (texts.size() >= 5)
+        if (texts.size() >= MAX_MESSAGE_COUNT)
             texts.remove(0);
         texts.add(new Text(message));
     }

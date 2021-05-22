@@ -5,7 +5,6 @@ import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.gui.Info;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static ch.epfl.tchu.game.Constants.*;
 import static java.lang.Math.max;
@@ -166,50 +165,28 @@ public final class Game {
         // 3. Fin de la partie
         sendStateUpdate(gameState, players);
 
-        Map<PlayerId, Integer> points = new EnumMap<>(PlayerId.class);
-        Map<PlayerId, Trail> longestTrails = new EnumMap<>(PlayerId.class);
+        Map<Integer, String> points = new HashMap<>();
+        Map<String, Trail> longestTrails = new HashMap<>();
 
         // Calcul du chemin le plus long de chacun des joueurs
         int maxLength = 0;
         for (PlayerId id : playerIds) {
             Trail longest = Trail.longest(gameState.playerState(id).routes());
             maxLength = max(maxLength, longest.length());
-            longestTrails.put(id, longest);
+            longestTrails.put(playerNames.get(id), longest);
         }
 
         for (PlayerId id : playerIds) {
-            Trail tr = longestTrails.get(id);
+            String name = playerNames.get(id);
+            Trail tr = longestTrails.get(name);
             if (tr.length() == maxLength) {
                 sendInformation(infos.get(id).getsLongestTrailBonus(tr), playersValues);
-                points.put(id, gameState.playerState(id).finalPoints() + LONGEST_TRAIL_BONUS_POINTS);
+                points.put(gameState.playerState(id).finalPoints() + LONGEST_TRAIL_BONUS_POINTS, name);
             } else
-                points.put(id, gameState.playerState(id).finalPoints());
+                points.put(gameState.playerState(id).finalPoints(), name);
         }
 
-        int maxPoints = points.values().stream()
-                .mapToInt(Integer::valueOf)
-                .max().orElseThrow();
-        List<PlayerId> winnerIds = playerIds.stream()
-                .filter(id -> points.get(id) == maxPoints)
-                .collect(Collectors.toList());
-
-        if (winnerIds.size() == playerIds.size()) {
-            sendInformation(Info.draw(new ArrayList<>(playerNames.values()), points.get(PlayerId.PLAYER_1)), playersValues);
-        } else if (winnerIds.size() == playerIds.size() - 1) {
-            List<String> winnerNames = winnerIds.stream()
-                    .map(playerNames::get)
-                    .collect(Collectors.toList());
-            PlayerId loserId = playerIds.stream()
-                    .filter(id -> !winnerIds.contains(id))
-                    .findAny().orElseThrow();
-            sendInformation(Info.drawMultiplePlayers(
-                    winnerNames,
-                    maxPoints,
-                    points.get(loserId)), playersValues);
-        } else {
-            PlayerId winner = winnerIds.get(0);
-            sendInformation(infos.get(winner).won(maxPoints, points.get(winner.next()), points.get(winner.next().next())), playersValues);
-        }
+        sendInformation(Info.classement(points), playersValues);
     }
 
     /**

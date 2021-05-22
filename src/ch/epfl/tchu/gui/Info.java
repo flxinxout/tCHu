@@ -1,18 +1,12 @@
 package ch.epfl.tchu.gui;
 
-import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.Card;
-import ch.epfl.tchu.game.PlayerId;
 import ch.epfl.tchu.game.Route;
 import ch.epfl.tchu.game.Trail;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.*;
 
-import static ch.epfl.tchu.game.Constants.MINIMUM_NUMBER_PLAYERS;
 import static ch.epfl.tchu.gui.StringsFr.*;
 
 /**
@@ -68,36 +62,16 @@ public final class Info {
         }
     }
 
-    /**
-     * Retourne le message déclarant que les joueurs, dont les noms sont {@code playerNames},
-     * ont terminé la partie ex æqo en ayant chacun remporté {@code points} points.
-     *
-     * @param playerNames la liste des noms des joueurs
-     * @param points      les points remportés par les joueurs
-     * @return le message déclarant que les joueurs ont terminé la partie ex æqo
-     */
-    public static String draw(List<String> playerNames, int points) {
-        String playersNamesTogether = String.join(AND_SEPARATOR, playerNames);
-        return String.format(DRAW, playersNamesTogether, points);
-    }
+    public static String classement(Map<Integer, String> playerNamesPoints){
+        Map<Integer, String> playerNamesRank = new TreeMap<>(Comparator.reverseOrder());
+        playerNamesRank.putAll(playerNamesPoints);
+        StringBuilder sB = new StringBuilder(CLASSEMENT);
+        int rank = 1;
+        for (Map.Entry<Integer, String> e : playerNamesRank.entrySet()) {
+            sB.append(String.format(CLASSEMENT_SLOT, rank++, e.getValue(), e.getKey()));
+        }
 
-    /**
-     * Retourne le message déclarant que plusieurs joueurs (mais pas tous), dont les noms sont {@code winnerNames},
-     * ont terminé la partie ex æqo en ayant chacun remporté {@code points} points et le joueur restant a perdu avec {@code loserPoints}.
-     *
-     * @param winnerNames la liste des noms des gagnants
-     * @param points      les points remportés par les gagnants
-     * @param loserPoints les points remportés par le perdant
-     * @return le message déclarant que deux joueurs ont terminé la partie ex æqo
-     */
-    public static String drawMultiplePlayers(List<String> winnerNames, int points, int loserPoints) {
-        Preconditions.checkArgument(winnerNames.size() <= PlayerId.COUNT && winnerNames.size() >= MINIMUM_NUMBER_PLAYERS);
-        return String.format(DRAW_2_PLAYERS,
-                joinListToString(winnerNames),
-                points,
-                plural(points),
-                loserPoints,
-                plural(loserPoints));
+        return sB.toString();
     }
 
     /**
@@ -282,29 +256,6 @@ public final class Info {
      */
     public String getsLongestTrailBonus(Trail longestTrail) {
         return String.format(GETS_BONUS, playerName, nameOf(longestTrail));
-    }
-
-    /**
-     * Retourne le message déclarant que le joueur remporte la partie avec {@code points} points
-     * et ses adversaires n'en ayant obtenu que {@code loserPoints}. Si plus de 3 éléments sont donnés en tant
-     * que loserPoints, seuls les 3 donnés sont comptés
-     *
-     * @param points      les points du vainqueur
-     * @param loserPoints les points des perdants
-     * @return le message déclarant que le joueur remporte la partie avec {@code points} points
-     * @throws IllegalArgumentException si {@code loserPoints} est vide ou plus grand que 3
-     */
-    public String won(int points, int... loserPoints) {
-        Preconditions.checkArgument(loserPoints.length > 0 && loserPoints.length <= 3);
-        List<String> pointsStr = Stream.of(loserPoints)
-                .map(String::valueOf)
-                .collect(Collectors.toList());
-
-        return String.format(WINS,
-                playerName,
-                points,
-                plural(points),
-                pointsStr);
     }
 }
 

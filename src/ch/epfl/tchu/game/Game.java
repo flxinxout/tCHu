@@ -17,6 +17,7 @@ import static java.lang.Math.max;
  */
 public final class Game {
     private final static int CARDS_DRAWN_COUNT = 2;
+    private final static int MAX_MESSAGE_COUNT = 6;
 
     private Game() {
     }
@@ -174,6 +175,10 @@ public final class Game {
             Trail longest = Trail.longest(gameState.playerState(id).routes());
             maxLength = max(maxLength, longest.length());
             longestTrails.put(playerNames.get(id), longest);
+        }
+
+        for (int i = 0; i < MAX_MESSAGE_COUNT; i++) {
+            sendInformation("", playersValues);
         }
 
         for (PlayerId id : playerIds) {

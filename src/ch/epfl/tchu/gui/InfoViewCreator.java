@@ -53,13 +53,20 @@ final class InfoViewCreator {
         VBox playerStats = new VBox();
         playerStats.setId(PLAYER_STATS_ID);
 
+        System.out.println(playerId);
         Set<PlayerId> playerIds = new TreeSet<>((i1, i2) -> {
             if (i1 == playerId)
+                return Integer.MIN_VALUE;
+            else if (i2 == playerId)
                 return Integer.MAX_VALUE;
             else if (i1 == i2)
                 return 0;
-            else
-                return i1.ordinal() - i2.ordinal();
+            else {
+                return Integer.signum(i1.ordinal() - playerId.ordinal()) != Integer.signum(i2.ordinal() - playerId.ordinal()) ?
+                        i2.ordinal() - i1.ordinal() :
+                        i1.ordinal() - i2.ordinal();
+            }
+
         });
         playerIds.addAll(playerNames.keySet());
 

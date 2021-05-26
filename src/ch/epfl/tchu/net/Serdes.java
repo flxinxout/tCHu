@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import static ch.epfl.tchu.game.Constants.*;
 import static ch.epfl.tchu.game.Player.*;
 
 /**
@@ -103,15 +104,15 @@ public final class Serdes {
     /**
      * {@code Serde} relatif aux {@code PublicPlayerState}.
      */
-    public static Serde<PublicPlayerState> ofPublicPlayerState(int playerNb){
-            return Serde.of(serFuncPublicPlayerState(playerNb), deserFuncPublicPlayerState());
+    public static Serde<PublicPlayerState> ofPublicPlayerState(int initialCarCount){
+            return Serde.of(serFuncPublicPlayerState(initialCarCount), deserFuncPublicPlayerState());
     }
 
     /**
      * {@code Serde} relatif aux {@code PlayerState}.
      */
-    public static Serde<PlayerState> ofPlayerState(int playerNb) {
-        return Serde.of(serFuncPlayerState(playerNb), deserFuncPlayerState());
+    public static Serde<PlayerState> ofPlayerState(int initialCarCount) {
+        return Serde.of(serFuncPlayerState(initialCarCount), deserFuncPlayerState());
     }
 
     /**
@@ -157,15 +158,14 @@ public final class Serdes {
      *
      * @return la fonction de sérialisation d'un {@code PublicPlayerState}
      */
-    private static Function<PublicPlayerState, String> serFuncPublicPlayerState(int playerNb) {
+    private static Function<PublicPlayerState, String> serFuncPublicPlayerState(int initialCarCount) {
         return publicPlayerState -> {
             StringJoiner joiner = new StringJoiner(String.valueOf(COLL_DELIM_DEG2));
-            if(publicPlayerState != null) {
-                joiner.add(Serdes.OF_INTEGER.serialize(playerNb));
-                joiner.add(Serdes.OF_INTEGER.serialize(publicPlayerState.ticketCount()));
-                joiner.add(Serdes.OF_INTEGER.serialize(publicPlayerState.cardCount()));
-                joiner.add(Serdes.OF_LIST_OF_ROUTES.serialize(publicPlayerState.routes()));
-            }
+            joiner.add(Serdes.OF_INTEGER.serialize(initialCarCount));
+            joiner.add(Serdes.OF_INTEGER.serialize(publicPlayerState.ticketCount()));
+            joiner.add(Serdes.OF_INTEGER.serialize(publicPlayerState.cardCount()));
+            joiner.add(Serdes.OF_LIST_OF_ROUTES.serialize(publicPlayerState.routes()));
+
             return joiner.toString();
         };
     }
@@ -190,10 +190,10 @@ public final class Serdes {
      *
      * @return la fonction de sérialisation d'un {@code PlayerState}
      */
-    private static Function<PlayerState, String> serFuncPlayerState(int playerNb) {
+    private static Function<PlayerState, String> serFuncPlayerState(int initialCarCount) {
         return playerState -> {
             StringJoiner joiner = new StringJoiner(String.valueOf(COLL_DELIM_DEG2));
-            joiner.add(Serdes.OF_INTEGER.serialize(playerNb));
+            joiner.add(Serdes.OF_INTEGER.serialize(initialCarCount));
             joiner.add(Serdes.OF_SORTED_BAG_OF_TICKETS.serialize(playerState.tickets()));
             joiner.add(Serdes.OF_SORTED_BAG_OF_CARD.serialize(playerState.cards()));
             joiner.add(Serdes.OF_LIST_OF_ROUTES.serialize(playerState.routes()));
@@ -231,9 +231,11 @@ public final class Serdes {
             int playerNb = (int)PlayerId.ALL.stream()
                     .filter(id -> publicGameState.playerState(id) != null)
                     .count();
+            int initialCarCount = INITIAL_CAR_COUNT - 10 * playerNb;
+
             for (PlayerId id : PlayerId.ALL) {
                 PublicPlayerState playerState = publicGameState.playerState(id);
-                joiner.add(playerState == null ? "" : Serdes.ofPublicPlayerState(playerNb).serialize(playerState));
+                joiner.add(playerState == null ? "" : Serdes.ofPublicPlayerState(initialCarCount).serialize(playerState));
             }
             joiner.add(publicGameState.lastPlayer() == null ?
                     "" : Serdes.OF_PLAYER_ID.serialize(publicGameState.lastPlayer()));
@@ -257,10 +259,11 @@ public final class Serdes {
                 if (!e.isEmpty())
                     playerNb += 1;
             }
+            int initialCarCount = INITIAL_CAR_COUNT - 10 * playerNb;
             for (int i = 0; i < PlayerId.COUNT; i++) {
                 String e = elements[i + playerStateStartsAt];
                 if (!e.isEmpty())
-                    playerState.put(PlayerId.ALL.get(i), Serdes.ofPublicPlayerState(playerNb).deserialize(e));
+                    playerState.put(PlayerId.ALL.get(i), Serdes.ofPublicPlayerState(initialCarCount).deserialize(e));
             }
             return new PublicGameState(
                     Serdes.OF_INTEGER.deserialize(elements[0]),

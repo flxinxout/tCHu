@@ -144,7 +144,7 @@ public final class ObservableGameState {
 
         // 1.
         ticketsPercentage.setValue(100 * newGameState.ticketsCount() / ChMap.tickets().size());
-        cardsPercentage.setValue(100 * newGameState.cardState().deckSize() / computeTotalCardsCount(newGameState.playerNb()));
+        cardsPercentage.setValue(100 * newGameState.cardState().deckSize() / computeTotalCardsCount(newGameState.playerCount()));
 
         for (int slot : FACE_UP_CARD_SLOTS)
             faceUpCards.get(slot).setValue(newGameState.cardState().faceUpCard(slot));

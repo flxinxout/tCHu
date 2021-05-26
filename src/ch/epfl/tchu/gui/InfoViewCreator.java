@@ -11,9 +11,9 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static ch.epfl.tchu.gui.MapViewCreator.FILLED_SC;
 
@@ -53,19 +53,18 @@ final class InfoViewCreator {
         VBox playerStats = new VBox();
         playerStats.setId(PLAYER_STATS_ID);
 
-        Set<PlayerId> playerIds = new TreeSet<>((i1, i2) -> {
-            if (i1 == playerId)
-                return Integer.MIN_VALUE;
-            else if (i2 == playerId)
-                return Integer.MAX_VALUE;
-            else {
-                return Integer.signum(i1.ordinal() - playerId.ordinal()) != Integer.signum(i2.ordinal() - playerId.ordinal()) ?
-                        i2.ordinal() - i1.ordinal() :
-                        i1.ordinal() - i2.ordinal();
-            }
-
-        });
-        playerIds.addAll(playerNames.keySet());
+        List<PlayerId> playerIds = playerNames.keySet().stream()
+                .sorted((i1, i2) -> {
+                    if (i1 == playerId)
+                        return Integer.MIN_VALUE;
+                    else if (i2 == playerId)
+                        return Integer.MAX_VALUE;
+                    else {
+                        return Integer.signum(i1.ordinal() - playerId.ordinal()) != Integer.signum(i2.ordinal() - playerId.ordinal()) ?
+                                i2.ordinal() - i1.ordinal() :
+                                i1.ordinal() - i2.ordinal();
+                    }
+                }).collect(Collectors.toList());
 
         for (PlayerId id : playerIds) {
             TextFlow playerTextFlow = new TextFlow();

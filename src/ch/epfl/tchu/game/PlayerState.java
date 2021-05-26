@@ -6,6 +6,7 @@ import ch.epfl.tchu.SortedBag;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ch.epfl.tchu.game.Constants.INITIAL_CAR_COUNT;
 import static java.lang.Math.*;
 
 /**
@@ -17,7 +18,6 @@ import static java.lang.Math.*;
  */
 public final class PlayerState extends PublicPlayerState {
 
-    private final int playerNb;
     private final SortedBag<Ticket> tickets;
     private final SortedBag<Card> cards;
 
@@ -29,10 +29,9 @@ public final class PlayerState extends PublicPlayerState {
      * @param cards   les cartes que possède le joueur
      * @param routes  les routes dont le joueur s'est emparées
      */
-    public PlayerState(int playerNb, SortedBag<Ticket> tickets, SortedBag<Card> cards, List<Route> routes) {
-        super(playerNb, tickets.size(), cards.size(), routes);
+    public PlayerState(int initialCarCount, SortedBag<Ticket> tickets, SortedBag<Card> cards, List<Route> routes) {
+        super(initialCarCount, tickets.size(), cards.size(), routes);
 
-        this.playerNb = playerNb;
         this.tickets = tickets;
         this.cards = cards;
     }
@@ -47,7 +46,8 @@ public final class PlayerState extends PublicPlayerState {
      */
     public static PlayerState initial(int playerNb, SortedBag<Card> initialCards) {
         Preconditions.checkArgument(initialCards.size() == Constants.INITIAL_CARDS_COUNT);
-        return new PlayerState(playerNb, SortedBag.of(), initialCards, List.of());
+        int initialCarCount = INITIAL_CAR_COUNT - 10 * playerNb;
+        return new PlayerState(initialCarCount, SortedBag.of(), initialCards, List.of());
     }
 
     /**
@@ -57,7 +57,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return un état identique à celui-ci, si ce n'est que ce joueur possède en plus les billets {@code newTickets}
      */
     public PlayerState withAddedTickets(SortedBag<Ticket> newTickets) {
-        return new PlayerState(playerNb, tickets.union(newTickets), cards, routes());
+        return new PlayerState(initialCarCount(), tickets.union(newTickets), cards, routes());
     }
 
     /**
@@ -67,7 +67,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return un état identique à celui-ci, si ce n'est que ce joueur possède en plus la carte {@code card}
      */
     public PlayerState withAddedCard(Card card) {
-        return new PlayerState(playerNb, tickets(), cards.union(SortedBag.of(card)), routes());
+        return new PlayerState(initialCarCount(), tickets(), cards.union(SortedBag.of(card)), routes());
     }
 
     /**
@@ -158,7 +158,7 @@ public final class PlayerState extends PublicPlayerState {
         List<Route> newRoutes = new ArrayList<>(routes());
         newRoutes.add(route);
 
-        return new PlayerState(playerNb, tickets(), newCards, newRoutes);
+        return new PlayerState(initialCarCount(), tickets(), newCards, newRoutes);
     }
 
     /**

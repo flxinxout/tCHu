@@ -62,7 +62,13 @@ public final class Info {
         }
     }
 
-    public static String classement(Map<Integer, String> playerNamesPoints){
+    /**
+     * Retourne le message contenant le classement des joueurs avec les points et les noms donnés.
+     *
+     * @param playerNamesPoints table associant les points des joueurs à leur nom
+     * @return le message contenant le classement des joueurs avec les points et les noms donnés
+     */
+    public static String classement(Map<Integer, String> playerNamesPoints) {
         Map<Integer, String> playerNamesRank = new TreeMap<>(Comparator.reverseOrder());
         playerNamesRank.putAll(playerNamesPoints);
         StringBuilder sB = new StringBuilder(CLASSEMENT);

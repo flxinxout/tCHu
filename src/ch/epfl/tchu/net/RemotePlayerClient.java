@@ -1,10 +1,7 @@
 package ch.epfl.tchu.net;
 
 import ch.epfl.tchu.SortedBag;
-import ch.epfl.tchu.game.Card;
-import ch.epfl.tchu.game.Player;
-import ch.epfl.tchu.game.PlayerId;
-import ch.epfl.tchu.game.Ticket;
+import ch.epfl.tchu.game.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -13,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static ch.epfl.tchu.game.Constants.*;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 /**
@@ -26,7 +24,7 @@ public final class RemotePlayerClient {
     private final Player player;
     private final String hostName;
     private final int port;
-    private int playerNb = 2;
+    private int playerCount = MINIMUM_NUMBER_PLAYERS;
 
     /**
      * Construit le client du joueur donné, auquel il doit fournir un accès distant à l'aide
@@ -60,11 +58,11 @@ public final class RemotePlayerClient {
 
                 switch (MessageId.valueOf(message[0])) {
                     case INIT_PLAYERS:
-                        playerNb = Serdes.OF_INTEGER.deserialize(message[1]);
+                        playerCount = Serdes.OF_INTEGER.deserialize(message[1]);
                         PlayerId id = Serdes.OF_PLAYER_ID.deserialize(message[2]);
                         List<String> names = Serdes.OF_LIST_OF_STRINGS.deserialize(message[3]);
                         Map<PlayerId, String> playerNames = new EnumMap<>(PlayerId.class);
-                        for (int i = 0; i < playerNb; i++) {
+                        for (int i = 0; i < playerCount; i++) {
                             playerNames.put(PlayerId.ALL.get(i), names.get(i));
                         }
 
@@ -76,8 +74,9 @@ public final class RemotePlayerClient {
                         break;
 
                     case UPDATE_STATE:
+                        int initialCarCount = INITIAL_CAR_COUNT - 10 * playerCount;
                         player.updateState(Serdes.OF_PUBLIC_GAME_STATE.deserialize(message[1]),
-                                Serdes.ofPlayerState(playerNb).deserialize(message[2]));
+                                Serdes.ofPlayerState(initialCarCount).deserialize(message[2]));
                         break;
 
                     case SET_INITIAL_TICKETS:

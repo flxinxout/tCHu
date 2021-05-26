@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.*;
 
+import static ch.epfl.tchu.game.Constants.INITIAL_CAR_COUNT;
 import static ch.epfl.tchu.net.MessageId.*;
 import static ch.epfl.tchu.net.Serdes.*;
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -114,7 +115,8 @@ public final class RemotePlayerProxy implements Player {
      */
     @Override
     public void updateState(PublicGameState newState, PlayerState ownState) {
-        writeMessage(UPDATE_STATE, OF_PUBLIC_GAME_STATE.serialize(newState), ofPlayerState(playerNb).serialize(ownState));
+        int initialCarCount = INITIAL_CAR_COUNT - 10 * playerNb;
+        writeMessage(UPDATE_STATE, OF_PUBLIC_GAME_STATE.serialize(newState), ofPlayerState(initialCarCount).serialize(ownState));
     }
 
     /**

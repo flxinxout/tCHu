@@ -52,11 +52,11 @@ public final class GameState extends PublicGameState {
      */
     public static GameState initial(Collection<PlayerId> playerIds, SortedBag<Ticket> tickets, Random rng) {
         Deck<Ticket> ticketsDeck = Deck.of(tickets, rng);
-        Deck<Card> cardsDeck = Deck.of(computeAllCards(playerIds.size()), rng);
+        Deck<Card> cardsDeck = Deck.of(ALL_CARDS, rng);
 
         Map<PlayerId, PlayerState> playerState = new EnumMap<>(PlayerId.class);
         for (PlayerId id : playerIds) {
-            playerState.put(id, PlayerState.initial(playerIds.size(), cardsDeck.topCards(INITIAL_CARDS_COUNT)));
+            playerState.put(id, PlayerState.initial(cardsDeck.topCards(INITIAL_CARDS_COUNT)));
             cardsDeck = cardsDeck.withoutTopCards(INITIAL_CARDS_COUNT);
         }
 

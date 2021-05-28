@@ -13,8 +13,7 @@ public enum PlayerId {
 
     PLAYER_1,
     PLAYER_2,
-    PLAYER_3,
-    PLAYER_4;
+    PLAYER_3;
 
     /**
      * La liste contenant les différentes identités des joueurs.
@@ -38,8 +37,6 @@ public enum PlayerId {
             case PLAYER_2:
                 return PLAYER_3;
             case PLAYER_3:
-                return PLAYER_4;
-            case PLAYER_4:
                 return PLAYER_1;
             default:
                 throw new Error();

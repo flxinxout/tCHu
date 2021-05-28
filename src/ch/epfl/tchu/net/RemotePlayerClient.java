@@ -24,7 +24,8 @@ public final class RemotePlayerClient {
     private final Player player;
     private final String hostName;
     private final int port;
-    private int playerCount = MINIMUM_NUMBER_PLAYERS;
+
+    private Serde<SortedBag<Ticket>> ticketsSerde = Serdes.OF_SORTED_BAG_OF_TICKETS;
 
     /**
      * Construit le client du joueur donné, auquel il doit fournir un accès distant à l'aide
@@ -58,13 +59,13 @@ public final class RemotePlayerClient {
 
                 switch (MessageId.valueOf(message[0])) {
                     case INIT_PLAYERS:
-                        playerCount = Serdes.OF_INTEGER.deserialize(message[1]);
-                        PlayerId id = Serdes.OF_PLAYER_ID.deserialize(message[2]);
-                        List<String> names = Serdes.OF_LIST_OF_STRINGS.deserialize(message[3]);
+                        PlayerId id = Serdes.OF_PLAYER_ID.deserialize(message[1]);
+                        List<String> names = Serdes.OF_LIST_OF_STRINGS.deserialize(message[2]);
+                        ticketsSerde = names.size() == MINIMUM_PLAYER_COUNT ?
+                                Serdes.OF_SORTED_BAG_OF_TICKETS : Serdes.OF_SORTED_BAG_OF_SUPP_TICKETS;
                         Map<PlayerId, String> playerNames = new EnumMap<>(PlayerId.class);
-                        for (int i = 0; i < playerCount; i++) {
+                        for (int i = 0; i < names.size(); i++)
                             playerNames.put(PlayerId.ALL.get(i), names.get(i));
-                        }
 
                         player.initPlayers(id, playerNames);
                         break;
@@ -74,17 +75,16 @@ public final class RemotePlayerClient {
                         break;
 
                     case UPDATE_STATE:
-                        int initialCarCount = INITIAL_CAR_COUNT - 10 * playerCount;
                         player.updateState(Serdes.OF_PUBLIC_GAME_STATE.deserialize(message[1]),
-                                Serdes.ofPlayerState(initialCarCount).deserialize(message[2]));
+                                Serdes.OF_PLAYER_STATE.deserialize(message[2]));
                         break;
 
                     case SET_INITIAL_TICKETS:
-                        player.setInitialTicketChoice(Serdes.OF_SORTED_BAG_OF_TICKETS.deserialize(message[1]));
+                        player.setInitialTicketChoice(ticketsSerde.deserialize(message[1]));
                         break;
 
                     case CHOOSE_INITIAL_TICKETS:
-                        writer.write(Serdes.OF_SORTED_BAG_OF_TICKETS.serialize(player.chooseInitialTickets()));
+                        writer.write(ticketsSerde.serialize(player.chooseInitialTickets()));
                         writer.write('\n');
                         writer.flush();
                         break;
@@ -97,8 +97,8 @@ public final class RemotePlayerClient {
 
                     case CHOOSE_TICKETS:
                         SortedBag<Ticket> chosenTickets = player
-                                .chooseTickets(Serdes.OF_SORTED_BAG_OF_TICKETS.deserialize(message[1]));
-                        writer.write(Serdes.OF_SORTED_BAG_OF_TICKETS.serialize(chosenTickets));
+                                .chooseTickets(ticketsSerde.deserialize(message[1]));
+                        writer.write(ticketsSerde.serialize(chosenTickets));
                         writer.write('\n');
                         writer.flush();
                         break;

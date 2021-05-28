@@ -4,6 +4,8 @@ import ch.epfl.tchu.Preconditions;
 
 import java.util.List;
 
+import static ch.epfl.tchu.game.Constants.*;
+
 /**
  * Partie publique (visible par tous les joueurs) de l'état d'un joueur, à savoir le nombre de billets, de cartes et de
  * wagons qu'il possède, les routes dont il s'est emparé, et le nombre de points de construction qu'il a ainsi obtenu.
@@ -17,7 +19,6 @@ public class PublicPlayerState {
     private final int cardCount;
     private final List<Route> routes;
     private final int carCount;
-    private final int initialCarCount;
     private final int claimPoints;
 
     /**
@@ -29,15 +30,14 @@ public class PublicPlayerState {
      * @param routes      les routes dont le joueur s'est emparées
      * @throws IllegalArgumentException si {@code ticketCount} ou {@code cardCount} < 0
      */
-    public PublicPlayerState(int initialCarCount, int ticketCount, int cardCount, List<Route> routes) {
+    public PublicPlayerState(int ticketCount, int cardCount, List<Route> routes) {
         Preconditions.checkArgument(ticketCount >= 0 && cardCount >= 0);
 
         this.ticketCount = ticketCount;
         this.cardCount = cardCount;
         this.routes = List.copyOf(routes);
 
-        this.initialCarCount = initialCarCount;
-        this.carCount = initialCarCount - routes.stream()
+        this.carCount = INITIAL_CAR_COUNT - routes.stream()
                 .mapToInt(Route::length)
                 .sum();
 
@@ -80,15 +80,6 @@ public class PublicPlayerState {
      */
     public int carCount() {
         return carCount;
-    }
-
-    /**
-     * Retourne le nombre de wagons que possédait ce joueur au début de la partie.
-     *
-     * @return le nombre de wagons que possédait ce joueur au début de la partie
-     */
-    public int initialCarCount() {
-        return initialCarCount;
     }
 
     /**

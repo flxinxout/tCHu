@@ -12,6 +12,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
+import static ch.epfl.tchu.game.ChMap.*;
 import static ch.epfl.tchu.game.Constants.*;
 
 /**
@@ -24,7 +25,7 @@ public final class ServerMain extends Application {
 
     private static final int DEFAULT_PORT = 5108;
     private static final int DEFAULT_PLAYER_NUMBER = 2;
-    private static final List<String> DEFAULT_NAMES = List.of("Ada", "Charles", "Odor", "Renée");
+    private static final List<String> DEFAULT_NAMES = List.of("Ada", "Charles", "Odor");
 
 
     public static void main(String[] args) {
@@ -41,9 +42,9 @@ public final class ServerMain extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
         List<String> args = getParameters().getRaw();
-
         int playerCount = args.isEmpty() ? DEFAULT_PLAYER_NUMBER : Integer.parseInt(args.get(0));
-        Preconditions.checkArgument(playerCount >= MINIMUM_NUMBER_PLAYERS && playerCount <= PlayerId.COUNT);
+        Preconditions.checkArgument(playerCount >= MINIMUM_PLAYER_COUNT && playerCount <= PlayerId.COUNT);
+
         List<PlayerId> playerIds = PlayerId.ALL.subList(0, playerCount);
 
         Map<PlayerId, String> playerNames = new EnumMap<>(PlayerId.class);
@@ -64,9 +65,10 @@ public final class ServerMain extends Application {
         Map<PlayerId, Player> players = new EnumMap<>(PlayerId.class);
         players.put(PlayerId.PLAYER_1, new GraphicalPlayerAdapter());
         for (int i = 1; i < playerCount; i++)
-            players.put(playerIds.get(i), playersProxy.get(i-1));
+            players.put(playerIds.get(i), playersProxy.get(i - 1));
 
-        SortedBag<Ticket> tickets = SortedBag.of(ChMap.tickets());
+        SortedBag<Ticket> tickets = playerCount == MINIMUM_PLAYER_COUNT ?
+                SortedBag.of(tickets()) : SortedBag.of(supplementaryTickets());
 
         new Thread(() -> Game.play(players, playerNames, tickets, new Random())).start();
     }

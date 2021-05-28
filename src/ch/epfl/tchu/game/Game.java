@@ -36,8 +36,8 @@ public final class Game {
      */
     public static void play(Map<PlayerId, Player> players, Map<PlayerId, String> playerNames,
                             SortedBag<Ticket> tickets, Random rng) {
-        Preconditions.checkArgument(players.size() <= PlayerId.COUNT && players.size() >= MINIMUM_NUMBER_PLAYERS);
-        Preconditions.checkArgument(playerNames.size() <= PlayerId.COUNT && playerNames.size() >= MINIMUM_NUMBER_PLAYERS);
+        Preconditions.checkArgument(players.size() <= PlayerId.COUNT && players.size() >= MINIMUM_PLAYER_COUNT);
+        Preconditions.checkArgument(playerNames.size() <= PlayerId.COUNT && playerNames.size() >= MINIMUM_PLAYER_COUNT);
 
         Collection<Player> playersValues = players.values();
         Set<PlayerId> playerIds = players.keySet();
@@ -177,9 +177,9 @@ public final class Game {
             longestTrails.put(playerNames.get(id), longest);
         }
 
-        for (int i = 0; i < MAX_MESSAGE_COUNT; i++) {
+        for (int i = 0; i < MAX_MESSAGE_COUNT; i++)
             sendInformation("", playersValues);
-        }
+
 
         for (PlayerId id : playerIds) {
             String name = playerNames.get(id);

@@ -20,6 +20,12 @@ public final class ChMap {
         return ALL_TICKETS;
     }
 
+    public static List<Ticket> supplementaryTickets(){
+        List<Ticket> tickets = new ArrayList<>(ALL_TICKETS);
+        tickets.addAll(SUPPLEMENTARY_TICKETS_3PLAYERS);
+        return tickets;
+    }
+
     // Stations - cities
     private static final Station BAD = new Station(0, "Baden");
     private static final Station BAL = new Station(1, "Bâle");
@@ -231,6 +237,14 @@ public final class ChMap {
             atToNeighbors, atToNeighbors,
             itToNeighbors, itToNeighbors,
             frToNeighbors, frToNeighbors);
+
+    private static final List<Ticket> SUPPLEMENTARY_TICKETS_3PLAYERS = List.of(
+            ticketToNeighbors(List.of(SIO), 15, 15, 6, 4),
+            ticketToNeighbors(List.of(STG), 2, 3, 11, 11),
+            ticketToNeighbors(List.of(BAL), 1, 11, 13, 4),
+            ticketToNeighbors(List.of(GEN), 14, 19, 16, 1),
+            deToNeighbors, atToNeighbors, itToNeighbors, frToNeighbors
+            );
 
     private static Ticket ticketToNeighbors(List<Station> from, int de, int at, int it, int fr) {
         var trips = new ArrayList<Trip>();

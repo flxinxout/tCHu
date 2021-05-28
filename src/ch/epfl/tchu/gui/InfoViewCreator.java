@@ -29,6 +29,8 @@ final class InfoViewCreator {
     private final static String GAME_INFO_ID = "game-info";
     private final static String PLAYER_STATS_ID = "player-stats";
 
+    private final static String CURRENT_SC = "current";
+
     private final static double CIRCLE_RADIUS = 5D;
 
     private InfoViewCreator() {
@@ -62,6 +64,12 @@ final class InfoViewCreator {
 
             Circle circle = new Circle(CIRCLE_RADIUS);
             circle.getStyleClass().add(FILLED_SC);
+            gameState.currentPlayer().addListener((o, oV, nV) -> {
+                if (oV == id)
+                    circle.getStyleClass().remove(CURRENT_SC);
+                if (nV == id)
+                    circle.getStyleClass().add(CURRENT_SC);
+            });
 
             Text text = new Text();
             text.textProperty().bind(Bindings.format(StringsFr.PLAYER_STATS,

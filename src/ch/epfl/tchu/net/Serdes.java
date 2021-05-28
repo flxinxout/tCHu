@@ -8,8 +8,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static ch.epfl.tchu.game.Constants.*;
-import static ch.epfl.tchu.game.Player.*;
+import static ch.epfl.tchu.game.Player.TurnKind;
 
 /**
  * Contient la totalité des {@code Serdes} utiles au jeu.
@@ -20,101 +19,98 @@ import static ch.epfl.tchu.game.Player.*;
  */
 public final class Serdes {
 
-    /** Séparateur des éléments d'une collection */
-    private static final char COLL_DELIM = ',';
-    /** Séparateur des éléments d'une collection de collections */
-    private static final char COLL_DELIM_DEG2 = ';';
-    /** Séparateur des éléments d'une collection de collections de collections */
-    private static final char COLL_DELIM_DEG3 = ':';
-
     /**
      * {@code Serde} relatif aux entiers.
      */
     public static final Serde<Integer> OF_INTEGER = Serde.of(i -> Integer.toString(i), Integer::parseInt);
-
     /**
      * {@code Serde} relatif aux chaînes de caractères.
      */
     public static final Serde<String> OF_STRING = Serde.of(
             s -> Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8)),
             s -> new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8));
-
     /**
      * {@code Serde} relatif aux {@code PlayerId}.
      */
     public static final Serde<PlayerId> OF_PLAYER_ID = Serde.oneOf(PlayerId.ALL);
-
     /**
      * {@code Serde} relatif aux types de tour de jeu.
      */
     public static final Serde<TurnKind> OF_TURN_KIND = Serde.oneOf(TurnKind.ALL);
-
     /**
      * {@code Serde} relatif aux cartes.
      */
     public static final Serde<Card> OF_CARD = Serde.oneOf(Card.ALL);
-
     /**
      * {@code Serde} relatif aux routes.
      */
     public static final Serde<Route> OF_ROUTE = Serde.oneOf(ChMap.routes());
-
     /**
-     * {@code Serde} relatif aux billets.
+     * {@code Serde} relatif aux billetspour 2 joueurs.
      */
     public static final Serde<Ticket> OF_TICKET = Serde.oneOf(ChMap.tickets());
-
+    /**
+     * {@code Serde} relatif aux billets pour 3 joueurs.
+     */
+    public static final Serde<Ticket> OF_SUPP_TICKET = Serde.oneOf(ChMap.supplementaryTickets());
+    /**
+     * Séparateur des éléments d'une collection
+     */
+    private static final char COLL_DELIM = ',';
     /**
      * {@code Serde} relatif aux listes de chaînes de caractères.
      */
     public static final Serde<List<String>> OF_LIST_OF_STRINGS = Serde.listOf(Serdes.OF_STRING, COLL_DELIM);
-
     /**
      * {@code Serde} relatif aux listes de cartes.
      */
     public static final Serde<List<Card>> OF_LIST_OF_CARDS = Serde.listOf(Serdes.OF_CARD, COLL_DELIM);
-
     /**
      * {@code Serde} relatif aux listes de routes.
      */
     public static final Serde<List<Route>> OF_LIST_OF_ROUTES = Serde.listOf(Serdes.OF_ROUTE, COLL_DELIM);
-
     /**
      * {@code Serde} relatif aux multi-ensembles de cartes.
      */
     public static final Serde<SortedBag<Card>> OF_SORTED_BAG_OF_CARD = Serde.bagOf(Serdes.OF_CARD, COLL_DELIM);
-
     /**
      * {@code Serde} relatif aux multi-ensembles de billets.
      */
     public static final Serde<SortedBag<Ticket>> OF_SORTED_BAG_OF_TICKETS = Serde.bagOf(Serdes.OF_TICKET, COLL_DELIM);
-
+    /**
+     * {@code Serde} relatif aux multi-ensembles de billets.
+     */
+    public static final Serde<SortedBag<Ticket>> OF_SORTED_BAG_OF_SUPP_TICKETS = Serde.bagOf(Serdes.OF_SUPP_TICKET, COLL_DELIM);
+    /**
+     * Séparateur des éléments d'une collection de collections
+     */
+    private static final char COLL_DELIM_DEG2 = ';';
     /**
      * {@code Serde} relatif aux listes de multi-ensembles de cartes.
      */
     public static final Serde<List<SortedBag<Card>>> OF_LIST_OF_SORTED_BAGS_OF_CARDS =
             Serde.listOf(OF_SORTED_BAG_OF_CARD, COLL_DELIM_DEG2);
-
     /**
      * {@code Serde} relatif aux {@code PublicCardState}.
      */
     public static final Serde<PublicCardState> OF_PUBLIC_CARD_STATE =
             Serde.of(serFuncPublicCardState(), deserFuncPublicCardState());
-
     /**
      * {@code Serde} relatif aux {@code PublicPlayerState}.
      */
-    public static Serde<PublicPlayerState> ofPublicPlayerState(int initialCarCount){
-            return Serde.of(serFuncPublicPlayerState(initialCarCount), deserFuncPublicPlayerState());
-    }
-
+    public static final Serde<PublicPlayerState> OF_PUBLIC_PLAYER_STATE = Serde.of(serFuncPublicPlayerState(), deserFuncPublicPlayerState());
     /**
      * {@code Serde} relatif aux {@code PlayerState}.
      */
-    public static Serde<PlayerState> ofPlayerState(int initialCarCount) {
-        return Serde.of(serFuncPlayerState(initialCarCount), deserFuncPlayerState());
-    }
-
+    public static final Serde<PlayerState> OF_PLAYER_STATE = Serde.of(serFuncPlayerState(), deserFuncPlayerState());
+    /**
+     * {@code Serde} relatif aux {@code PlayerState}.
+     */
+    public static final Serde<PlayerState> OF_SUPP_PLAYER_STATE = Serde.of(serFuncSuppPlayerState(), deserFuncSuppPlayerState());
+    /**
+     * Séparateur des éléments d'une collection de collections de collections
+     */
+    private static final char COLL_DELIM_DEG3 = ':';
     /**
      * {@code Serde} relatif aux {@code PublicGameState}.
      */
@@ -158,14 +154,12 @@ public final class Serdes {
      *
      * @return la fonction de sérialisation d'un {@code PublicPlayerState}
      */
-    private static Function<PublicPlayerState, String> serFuncPublicPlayerState(int initialCarCount) {
+    private static Function<PublicPlayerState, String> serFuncPublicPlayerState() {
         return publicPlayerState -> {
             StringJoiner joiner = new StringJoiner(String.valueOf(COLL_DELIM_DEG2));
-            joiner.add(Serdes.OF_INTEGER.serialize(initialCarCount));
             joiner.add(Serdes.OF_INTEGER.serialize(publicPlayerState.ticketCount()));
             joiner.add(Serdes.OF_INTEGER.serialize(publicPlayerState.cardCount()));
             joiner.add(Serdes.OF_LIST_OF_ROUTES.serialize(publicPlayerState.routes()));
-
             return joiner.toString();
         };
     }
@@ -180,8 +174,7 @@ public final class Serdes {
             String[] elements = s.split(Pattern.quote(String.valueOf(COLL_DELIM_DEG2)), -1);
             return new PublicPlayerState(Serdes.OF_INTEGER.deserialize(elements[0]),
                     Serdes.OF_INTEGER.deserialize(elements[1]),
-                    Serdes.OF_INTEGER.deserialize(elements[2]),
-                    Serdes.OF_LIST_OF_ROUTES.deserialize(elements[3]));
+                    Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]));
         };
     }
 
@@ -190,10 +183,9 @@ public final class Serdes {
      *
      * @return la fonction de sérialisation d'un {@code PlayerState}
      */
-    private static Function<PlayerState, String> serFuncPlayerState(int initialCarCount) {
+    private static Function<PlayerState, String> serFuncPlayerState() {
         return playerState -> {
             StringJoiner joiner = new StringJoiner(String.valueOf(COLL_DELIM_DEG2));
-            joiner.add(Serdes.OF_INTEGER.serialize(initialCarCount));
             joiner.add(Serdes.OF_SORTED_BAG_OF_TICKETS.serialize(playerState.tickets()));
             joiner.add(Serdes.OF_SORTED_BAG_OF_CARD.serialize(playerState.cards()));
             joiner.add(Serdes.OF_LIST_OF_ROUTES.serialize(playerState.routes()));
@@ -210,10 +202,39 @@ public final class Serdes {
     private static Function<String, PlayerState> deserFuncPlayerState() {
         return s -> {
             String[] elements = s.split(Pattern.quote(String.valueOf(COLL_DELIM_DEG2)), -1);
-            return new PlayerState(Serdes.OF_INTEGER.deserialize(elements[0]),
-                    Serdes.OF_SORTED_BAG_OF_TICKETS.deserialize(elements[1]),
-                    Serdes.OF_SORTED_BAG_OF_CARD.deserialize(elements[2]),
-                    Serdes.OF_LIST_OF_ROUTES.deserialize(elements[3]));
+            return new PlayerState(Serdes.OF_SORTED_BAG_OF_TICKETS.deserialize(elements[0]),
+                    Serdes.OF_SORTED_BAG_OF_CARD.deserialize(elements[1]),
+                    Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]));
+        };
+    }
+
+    /**
+     * Crée la fonction de sérialisation d'un {@code PlayerState}.
+     *
+     * @return la fonction de sérialisation d'un {@code PlayerState}
+     */
+    private static Function<PlayerState, String> serFuncSuppPlayerState() {
+        return playerState -> {
+            StringJoiner joiner = new StringJoiner(String.valueOf(COLL_DELIM_DEG2));
+            joiner.add(Serdes.OF_SORTED_BAG_OF_SUPP_TICKETS.serialize(playerState.tickets()));
+            joiner.add(Serdes.OF_SORTED_BAG_OF_CARD.serialize(playerState.cards()));
+            joiner.add(Serdes.OF_LIST_OF_ROUTES.serialize(playerState.routes()));
+            return joiner.toString();
+
+        };
+    }
+
+    /**
+     * Retourne la fonction de désérialisation d'un {@code PlayerState}.
+     *
+     * @return la fonction de désérialisation d'un {@code PlayerState}
+     */
+    private static Function<String, PlayerState> deserFuncSuppPlayerState() {
+        return s -> {
+            String[] elements = s.split(Pattern.quote(String.valueOf(COLL_DELIM_DEG2)), -1);
+            return new PlayerState(Serdes.OF_SORTED_BAG_OF_SUPP_TICKETS.deserialize(elements[0]),
+                    Serdes.OF_SORTED_BAG_OF_CARD.deserialize(elements[1]),
+                    Serdes.OF_LIST_OF_ROUTES.deserialize(elements[2]));
         };
     }
 
@@ -228,13 +249,9 @@ public final class Serdes {
             joiner.add(Serdes.OF_INTEGER.serialize(publicGameState.ticketsCount()));
             joiner.add(Serdes.OF_PUBLIC_CARD_STATE.serialize(publicGameState.cardState()));
             joiner.add(Serdes.OF_PLAYER_ID.serialize(publicGameState.currentPlayerId()));
-            int playerNb = (int)PlayerId.ALL.stream()
-                    .filter(id -> publicGameState.playerState(id) != null)
-                    .count();
-            int initialCarCount = INITIAL_CAR_COUNT - 10 * playerNb;
             for (PlayerId id : PlayerId.ALL) {
                 PublicPlayerState playerState = publicGameState.playerState(id);
-                joiner.add(playerState == null ? "" : Serdes.ofPublicPlayerState(initialCarCount).serialize(playerState));
+                joiner.add(playerState == null ? "" : Serdes.OF_PUBLIC_PLAYER_STATE.serialize(playerState));
             }
             joiner.add(publicGameState.lastPlayer() == null ?
                     "" : Serdes.OF_PLAYER_ID.serialize(publicGameState.lastPlayer()));
@@ -251,25 +268,20 @@ public final class Serdes {
         return s -> {
             String[] elements = s.split(Pattern.quote(String.valueOf(COLL_DELIM_DEG3)), -1);
             Map<PlayerId, PublicPlayerState> playerState = new EnumMap<>(PlayerId.class);
-            int playerStateStartsAt = 3;
-            int playerNb = 0;
+            int playerStateStart = 3;
             for (int i = 0; i < PlayerId.COUNT; i++) {
-                String e = elements[i + playerStateStartsAt];
+                String e = elements[i + playerStateStart];
                 if (!e.isEmpty())
-                    playerNb += 1;
+                    playerState.put(PlayerId.ALL.get(i), Serdes.OF_PUBLIC_PLAYER_STATE.deserialize(e));
             }
-            int initialCarCount = INITIAL_CAR_COUNT - 10 * playerNb;
-            for (int i = 0; i < PlayerId.COUNT; i++) {
-                String e = elements[i + playerStateStartsAt];
-                if (!e.isEmpty())
-                    playerState.put(PlayerId.ALL.get(i), Serdes.ofPublicPlayerState(initialCarCount).deserialize(e));
-            }
+
+            String lastPlayerSer = elements[playerStateStart + PlayerId.COUNT];
             return new PublicGameState(
                     Serdes.OF_INTEGER.deserialize(elements[0]),
                     Serdes.OF_PUBLIC_CARD_STATE.deserialize(elements[1]),
                     Serdes.OF_PLAYER_ID.deserialize(elements[2]),
                     playerState,
-                    elements[7].isEmpty() ? null : Serdes.OF_PLAYER_ID.deserialize(elements[7]));
+                    lastPlayerSer.isEmpty() ? null : Serdes.OF_PLAYER_ID.deserialize(lastPlayerSer));
         };
     }
 }

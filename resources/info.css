@@ -6,8 +6,13 @@
 }
 
 #player-stats Circle {
-    -fx-stroke: dimgrey;
+    -fx-stroke: dimgray;
     -fx-stroke-width: 1;
+}
+
+#player-stats Circle.current{
+    -fx-stroke: grey;
+    -fx-stroke-width: 2;
 }
 
 #game-info {

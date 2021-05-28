@@ -5,9 +5,11 @@ import ch.epfl.tchu.game.*;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 
-import static ch.epfl.tchu.game.Constants.INITIAL_CAR_COUNT;
 import static ch.epfl.tchu.net.MessageId.*;
 import static ch.epfl.tchu.net.Serdes.*;
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -22,7 +24,6 @@ public final class RemotePlayerProxy implements Player {
 
     private final BufferedReader bufferedReader;
     private final BufferedWriter bufferedWriter;
-    private int playerNb = 2;
 
     /**
      * Construit un mandataire du joueur distant en fonction de la prise ({@code Socket}),
@@ -88,10 +89,7 @@ public final class RemotePlayerProxy implements Player {
     public void initPlayers(PlayerId ownId, Map<PlayerId, String> playerNames) {
         String playerNamesSer = OF_LIST_OF_STRINGS.serialize(List.copyOf(playerNames.values()));
 
-        playerNb = playerNames.size();
-
         writeMessage(INIT_PLAYERS,
-                OF_INTEGER.serialize(playerNames.size()),
                 OF_PLAYER_ID.serialize(ownId),
                 playerNamesSer);
     }
@@ -115,8 +113,7 @@ public final class RemotePlayerProxy implements Player {
      */
     @Override
     public void updateState(PublicGameState newState, PlayerState ownState) {
-        int initialCarCount = INITIAL_CAR_COUNT - 10 * playerNb;
-        writeMessage(UPDATE_STATE, OF_PUBLIC_GAME_STATE.serialize(newState), ofPlayerState(initialCarCount).serialize(ownState));
+        writeMessage(UPDATE_STATE, OF_PUBLIC_GAME_STATE.serialize(newState), Serdes.OF_PLAYER_STATE.serialize(ownState));
     }
 
     /**

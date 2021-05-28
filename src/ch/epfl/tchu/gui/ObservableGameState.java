@@ -28,6 +28,7 @@ public final class ObservableGameState {
 
     // Groupe 1: propriétés de l'état public de la partie
     private final IntegerProperty ticketsPercentage, cardsPercentage;
+    private final ObjectProperty<PlayerId> currentPlayer;
     private final List<ObjectProperty<Card>> faceUpCards;
     private final Map<Route, ObjectProperty<PlayerId>> routesOwner;
 
@@ -56,6 +57,7 @@ public final class ObservableGameState {
         // 1.
         this.ticketsPercentage = new SimpleIntegerProperty();
         this.cardsPercentage = new SimpleIntegerProperty();
+        this.currentPlayer = new SimpleObjectProperty<>();
         this.faceUpCards = createFaceUpCards();
         this.routesOwner = createRoutesOwner();
 
@@ -80,7 +82,7 @@ public final class ObservableGameState {
         List<ObjectProperty<Card>> faceUpCards = new ArrayList<>(FACE_UP_CARDS_COUNT);
         for (int i = 0; i < FACE_UP_CARDS_COUNT; i++)
             faceUpCards.add(new SimpleObjectProperty<>());
-        return faceUpCards;
+        return List.copyOf(faceUpCards);
     }
 
     /**
@@ -92,7 +94,7 @@ public final class ObservableGameState {
         Map<Route, ObjectProperty<PlayerId>> routesMap = new HashMap<>();
         for (Route route : routes())
             routesMap.put(route, new SimpleObjectProperty<>());
-        return routesMap;
+        return Map.copyOf(routesMap);
     }
 
     /**
@@ -104,7 +106,7 @@ public final class ObservableGameState {
         Map<Route, BooleanProperty> routesMap = new HashMap<>();
         for (Route route : routes())
             routesMap.put(route, new SimpleBooleanProperty());
-        return routesMap;
+        return Map.copyOf(routesMap);
     }
 
     /**
@@ -117,7 +119,7 @@ public final class ObservableGameState {
         Map<PlayerId, IntegerProperty> map = new EnumMap<>(PlayerId.class);
         for (PlayerId id : ids)
             map.put(id, new SimpleIntegerProperty());
-        return map;
+        return Map.copyOf(map);
     }
 
     /**
@@ -129,7 +131,7 @@ public final class ObservableGameState {
         Map<Card, IntegerProperty> cardOccurrences = new EnumMap<>(Card.class);
         for (Card card : Card.ALL)
             cardOccurrences.put(card, new SimpleIntegerProperty());
-        return cardOccurrences;
+        return Map.copyOf(cardOccurrences);
     }
 
     /**
@@ -144,7 +146,8 @@ public final class ObservableGameState {
 
         // 1.
         ticketsPercentage.setValue(100 * newGameState.ticketsCount() / ChMap.tickets().size());
-        cardsPercentage.setValue(100 * newGameState.cardState().deckSize() / computeTotalCardsCount(newGameState.playerCount()));
+        cardsPercentage.setValue(100 * newGameState.cardState().deckSize() / TOTAL_CARDS_COUNT);
+        currentPlayer.setValue(newGameState.currentPlayerId());
 
         for (int slot : FACE_UP_CARD_SLOTS)
             faceUpCards.get(slot).setValue(newGameState.cardState().faceUpCard(slot));
@@ -175,7 +178,7 @@ public final class ObservableGameState {
 
         for (Route route : routes()) {
             Set<List<Station>> stations;
-            stations = playerIds.size() == MINIMUM_NUMBER_PLAYERS ?
+            stations = playerIds.size() == MINIMUM_PLAYER_COUNT ?
                     newGameState.claimedRoutes().stream()
                             .map(Route::stations)
                             .collect(Collectors.toSet()) :
@@ -323,5 +326,14 @@ public final class ObservableGameState {
      */
     public List<SortedBag<Card>> possibleClaimCards(Route route) {
         return playerState == null ? List.of() : playerState.possibleClaimCards(route);
+    }
+
+    /**
+     * Retourne la propriété contenant le joueur actuel de l'état de jeu.
+     *
+     * @return la propriété contenant le joueur actuel de l'état de jeu
+     */
+    public ReadOnlyObjectProperty<PlayerId> currentPlayer(){
+        return currentPlayer;
     }
 }

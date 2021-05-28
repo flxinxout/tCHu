@@ -232,7 +232,6 @@ public final class Serdes {
                     .filter(id -> publicGameState.playerState(id) != null)
                     .count();
             int initialCarCount = INITIAL_CAR_COUNT - 10 * playerNb;
-
             for (PlayerId id : PlayerId.ALL) {
                 PublicPlayerState playerState = publicGameState.playerState(id);
                 joiner.add(playerState == null ? "" : Serdes.ofPublicPlayerState(initialCarCount).serialize(playerState));

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import static ch.epfl.tchu.game.Constants.MINIMUM_PLAYER_COUNT;
 import static ch.epfl.tchu.net.MessageId.*;
 import static ch.epfl.tchu.net.Serdes.*;
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -24,6 +25,8 @@ public final class RemotePlayerProxy implements Player {
 
     private final BufferedReader bufferedReader;
     private final BufferedWriter bufferedWriter;
+
+    private Serde<SortedBag<Ticket>> ticketsSerde = OF_SORTED_BAG_OF_TICKETS;
 
     /**
      * Construit un mandataire du joueur distant en fonction de la prise ({@code Socket}),
@@ -89,6 +92,8 @@ public final class RemotePlayerProxy implements Player {
     public void initPlayers(PlayerId ownId, Map<PlayerId, String> playerNames) {
         String playerNamesSer = OF_LIST_OF_STRINGS.serialize(List.copyOf(playerNames.values()));
 
+        ticketsSerde = playerNames.size() == MINIMUM_PLAYER_COUNT ?
+                OF_SORTED_BAG_OF_TICKETS : OF_SORTED_BAG_OF_SUPP_TICKETS;
         writeMessage(INIT_PLAYERS,
                 OF_PLAYER_ID.serialize(ownId),
                 playerNamesSer);
@@ -124,7 +129,7 @@ public final class RemotePlayerProxy implements Player {
      */
     @Override
     public void setInitialTicketChoice(SortedBag<Ticket> tickets) {
-        writeMessage(SET_INITIAL_TICKETS, OF_SORTED_BAG_OF_TICKETS.serialize(tickets));
+        writeMessage(SET_INITIAL_TICKETS, ticketsSerde.serialize(tickets));
     }
 
     /**
@@ -136,7 +141,7 @@ public final class RemotePlayerProxy implements Player {
     @Override
     public SortedBag<Ticket> chooseInitialTickets() {
         writeMessage(CHOOSE_INITIAL_TICKETS);
-        return OF_SORTED_BAG_OF_TICKETS.deserialize(readMessage());
+        return ticketsSerde.deserialize(readMessage());
     }
 
     /**
@@ -161,8 +166,8 @@ public final class RemotePlayerProxy implements Player {
      */
     @Override
     public SortedBag<Ticket> chooseTickets(SortedBag<Ticket> options) {
-        writeMessage(CHOOSE_TICKETS, OF_SORTED_BAG_OF_TICKETS.serialize(options));
-        return OF_SORTED_BAG_OF_TICKETS.deserialize(readMessage());
+        writeMessage(CHOOSE_TICKETS, ticketsSerde.serialize(options));
+        return ticketsSerde.deserialize(readMessage());
     }
 
     /**

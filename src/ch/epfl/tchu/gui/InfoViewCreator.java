@@ -1,6 +1,9 @@
 package ch.epfl.tchu.gui;
 
 import ch.epfl.tchu.game.PlayerId;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
@@ -10,6 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ch.epfl.tchu.gui.MapViewCreator.FILLED_SC;
+import static javafx.animation.Animation.INDEFINITE;
 
 /**
  * Créateur de la vue des informations d'une partie de tCHu.
@@ -30,6 +35,9 @@ final class InfoViewCreator {
     private final static String PLAYER_STATS_ID = "player-stats";
 
     private final static String CURRENT_SC = "current";
+
+    private final static double BLINK_DURATION = 1500D;
+    private final static double BLINK_DELAY = 1000D;
 
     private final static double CIRCLE_RADIUS = 5D;
 
@@ -64,11 +72,29 @@ final class InfoViewCreator {
 
             Circle circle = new Circle(CIRCLE_RADIUS);
             circle.getStyleClass().add(FILLED_SC);
+
+            Timeline timeline = new Timeline();
+            timeline.getKeyFrames().addAll(
+                    new KeyFrame(new Duration(BLINK_DELAY),
+                            new KeyValue(circle.opacityProperty(), 1)),
+                    new KeyFrame(new Duration(BLINK_DELAY + BLINK_DURATION / 2),
+                            new KeyValue(circle.opacityProperty(), 0)),
+                    new KeyFrame(new Duration(BLINK_DELAY + BLINK_DURATION),
+                            new KeyValue(circle.opacityProperty(), 1))
+
+            );
+            timeline.setDelay(new Duration(BLINK_DELAY));
+            timeline.setCycleCount(INDEFINITE);
+
             gameState.currentPlayer().addListener((o, oV, nV) -> {
-                if (oV == id)
+                if (oV == id) {
+                    timeline.stop();
                     circle.getStyleClass().remove(CURRENT_SC);
-                if (nV == id)
+                }
+                if (nV == id) {
+                    timeline.play();
                     circle.getStyleClass().add(CURRENT_SC);
+                }
             });
 
             Text text = new Text();

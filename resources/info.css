@@ -11,8 +11,8 @@
 }
 
 #player-stats Circle.current{
-    -fx-stroke: grey;
-    -fx-stroke-width: 2;
+    -fx-stroke: black;
+    -fx-stroke-width: 1.5;
 }
 
 #game-info {

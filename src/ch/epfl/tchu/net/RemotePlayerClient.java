@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static ch.epfl.tchu.game.Constants.*;
+import static ch.epfl.tchu.net.Serdes.OF_PLAYER_STATE;
+import static ch.epfl.tchu.net.Serdes.OF_SUPP_PLAYER_STATE;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 /**
@@ -26,6 +28,7 @@ public final class RemotePlayerClient {
     private final int port;
 
     private Serde<SortedBag<Ticket>> ticketsSerde = Serdes.OF_SORTED_BAG_OF_TICKETS;
+    private Serde<PlayerState> playerStateSerde = OF_PLAYER_STATE;
 
     /**
      * Construit le client du joueur donné, auquel il doit fournir un accès distant à l'aide
@@ -61,8 +64,12 @@ public final class RemotePlayerClient {
                     case INIT_PLAYERS:
                         PlayerId id = Serdes.OF_PLAYER_ID.deserialize(message[1]);
                         List<String> names = Serdes.OF_LIST_OF_STRINGS.deserialize(message[2]);
+
                         ticketsSerde = names.size() == MINIMUM_PLAYER_COUNT ?
                                 Serdes.OF_SORTED_BAG_OF_TICKETS : Serdes.OF_SORTED_BAG_OF_SUPP_TICKETS;
+                        playerStateSerde = names.size() == MINIMUM_PLAYER_COUNT ?
+                                OF_PLAYER_STATE : OF_SUPP_PLAYER_STATE;
+
                         Map<PlayerId, String> playerNames = new EnumMap<>(PlayerId.class);
                         for (int i = 0; i < names.size(); i++)
                             playerNames.put(PlayerId.ALL.get(i), names.get(i));
@@ -76,7 +83,7 @@ public final class RemotePlayerClient {
 
                     case UPDATE_STATE:
                         player.updateState(Serdes.OF_PUBLIC_GAME_STATE.deserialize(message[1]),
-                                Serdes.OF_PLAYER_STATE.deserialize(message[2]));
+                                playerStateSerde.deserialize(message[2]));
                         break;
 
                     case SET_INITIAL_TICKETS:

@@ -33,6 +33,7 @@ final class MapViewCreator {
     private final static String NEUTRAL_SC = "NEUTRAL";
     private final static String ROUTE_SC = "route";
     private final static String TRACK_SC = "track";
+    private final static String CLAIMABLE_SC = "claimable";
 
     private final static double CIRCLE_MARGIN = 6D;
     private final static double CIRCLE_RADIUS = 3D;
@@ -88,6 +89,13 @@ final class MapViewCreator {
                 Rectangle railwayRect = new Rectangle(RECT_WIDTH, RECT_HEIGHT);
                 railwayRect.getStyleClass().addAll(TRACK_SC, FILLED_SC);
 
+                gameState.claimable(route).addListener((oV, o, nV) ->{
+                    if (nV)
+                        railwayRect.getStyleClass().add(CLAIMABLE_SC);
+                    else
+                        railwayRect.getStyleClass().remove(CLAIMABLE_SC);
+                });
+
                 Group carGroup = new Group();
                 carGroup.getStyleClass().add(CAR_CS);
 
@@ -104,6 +112,7 @@ final class MapViewCreator {
 
                 squareGroup.getChildren().addAll(railwayRect, carGroup);
                 routeGroup.getChildren().add(squareGroup);
+
             }
             root.getChildren().add(routeGroup);
         }

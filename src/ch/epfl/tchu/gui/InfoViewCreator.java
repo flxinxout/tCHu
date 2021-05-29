@@ -1,9 +1,7 @@
 package ch.epfl.tchu.gui;
 
 import ch.epfl.tchu.game.PlayerId;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
@@ -73,26 +71,25 @@ final class InfoViewCreator {
             Circle circle = new Circle(CIRCLE_RADIUS);
             circle.getStyleClass().add(FILLED_SC);
 
-            Timeline timeline = new Timeline();
-            timeline.getKeyFrames().addAll(
-                    new KeyFrame(new Duration(BLINK_DELAY),
-                            new KeyValue(circle.opacityProperty(), 1)),
-                    new KeyFrame(new Duration(BLINK_DELAY + BLINK_DURATION / 2),
-                            new KeyValue(circle.opacityProperty(), 0)),
-                    new KeyFrame(new Duration(BLINK_DELAY + BLINK_DURATION),
-                            new KeyValue(circle.opacityProperty(), 1))
-
+            FadeTransition fade = new FadeTransition();
+            fade.setDuration(new Duration(BLINK_DURATION));
+            fade.setAutoReverse(true);
+            fade.setCycleCount(INDEFINITE);
+            fade.setFromValue(1);
+            fade.setToValue(0);
+            fade.setNode(circle);
+            SequentialTransition blink = new SequentialTransition (
+                    new PauseTransition(Duration.millis(BLINK_DELAY)),
+                    fade
             );
-            timeline.setDelay(new Duration(BLINK_DELAY));
-            timeline.setCycleCount(INDEFINITE);
 
             gameState.currentPlayer().addListener((o, oV, nV) -> {
                 if (oV == id) {
-                    timeline.stop();
+                    blink.stop();
                     circle.getStyleClass().remove(CURRENT_SC);
                 }
                 if (nV == id) {
-                    timeline.play();
+                    blink.playFromStart();
                     circle.getStyleClass().add(CURRENT_SC);
                 }
             });

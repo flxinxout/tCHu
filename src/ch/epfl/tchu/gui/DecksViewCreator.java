@@ -3,6 +3,7 @@ package ch.epfl.tchu.gui;
 import ch.epfl.tchu.game.Card;
 import ch.epfl.tchu.game.Constants;
 import ch.epfl.tchu.game.Ticket;
+import javafx.animation.*;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
@@ -15,6 +16,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 import static ch.epfl.tchu.game.Card.ALL;
 import static ch.epfl.tchu.gui.ActionHandlers.DrawCardHandler;
@@ -42,6 +44,8 @@ final class DecksViewCreator {
     private final static String INSIDE_SC = "inside";
     private final static String OUTSIDE_SC = "outside";
     private final static String TRAIN_IMAGE_SC = "train-image";
+
+    private final static double APPARITION_DURATION = 750D;
 
     private final static double GAUGE_HEIGHT = 5D;
     private final static double GAUGE_INITIAL_WIDTH = 50D;
@@ -122,7 +126,17 @@ final class DecksViewCreator {
                 } else
                     cardPane.getStyleClass().add(colorSC(nV.color()));
             });
-            cardPane.setOnMouseClicked(e -> drawCardHP.get().onDrawCard(slot));
+
+            FadeTransition fade = new FadeTransition();
+            fade.setDuration(new Duration(APPARITION_DURATION));
+            fade.setFromValue(0);
+            fade.setToValue(1);
+            fade.setNode(cardPane);
+
+            cardPane.setOnMouseClicked(e -> {
+                drawCardHP.get().onDrawCard(slot);
+                fade.playFromStart();
+            });
             cardPane.disableProperty().bind(drawCardHP.isNull());
             root.getChildren().add(cardPane);
         }

@@ -1,7 +1,9 @@
 package ch.epfl.tchu.gui;
 
 import ch.epfl.tchu.game.PlayerId;
-import javafx.animation.*;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
@@ -35,7 +37,7 @@ final class InfoViewCreator {
     private final static String CURRENT_SC = "current";
 
     private final static double BLINK_DURATION = 1500D;
-    private final static double BLINK_DELAY = 1000D;
+    private final static double BLINK_DELAY = 750D;
 
     private final static double CIRCLE_RADIUS = 5D;
 
@@ -74,18 +76,17 @@ final class InfoViewCreator {
             FadeTransition fade = new FadeTransition();
             fade.setDuration(new Duration(BLINK_DURATION));
             fade.setAutoReverse(true);
-            fade.setCycleCount(INDEFINITE);
             fade.setFromValue(1);
             fade.setToValue(0);
             fade.setNode(circle);
-            SequentialTransition blink = new SequentialTransition (
-                    new PauseTransition(Duration.millis(BLINK_DELAY)),
-                    fade
-            );
+            fade.setCycleCount(2);
+            SequentialTransition blink = new SequentialTransition (fade, new PauseTransition(Duration.millis(BLINK_DELAY)));
+            blink.setCycleCount(INDEFINITE);
 
             gameState.currentPlayer().addListener((o, oV, nV) -> {
                 if (oV == id) {
                     blink.stop();
+                    circle.setOpacity(1);
                     circle.getStyleClass().remove(CURRENT_SC);
                 }
                 if (nV == id) {

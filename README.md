@@ -1,2 +1,2 @@
 # tCHu
-Project Java developed at the EPFL
+Java Project developed at the EPFL
